@@ -95,8 +95,7 @@ function showOutput()
 	return $objResponse;
 }
 
-$reqShowOutput = $xajax->getPlugin('function')->registerRequest((array) 'showOutput');
-//$reqShowOutput = $xajax->register(XAJAX_FUNCTION, 'showOutput');
+$reqShowOutput = $xajax->register(XAJAX_FUNCTION, 'showOutput');
 
 //$xajax->configure('responseType', 'JSON');
 $xajax->processRequest();

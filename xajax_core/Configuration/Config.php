@@ -16,6 +16,8 @@ declare(strict_types=1);
 
 namespace Xajax\Configuration;
 
+use Xajax\Configuration;
+
 /**
  * Trait Config
  *
@@ -29,8 +31,8 @@ trait Config
 	 * @notice this is an tmp helper method
 	 * @return \Xajax\Configuration
 	 */
-	public function getConfig(): \Xajax\Configuration
+	public function getConfig(): Configuration
 	{
-		return \Xajax\Configuration::getInstance();
+		return Configuration::getInstance();
 	}
 }

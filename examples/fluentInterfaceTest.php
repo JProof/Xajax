@@ -13,10 +13,10 @@ function testFluentInterface()
 	              ->assign('submittedDiv', 'innerHTML', 'Here is some <b>HTML text</b>.');
 }
 
-$xajax->getPlugin('function')->registerRequest((array) 'testFluentInterface');
-
+$xajax->register(XAJAX_FUNCTION, 'testFluentInterface');
 $xajax->processRequest();
-$xajax->getConfig()->setJavascriptURI('../');
+$xajax->configure('javascript URI', '../');
+
 
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"

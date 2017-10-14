@@ -28,11 +28,12 @@ function replace($aForm)
 }
 
 $xajax = new xajax();
-$xajax->getConfig()->setDebug(true);
-//$xajax->configure("debug", true);
-$xajax->getConfig()->setJavascriptURI('../');
-//$xajax->configure("javascript URI", '../');
-$xajax->getPlugin(XAJAX_FUNCTION)->registerRequest((array) 'replace');
+
+$xajax->configure("debug", true);
+
+$xajax->configure("javascript URI", '../');
+$reqShowOutput = $xajax->register(XAJAX_FUNCTION, 'replace');
+
 $xajax->processRequest();
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
