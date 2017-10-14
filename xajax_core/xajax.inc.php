@@ -328,12 +328,13 @@ final class xajax
 		$sLocalFolder = __DIR__;
 
 //SkipAIO
-		require $sLocalFolder . '/xajaxPluginManager.inc.php';
-		require $sLocalFolder . '/xajaxLanguageManager.inc.php';
-		require $sLocalFolder . '/xajaxArgumentManager.inc.php';
-		require $sLocalFolder . '/xajaxResponseManager.inc.php';
-		require $sLocalFolder . '/xajaxRequest.inc.php';
-		require $sLocalFolder . '/xajaxResponse.inc.php';
+		/**@deprecated  load via composer* */
+		require_once $sLocalFolder . '/xajaxPluginManager.inc.php';
+		require_once $sLocalFolder . '/xajaxLanguageManager.inc.php';
+		require_once $sLocalFolder . '/xajaxArgumentManager.inc.php';
+		require_once $sLocalFolder . '/xajaxResponseManager.inc.php';
+		require_once $sLocalFolder . '/xajaxRequest.inc.php';
+		require_once $sLocalFolder . '/xajaxResponse.inc.php';
 //EndSkipAIO
 
 		// this is the list of folders where xajax will look for plugins

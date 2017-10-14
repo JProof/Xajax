@@ -45,6 +45,9 @@
     },
     "files": [
       "xajax_core/xajax.inc.php"
+    ],
+    "classmap": [
+      "xajax_core/"
     ]
   }
 }
