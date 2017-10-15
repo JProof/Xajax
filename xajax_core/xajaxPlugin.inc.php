@@ -23,6 +23,12 @@
 	
 	The base class for all xajax plugins.
 */
+
+/**
+ * Class xajaxPlugin
+ *
+ * @deprecated use  \Xajax\Plugin
+ */
 class xajaxPlugin
 {
 }
@@ -41,6 +47,12 @@ class xajaxPlugin
 	plugin will detect the signature generated previously and process the request
 	accordingly.
 */
+
+/**
+ * Class xajaxRequestPlugin
+ *
+ * @deprecated use Xajax\Plugin\Request
+ */
 class xajaxRequestPlugin extends xajaxPlugin
 {
 	/*
@@ -53,7 +65,7 @@ class xajaxRequestPlugin extends xajaxPlugin
 	function configure($sName, $mValue)
 	{
 	}
-	
+
 	/*
 		Function: register
 		
@@ -67,7 +79,8 @@ class xajaxRequestPlugin extends xajaxPlugin
 	}
 
 	function generateHash()
-	{}
+	{
+	}
 
 	/*
 		Function: generateClientScript
@@ -80,7 +93,7 @@ class xajaxRequestPlugin extends xajaxPlugin
 	function generateClientScript()
 	{
 	}
-	
+
 	/*
 		Function: canProcessRequest
 		
@@ -91,7 +104,7 @@ class xajaxRequestPlugin extends xajaxPlugin
 	{
 		return false;
 	}
-	
+
 	/*
 		Function: processRequest
 		
@@ -118,6 +131,7 @@ class xajaxRequestPlugin extends xajaxPlugin
 	client.  In addition, a response command may send javascript to the browser
 	at page load to aid in the processing of it's response commands.
 */
+
 class xajaxResponsePlugin extends xajaxPlugin
 {
 	/*
@@ -127,7 +141,7 @@ class xajaxResponsePlugin extends xajaxPlugin
 		to build the response that will be sent to the client browser.
 	*/
 	var $objResponse;
-	
+
 	/*
 		Function: setResponse
 		
@@ -142,7 +156,7 @@ class xajaxResponsePlugin extends xajaxPlugin
 	{
 		$this->objResponse = $objResponse;
 	}
-	
+
 	/*
 		Function: addCommand
 		
@@ -150,11 +164,11 @@ class xajaxResponsePlugin extends xajaxPlugin
 		will call <xajaxResponse->addPluginCommand> using the reference provided
 		in <xajaxResponsePlugin->setResponse>.
 	*/
- 	function addCommand($aAttributes, $sData)
- 	{
- 		$this->objResponse->addPluginCommand($this, $aAttributes, $sData);
- 	}
-	
+	function addCommand($aAttributes, $sData)
+	{
+		$this->objResponse->addPluginCommand($this, $aAttributes, $sData);
+	}
+
 	/*
 		Function: getName
 		
@@ -167,12 +181,12 @@ class xajaxResponsePlugin extends xajaxPlugin
 //SkipDebug
 		$objLanguageManager = xajaxLanguageManager::getInstance();
 		trigger_error(
-			$objLanguageManager->getText('XJXPLG:GNERR:01')
-			, E_USER_ERROR
-			);
+		    $objLanguageManager->getText('XJXPLG:GNERR:01')
+		    , E_USER_ERROR
+		);
 //EndSkipDebug
 	}
-	
+
 	/*
 		Function: process
 		
@@ -186,9 +200,9 @@ class xajaxResponsePlugin extends xajaxPlugin
 //SkipDebug
 		$objLanguageManager = xajaxLanguageManager::getInstance();
 		trigger_error(
-			$objLanguageManager->getText('XJXPLG:PERR:01')
-			, E_USER_ERROR
-			);
+		    $objLanguageManager->getText('XJXPLG:PERR:01')
+		    , E_USER_ERROR
+		);
 //EndSkipDebug
 	}
 }

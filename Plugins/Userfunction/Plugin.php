@@ -1,69 +1,52 @@
 <?php
-/*
-	File: xajaxFunctionPlugin.inc.php
+/**
+ * PHP version php7
+ *
+ * @category
+ * @package            xajax-php-7
+ * @author             ${JProof}
+ * @copyright          ${copyright}
+ * @license            ${license}
+ * @link
+ * @see                ${docu}
+ * @since              15.10.2017
+ */
 
-	Contains the xajaxFunctionPlugin class
+declare(strict_types=1);
 
-	Title: xajaxFunctionPlugin class
+namespace Xajax\Plugins\Userfunction;
 
-	Please see <copyright.inc.php> for a detailed description, copyright
-	and license information.
-*/
-
-/*
-	@package xajax
-	@version $Id: xajaxFunctionPlugin.inc.php 362 2007-05-29 15:32:24Z calltoconstruct $
-	@copyright Copyright (c) 2005-2007 by Jared White & J. Max Wilson
-	@copyright Copyright (c) 2008-2010 by Joseph Woolley, Steffen Konerow, Jared White  & J. Max Wilson
-	@license http://www.xajaxproject.org/bsd_license.txt BSD License
-*/
-
-/*
-	Constant: XAJAX_FUNCTION
-		Specifies that the item being registered via the <xajax->register> function
-		is a php function available at global scope, or a specific function from
-		an instance of an object.
-*/
-
-use Xajax\plugin_layer\RequestIface;
-
-if (!defined('XAJAX_FUNCTION'))
-{
-	define('XAJAX_FUNCTION', 'function');
-}
-
-// require_once is necessary here as the xajaxEvent class will include this also
-//SkipAIO
-require_once __DIR__ . '/support/xajaxUserFunction.inc.php';
-//EndSkipAIO
-
-/*
-	Class: xajaxFunctionPlugin
-*/
+use InvalidArgumentException;
+use Xajax\Core\Plugin\Request\RequestPluginIface;
+use Xajax\Core\RequestIface;
+use Xajax\Plugin\Request;
+use xajaxArgumentManager;
 
 /**
- * Class xajaxFunctionPlugin
- * @deprecated 0.7.2 use the \Xajax\Plugins\Userfunction\Request
+ * Class Plugin
+ * Hold all Userfunction Plugin Instances
+ *
+ * @package Xajax\Plugins\Userfunction
  */
-class xajaxFunctionPlugin extends xajaxRequestPlugin implements RequestIface
+class Plugin extends Request implements RequestPluginIface
 {
 	/*
 		Array: aFunctions
-		
+
 		An array of <xajaxUserFunction> object that are registered and
 		available via a <xajax.request> call.
 	*/
 	protected $aFunctions;
 	/*
 		String: sXajaxPrefix
-		
+
 		A configuration setting that is stored locally and used during
 		the client script generation phase.
 	*/
 	protected $sXajaxPrefix;
 	/*
 		String: sDefer
-		
+
 		Configuration option that can be used to request that the
 		javascript file is loaded after the page has been fully loaded.
 	*/
@@ -82,7 +65,7 @@ class xajaxFunctionPlugin extends xajaxRequestPlugin implements RequestIface
 
 	/*
 		Function: xajaxFunctionPlugin
-		
+
 		Constructs and initializes the <xajaxFunctionPlugin>.  The GET and POST
 		data is searched for xajax function call parameters.  This will later
 		be used to determine if the request is for a registered function in
@@ -106,11 +89,13 @@ class xajaxFunctionPlugin extends xajaxRequestPlugin implements RequestIface
 		{
 			$this->sRequestedFunction = $_POST['xjxfun'];
 		}
+		// populate which type the current plugin is
+		parent::__construct(Plugin::getRequestType());
 	}
 
 	/*
 		Function: configure
-		
+
 		Sets/stores configuration options used by this plugin.
 	*/
 	public function configure($sName, $mValue)
@@ -146,18 +131,18 @@ class xajaxFunctionPlugin extends xajaxRequestPlugin implements RequestIface
 	/**
 	 * @param array $aArgs
 	 *
-	 * @return \xajaxRequest
+	 * @return RequestIface
 	 */
-	public function registerRequest(array $aArgs = []): \xajaxRequest
+	public function registerRequest(array $aArgs = []): RequestIface
 	{
 		if (0 < count($aArgs))
 		{
 
 			$xuf = $aArgs[0];
 
-			if (false === ($xuf instanceof xajaxUserFunction))
+			if (false === ($xuf instanceof Handler))
 			{
-				$xuf = new xajaxUserFunction($xuf);
+				$xuf = new Handler($xuf);
 			}
 
 			if (2 < count($aArgs))
@@ -184,55 +169,10 @@ class xajaxFunctionPlugin extends xajaxRequestPlugin implements RequestIface
 
 	/*
 		Function: register
-		
+
 		Provides a mechanism for functions to be registered and made available to
 		the page via the javascript <xajax.request> call.
 	*/
-	/**
-	 * Register an User Function
-	 *
-	 * @param $aArgs
-	 *
-	 * @return bool|\xajaxRequest
-	 * @deprecated use RegisterRequest
-	 */
-	public function register($aArgs)
-	{
-		if (1 < count($aArgs))
-		{
-			$sType = $aArgs[0];
-
-			if (XAJAX_FUNCTION == $sType)
-			{
-				$xuf = $aArgs[1];
-
-				if (false === ($xuf instanceof xajaxUserFunction))
-				{
-					$xuf = new xajaxUserFunction($xuf);
-				}
-
-				if (2 < count($aArgs))
-				{
-					if (is_array($aArgs[2]))
-					{
-						foreach ($aArgs[2] as $sName => $sValue)
-						{
-							$xuf->configure($sName, $sValue);
-						}
-					}
-					else
-					{
-						$xuf->configure('include', $aArgs[2]);
-					}
-				}
-				$this->aFunctions[] = $xuf;
-
-				return $xuf->generateRequest($this->sXajaxPrefix);
-			}
-		}
-
-		return false;
-	}
 
 	public function generateHash()
 	{
@@ -253,15 +193,28 @@ class xajaxFunctionPlugin extends xajaxRequestPlugin implements RequestIface
 		contain function declarations that can be used on the browser through
 		javascript to initiate xajax requests.
 	*/
-	public function generateClientScript()
+	public function generateClientScript(): string
 	{
+		$script = '';
 		if (0 < count($this->aFunctions))
 		{
 			foreach (array_keys($this->aFunctions) as $sKey)
 			{
-				$this->aFunctions[$sKey]->generateClientScript($this->sXajaxPrefix);
+
+				$script .= $this->getFunctionByIndex($sKey)->generateClientScript($this->sXajaxPrefix);
 			}
 		}
+
+		return $script;
+	}
+
+	protected function getMethodByIndex(?int $idx = null): Handler
+	{
+		if (is_int($idx) && array_key_exists($idx, $this->aFunctions) && $this->aFunctions[$idx] instanceof Handler)
+		{
+			return $this->aFunctions[$idx];
+		}
+		throw new InvalidArgumentException(self::class . '::getFunctionByIndex(?int $idx = null) The function was not registered or is invalid');
 	}
 
 	/*
@@ -275,7 +228,7 @@ class xajaxFunctionPlugin extends xajaxRequestPlugin implements RequestIface
 		boolean - True if the current request can be handled by this plugin;
 			false otherwise.
 	*/
-	public function canProcessRequest()
+	public function canProcessRequest(): bool
 	{
 		if (null === $this->sRequestedFunction)
 		{
@@ -332,6 +285,3 @@ class xajaxFunctionPlugin extends xajaxRequestPlugin implements RequestIface
 		return 'function';
 	}
 }
-
-$objPluginManager = xajaxPluginManager::getInstance();
-$objPluginManager->registerPlugin(new xajaxFunctionPlugin(), 100);

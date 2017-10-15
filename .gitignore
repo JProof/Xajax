@@ -14,7 +14,7 @@ tests/functional.suite.yml
 tests/functional/
 vendor/
 /xajax_js/deferred/
-xajax_core/Plugins/Response/
+Plugins/Response/
 
 
 /examples/demo/assets/font-awesome-4.7.0/

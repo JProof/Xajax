@@ -9,13 +9,13 @@
  * @license            ${license}
  * @link
  * @see                ${docu}
- * @since              21.09.2017
+ * @since              15.10.2017
  */
 
 declare(strict_types=1);
 
-namespace Xajax\Plugins\Request;
+namespace Xajax\Plugin;
 
-class Request
+interface PluginIface
 {
 }

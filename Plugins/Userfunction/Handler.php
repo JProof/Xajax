@@ -1,39 +1,35 @@
 <?php
-/*
-	File: xajaxUserFunction.inc.php
+/**
+ * PHP version php7
+ *
+ * @category
+ * @package            xajax-php-7
+ * @author             ${JProof}
+ * @copyright          ${copyright}
+ * @license            ${license}
+ * @link
+ * @see                ${docu}
+ * @since              14.10.2017
+ */
 
-	Contains the xajaxUserFunction class
+declare(strict_types=1);
 
-	Title: xajaxUserFunction class
+namespace Xajax\Plugins\Userfunction;
 
-	Please see <copyright.inc.php> for a detailed description, copyright
-	and license information.
-*/
+use Xajax\Configuration\RequestConfigurationIface;
+use Xajax\Core\RequestIface;
+use xajaxResponseManager;
 
-/*
-	@package xajax
-	@version $Id: xajaxUserFunction.inc.php 362 2007-05-29 15:32:24Z calltoconstruct $
-	@copyright Copyright (c) 2005-2007 by Jared White & J. Max Wilson
-	@copyright Copyright (c) 2008-2010 by Joseph Woolley, Steffen Konerow, Jared White  & J. Max Wilson
-	@license http://www.xajaxproject.org/bsd_license.txt BSD License
-*/
-
-/*
-	Class: xajaxUserFunction
-	
-	Construct instances of this class to define functions that will be registered
-	with the <xajax> request processor.  This class defines the parameters that
-	are needed for the definition of a xajax enabled function.  While you can
-	still specify functions by name during registration, it is advised that you
-	convert to using this class when you wish to register external functions or 
-	to specify call options as well.
-*/
-
-final class xajaxUserFunction
+/**
+ * Class Handler
+ *
+ * @package Xajax\Plugins\Userfunction
+ */
+class Handler
 {
 	/*
 		String: sAlias
-		
+
 		An alias to use for this function.  This is useful when you want
 		to call the same xajax enabled function with a different set of
 		call options from what was already registered.
@@ -41,19 +37,19 @@ final class xajaxUserFunction
 	private $sAlias;
 	/*
 		Object: uf
-		
+
 		A string or array which defines the function to be registered.
 	*/
 	private $uf;
 	/*
 		String: sInclude
-		
+
 		The path and file name of the include file that contains the function.
 	*/
 	private $sInclude;
 	/*
 		Array: aConfiguration
-		
+
 		An associative array containing call options that will be sent to the
 		browser curing client script generation.
 	*/
@@ -61,14 +57,14 @@ final class xajaxUserFunction
 
 	/*
 		Function: xajaxUserFunction
-		
+
 		Constructs and initializes the <xajaxUserFunction> object.
-		
+
 		$uf - (mixed): A function specification in one of the following formats:
-		
+
 			- a three element array:
 				(string) Alternate function name: when a method of a class has the same
-					name as another function in the system, you can provide an alias to 
+					name as another function in the system, you can provide an alias to
 					help avoid collisions.
 				(object or class name) Class: the name of the class or an instance of
 					the object which contains the function to be called.
@@ -78,31 +74,31 @@ final class xajaxUserFunction
 					the object which contains the function to be called.
 				(string) Method:  the name of the method that will be called.
 			- a string:
-				the name of the function that is available at global scope (not in a 
+				the name of the function that is available at global scope (not in a
 				class.
-		
+
 		$sInclude - deprecated syntax - use ->configure('include','/path/to/file'); instead
 		$sInclude - (string, optional):  The path and file name of the include file
 			that contains the class or function to be called.
-			
+
 		$aConfiguration - marked as deprecated - might become reactivated as argument #2
 		$aConfiguration - (array, optional):  An associative array of call options
 			that will be used when sending the request from the client.
-			
+
 		Examples:
-		
+
 			$myFunction = array('alias', 'myClass', 'myMethod');
 			$myFunction = array('alias', &$myObject, 'myMethod');
 			$myFunction = array('myClass', 'myMethod');
 			$myFunction = array(&$myObject, 'myMethod');
 			$myFunction = 'myFunction';
-			
+
 			$myUserFunction = new xajaxUserFunction($myFunction, 'myFile.inc.php', array(
 				'method' => 'get',
 				'mode' => 'synchronous'
 				));
-				
-			$xajax->register(XAJAX_FUNCTION, $myUserFunction);				
+
+			$xajax->register(XAJAX_FUNCTION, $myUserFunction);
 	*/
 	public function __construct($uf) // /*deprecated parameters */ $sInclude=NULL, $aConfiguration=array())
 	{
@@ -110,18 +106,12 @@ final class xajaxUserFunction
 		$this->uf             = $uf;
 		$this->aConfiguration = [];
 
-		/*deprecated parameters */
-//		$this->sInclude = $sInclude;
-//		foreach ($aConfiguration as $sKey => $sValue)
-//			$this->configure($sKey, $sValue);
-
 		if (is_array($this->uf) && 2 < count($this->uf))
 		{
 			$this->sAlias = $this->uf[0];
 			$this->uf     = array_slice($this->uf, 1);
 		}
 
-//SkipDebug
 		if (is_array($this->uf) && 2 != count($this->uf))
 		{
 			trigger_error(
@@ -129,29 +119,34 @@ final class xajaxUserFunction
 			    E_USER_ERROR
 			);
 		}
-//EndSkipDebug
 	}
 
 	/*
 		Function: getName
-		
+
 		Get the name of the function being referenced.
-		
+
 		Returns:
-		
+
 		string - the name of the function contained within this object.
 	*/
 	public function getName(): string
 	{
 		// Do not use sAlias here!
-		return (string) (is_array($this->uf)) ? $this->uf[1] : $this->uf;
+		return (is_array($this->uf)) ? (string) $this->uf[1] : (string) $this->uf;
 	}
 
 	/*
 		Function: configure
-		
+
 		Call this to set call options for this instance.
 	*/
+	/**
+	 * @param $sName
+	 * @param $sValue
+	 *
+	 * @deprecated use an global or plugin or handler config
+	 */
 	public function configure($sName, $sValue)
 	{
 		if ('alias' == $sName)
@@ -170,17 +165,19 @@ final class xajaxUserFunction
 
 	/*
 		Function: generateRequest
-		
+
 		Constructs and returns a <xajaxRequest> object which is capable
 		of generating the javascript call to invoke this xajax enabled
 		function.
 	*/
 	/**
-	 * @param string $sXajaxPrefix
+	 * @param string                    $sXajaxPrefix
+	 * @param RequestConfigurationIface $configuration
 	 *
-	 * @return \UserFunction
+	 * @return RequestIface
+	 * @todo set possible configuration to the single request
 	 */
-	public function generateRequest($sXajaxPrefix = ''): Xajax\Plugin\Request\UserFunction
+	public function generateRequest(?string $sXajaxPrefix = null, ? RequestConfigurationIface $configuration = null): RequestIface
 	{
 		$sAlias = $this->getName();
 		if (0 < strlen($this->sAlias))
@@ -188,49 +185,61 @@ final class xajaxUserFunction
 			$sAlias = $this->sAlias;
 		}
 
-		/** @var string $sXajaxPrefix
+		/**
+		 * @var string $sXajaxPrefix
 		 * @deprecated use the plugin or instance configuration
 		 * */
-		return new Xajax\Plugin\Request\UserFunction("{$sXajaxPrefix}{$sAlias}");
+		return new \Xajax\Plugins\Userfunction\Request("{$sXajaxPrefix}{$sAlias}");
 	}
 
 	/*
 		Function: generateClientScript
-		
+
 		Called by the <xajaxPlugin> that is referencing this function
 		reference during the client script generation phase.  This function
 		will generate the javascript function stub that is sent to the
 		browser on initial page load.
 	*/
-	public function generateClientScript($sXajaxPrefix)
+	/**
+	 * Refactured Generation
+	 *
+	 * @param $sXajaxPrefix
+	 *
+	 * @return string
+	 */
+	public function generateClientScript($sXajaxPrefix): string
 	{
+		$string = '';
+
 		$sFunction = $this->getName();
 		$sAlias    = $sFunction;
 		if (0 < strlen($this->sAlias))
 		{
 			$sAlias = $this->sAlias;
 		}
-		echo "{$sXajaxPrefix}{$sAlias} = function() { ";
-		echo "return xajax.request( ";
-		echo "{ xjxfun: '{$sFunction}' }, ";
-		echo "{ parameters: arguments";
+		$string .= "{$sXajaxPrefix}{$sAlias} = function() { ";
+		$string .= "return xajax.request( ";
+		$string .= "{ xjxfun: '{$sFunction}' }, ";
+		$string .= "{ parameters: arguments";
 
 		$sSeparator = ", ";
 		foreach ($this->aConfiguration as $sKey => $sValue)
 		{
-			echo "{$sSeparator}{$sKey}: {$sValue}";
+			$string .= "{$sSeparator}{$sKey}: {$sValue}";
 		}
 
-		echo " } ); ";
-		echo "};\n";
+		$string .= " } ); ";
+		$string .= "};\n";
+
+		return $string;
 	}
 
 	/*
 		Function: call
-		
+
 		Called by the <xajaxPlugin> that references this function during the
 		request processing phase.  This function will call the specified
-		function, including an external file if needed and passing along 
+		function, including an external file if needed and passing along
 		the specified arguments.
 	*/
 	public function call($aArgs = [])

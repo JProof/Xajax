@@ -20,7 +20,7 @@ use xajaxRequest;
 
 /**
  * Interface Iface
- *
+ * @deprecated in old Plugin
  * @package Xajax\plugin_layer
  */
 interface RequestIface

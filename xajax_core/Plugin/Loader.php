@@ -14,14 +14,8 @@
 
 declare(strict_types=1);
 
-namespace Xajax\Plugins;
+namespace Xajax\Plugin;
 
-/**
- * Class Base
- * Basic PluginHandler
- *
- * @package Xajax\Plugins
- */
-class Base
+class Loader
 {
 }
