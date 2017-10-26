@@ -14,8 +14,13 @@
 
 declare(strict_types=1);
 
-namespace Xajax\Plugin;
+namespace Xajax\Core\Plugin;
 
+/**
+ * Class Request
+ *
+ * @package Xajax\Plugin
+ */
 /**
  * Class Request
  *
@@ -23,6 +28,7 @@ namespace Xajax\Plugin;
  */
 abstract class Request extends Plugin
 {
+	use \Xajax\Core\Errors\Call;
 	/**
 	 * Request constructor.
 	 *
@@ -40,6 +46,10 @@ abstract class Request extends Plugin
 		Plugins should store a local copy of the settings they wish to use during
 		registration, client script generation or request processing.
 	*/
+	/**
+	 * @param $sName
+	 * @param $mValue
+	 */
 	function configure($sName, $mValue)
 	{
 	}
@@ -51,11 +61,19 @@ abstract class Request extends Plugin
 		or callable object is to be registered.  Additional plugins may support other
 		registration types.
 	*/
+	/**
+	 * @param $aArgs
+	 *
+	 * @return bool
+	 */
 	function register($aArgs)
 	{
 		return false;
 	}
 
+	/**
+	 *
+	 */
 	function generateHash()
 	{
 	}
@@ -68,6 +86,9 @@ abstract class Request extends Plugin
 		into the HEAD of the document.  Each block must be appropriately enclosed, meaning
 		javascript code must be enclosed in SCRIPT and /SCRIPT tags.
 	*/
+	/**
+	 * @return string
+	 */
 	abstract public function generateClientScript(): string;
 
 	/*
@@ -91,5 +112,8 @@ abstract class Request extends Plugin
 		Returns:
 			false
 	*/
+	/**
+	 * @return mixed
+	 */
 	abstract public function processRequest();
 }

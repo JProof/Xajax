@@ -14,7 +14,7 @@
 
 declare(strict_types=1);
 
-namespace Xajax\Core\Plugin\Request;
+namespace Xajax\Core\Plugin\Response;
 
 use InvalidArgumentException;
 
@@ -23,21 +23,22 @@ use InvalidArgumentException;
  * PluginObject
  *
  * @package Xajax\Core\Plugin\Request
- * @property-read string                     $name
- * @property-read int                        $priority
- * @property-read string                     pluginType
- * @property-read \Xajax\Core\Plugin\Request $pluginInstance
+ * @property-read string                      $name
+ * @property-read int                         $priority
+ * @property-read string                      pluginType
+ * @property-read \Xajax\Core\Plugin\Response $pluginInstance
  */
 class Data extends \Xajax\Core\Plugin\Data
 {
 	/**
 	 * Getting Access to real plugin
 	 *
-	 * @return \Xajax\Core\Plugin\Request
+	 * @return \Xajax\Core\Plugin\Response
+	 * @throws \InvalidArgumentException
 	 */
-	public function getPluginInstance(): \Xajax\Core\Plugin\Request
+	public function getPluginInstance(): \Xajax\Core\Plugin\Response
 	{
-		if ($this->pluginInstance instanceof \Xajax\Core\Plugin\Request)
+		if ($this->pluginInstance instanceof \Xajax\Core\Plugin\Response)
 		{
 			return $this->pluginInstance;
 		}
@@ -45,13 +46,13 @@ class Data extends \Xajax\Core\Plugin\Data
 	}
 
 	/**
-	 * @param \Xajax\Core\Plugin\Plugin $pluginInstance
+	 * @param \Xajax\Core\Plugin\Response $pluginInstance
 	 *
-	 * @return \Xajax\Core\Plugin\Request\Data
+	 * @return \Xajax\Core\Plugin\Response\Data
 	 */
-	public function setPluginInstance(?\Xajax\Core\Plugin\Plugin $pluginInstance = null): self
+	public function setPluginInstance(? $pluginInstance = null): self
 	{
-		if ($pluginInstance instanceof \Xajax\Core\Plugin\Request)
+		if ($pluginInstance instanceof \Xajax\Core\Plugin\Response)
 		{
 			$this->pluginInstance = $pluginInstance;
 

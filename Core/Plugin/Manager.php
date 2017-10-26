@@ -18,24 +18,16 @@ namespace Xajax\Core\Plugin;
 
 use InvalidArgumentException;
 use Xajax\Configuration\Config;
+use Xajax\Core\Helper\Compress\Javascripts;
 use Xajax\Core\Plugin\Request\Data;
-use Xajax\Core\Plugin\Request\Datas;
 use Xajax\Core\Plugin\Request\RequestPluginIface;
-use Xajax\Plugin\Plugin;
-use Xajax\Plugin\Request;
+use xajaxLanguageManager;
 
 class Manager
 {
 	use Config;
+	use \Xajax\Core\Errors\Call;
 
-	/*
-		Array: aRequestPlugins
-	*/
-	/**
-	 * @deprecated
-	 * @var array
-	 */
-	private $aRequestPlugins;
 	/*
 		Array: aResponsePlugins
 	*/
@@ -47,33 +39,15 @@ class Manager
 	 */
 	private $requestPlugins;
 	/**
-	 * @deprecated
-	 * @var array
+	 * The Request-Plugins as own Objects with getters and setters
+	 *
+	 * @var \Xajax\Core\Plugin\Response\Datas
 	 */
-	private $aResponsePlugins;
-	/*
-		Array: aConfigurable
-	*/
-	/**
-	 * @deprecated
-	 * @var array
-	 */
-	private $aConfigurable;
+	private $responsePlugins;
 	/*
 		Array: aRegistrars
 	*/
-	/**
-	 * @var array
-	 */
-	private $aRegistrars = [];
-	/*
-		Array: aProcessors
-	*/
-	/**
-	 * @deprecated
-	 * @var array
-	 */
-	private $aProcessors;
+
 	/*
 		Array: aClientScriptGenerators
 	*/
@@ -90,21 +64,15 @@ class Manager
 	 */
 	public  $aJsFiles = [];
 	private $nScriptLoadTimeout;
-	private $sLanguage;
 	private $nResponseQueueSize;
 	private $sDebugOutputID;
 
 	private function __construct()
 	{
 
-		$this->requestPlugins = new Datas();
+		$this->requestPlugins  = new \Xajax\Core\Plugin\Request\Datas();
+		$this->responsePlugins = new \Xajax\Core\Plugin\Response\Datas;
 
-		$this->aRequestPlugins  = [];
-		$this->aResponsePlugins = [];
-
-		$this->aConfigurable = [];
-
-		$this->aProcessors             = [];
 		$this->aClientScriptGenerators = [];
 
 		$this->aJsFiles = [];
@@ -142,78 +110,18 @@ class Manager
 		Parameters:
 			$aFolders - (array): Array of folders to check for plugins
 	*/
-	/**
-	 * @deprecated hook with an other Plugin mechanism
-	 * @todo       use spl priority queue
-	 *
-	 * @param $aFolders
-	 */
-	public function loadPlugins(array $aFolders = [])
-	{
-		if (0 < count($aFolders))
-		{
-			foreach ($aFolders as $sFolder)
-			{
-				if (is_dir($sFolder) && $handle = opendir($sFolder))
-				{
-					while (!(false === ($sName = readdir($handle))))
-					{
-						$nLength = strlen($sName);
-						if (8 < $nLength)
-						{
-							$sFileName  = substr($sName, 0, $nLength - 8);
-							$sExtension = substr($sName, $nLength - 8, 8);
-							if ('.inc.php' === $sExtension)
-							{
-								require $sFolder . '/' . $sFileName . $sExtension;
-							}
-						}
-					}
-
-					closedir($handle);
-				}
-			}
-		}
-	}
-
-	/*
-		Function: _insertIntoArray
-
-		Inserts an entry into an array given the specified priority number.
-		If a plugin already exists with the given priority, the priority is
-		automatically incremented until a free spot is found.  The plugin
-		is then inserted into the empty spot in the array.
-
-		Parameters:
-
-		$aPlugins - (array): Plugins array
-		$objPlugin - (object): A reference to an instance of a plugin.
-		$nPriority - (number): The desired priority, used to order
-			the plugins.
-
-	*/
-	/**
-	 * @param $aPlugins
-	 * @param $objPlugin
-	 * @param $nPriority
-	 *
-	 * @deprecated never never use
-	 */
-	private function _insertIntoArray(&$aPlugins, $objPlugin, $nPriority)
-	{
-		while (isset($aPlugins[$nPriority]))
-			$nPriority ++;
-
-		$aPlugins[$nPriority] = $objPlugin;
-	}
 
 	/**
 	 * Register Request Plugin
 	 *
-	 * @param \Xajax\Plugin\Request $objPlugin
-	 * @param int|null              $nPriority
+	 * @todo hier gehts weiter, setting des Plugins als Data-Object
+	 *
+	 * @param \Xajax\Core\Plugin\Request $objPlugin
+	 * @param int|null                   $nPriority
+	 *
+	 * @return Request\Data
 	 */
-	protected function registerRequestPlugin(Request $objPlugin, ?int $nPriority = null)
+	protected function registerRequestPlugin(Request $objPlugin, ?int $nPriority = null): Request\Data
 	{
 		if (!$objPlugin instanceof RequestPluginIface)
 		{
@@ -222,7 +130,34 @@ class Manager
 
 		$plugins = $this->getRequestPlugins();
 
-		$plugin = new \Xajax\Core\Plugin\Request\Data();
+		$pluginData = new Request\Data();
+		$pluginData->setPluginInstance($objPlugin);
+
+		$plugins->addPlugin($nPriority, $pluginData);
+
+		return $pluginData;
+	}
+
+	/**
+	 * Register Request Plugin
+	 *
+	 * @todo hier gehts weiter .........
+	 *
+	 * @param \Xajax\Core\Plugin\Response $objPlugin
+	 * @param int|null                    $nPriority
+	 *
+	 * @throws \InvalidArgumentException
+	 */
+	protected function registerResponsePlugin(Response $objPlugin, ?int $nPriority = null)
+	{
+		if (!$objPlugin instanceof RequestPluginIface)
+		{
+			throw new InvalidArgumentException('Request Plugin can not be registered because of missing ResponsePluginInfterface');
+		}
+
+		$plugins = $this->getRequestPlugins();
+
+		$plugin = new \Xajax\Core\Plugin\Response\Data();
 		$plugin->setPluginInstance($objPlugin);
 	}
 
@@ -245,81 +180,39 @@ class Manager
 	{
 		if ($objPlugin instanceof Request)
 		{
-			$this->registerRequestPlugin($objPlugin, $nPriority);
+			return $this->registerRequestPlugin($objPlugin, $nPriority);
 		}
-		else if ($objPlugin instanceof xajaxResponsePlugin)
+
+		if ($objPlugin instanceof Response)
 		{
-			$this->aResponsePlugins[] = $objPlugin;
-		}
-		else
-		{
-//SkipDebug
-			$objLanguageManager = xajaxLanguageManager::getInstance();
-			trigger_error(
-			    $objLanguageManager->getText('XJXPM:IPLGERR:01')
-			    . get_class($objPlugin)
-			    . $objLanguageManager->getText('XJXPM:IPLGERR:02')
-			    , E_USER_ERROR
-			);
-//EndSkipDebug
+			return $this->registerResponsePlugin($objPlugin, $nPriority);
 		}
 
-		if (method_exists($objPlugin, 'configure'))
-		{
-			$this->_insertIntoArray($this->aConfigurable, $objPlugin, $nPriority);
-		}
-
-		if (method_exists($objPlugin, 'generateClientScript'))
-		{
-			$this->_insertIntoArray($this->aClientScriptGenerators, $objPlugin, $nPriority);
-		}
-	}
-
-	/**
-	 * Check an Request Plugin has an specific Method
-	 *
-	 * @param string $methodName
-	 */
-	protected function hasRequestPluginMethod($methodName = '')
-	{
-		return $this->searchPluginMethod($methodName, Plugin::getRequestType());
-	}
-
-	/**
-	 * Check an Response Plugin has an specific Method
-	 *
-	 * @param string $methodName
-	 */
-	protected function hasResponsePluginMethod($methodName = '')
-	{
-		return $this->searchPluginMethod($methodName, Plugin::getResponseType());
-	}
-
-	protected function getRequestPluginsWithMethod(string $methodName = ''): array
-	{
-
+		$objLanguageManager = xajaxLanguageManager::getInstance();
+		trigger_error(
+		    $objLanguageManager->getText('XJXPM:IPLGERR:01')
+		    . get_class($objPlugin)
+		    . $objLanguageManager->getText('XJXPM:IPLGERR:02')
+		    , E_USER_ERROR
+		);
 	}
 
 	/**
 	 * @return \Xajax\Core\Plugin\Request\Datas
 	 */
-	public function getRequestPlugins(): Datas
+	public function getRequestPlugins(): \Xajax\Core\Plugin\Request\Datas
 	{
 		return $this->requestPlugins;
 	}
 
-	protected function searchPluginMethod($methodName = '', $type = '')
+	/**
+	 * @return \Xajax\Core\Plugin\Response\Datas
+	 */
+	public function getResponsePlugins(): \Xajax\Core\Plugin\Response\Datas
 	{
-
-		Plugin::getResponseType();
+		return $this->responsePlugins;
 	}
 
-	/*
-		Function: canProcessRequest
-
-
-
-	*/
 	/**
 	 * Calls each of the request plugins and determines if the
 	 * current request can be processed by one of them.  If no processor identifies
@@ -339,7 +232,8 @@ class Manager
 		foreach ($requestPlugins as $requestPlugin)
 		{
 
-			if ($requestPlugin->hasPluginMethod(__METHOD__) && ($canProcessRequest = $requestPlugin->getPluginInstance()->{__METHOD__}()))
+			if ($requestPlugin->hasPluginMethod(__FUNCTION__) &&
+			    ($canProcessRequest = $requestPlugin->getPluginInstance()->{__FUNCTION__}()))
 			{
 				return $canProcessRequest;
 			}
@@ -365,7 +259,8 @@ class Manager
 		foreach ($requestPlugins as $requestPlugin)
 		{
 
-			if ($requestPlugin->hasPluginMethod(__METHOD__) && (true === $requestPlugin->getPluginInstance()->{__METHOD__}()))
+			// processing each plugin
+			if ($requestPlugin->hasPluginMethod(__FUNCTION__) && (true === $requestPlugin->getPluginInstance()->{__FUNCTION__}()))
 			{
 				$hasProcessRequested = true;
 			}
@@ -388,14 +283,6 @@ class Manager
 	public function configure($sName, $mValue)
 	{
 
-
-		$aKeys = array_keys($this->aConfigurable);
-		sort($aKeys);
-		foreach ($aKeys as $sKey)
-		{
-			$this->aConfigurable[$sKey]->configure($sName, $mValue);
-		}
-
 		if ('javascript files' === $sName)
 		{
 			$this->aJsFiles = array_merge($this->aJsFiles, $mValue);
@@ -414,114 +301,6 @@ class Manager
 		{
 			$this->sDebugOutputID = $mValue;
 		}
-	}
-
-	/*
-		Function: register
-
-		Call each of the request plugins and give them the opportunity to
-		handle the registration of the specified function, event or callable object.
-
-		Parameters:
-		 $aArgs - (array) :
-	*/
-
-	/**
-	 * @param array $aArgs
-	 *
-	 * @todo       check return type
-	 * @deprecated not used anymore
-	 * @return bool
-	 */
-	public function registerRequest(array $aArgs = []): bool
-	{
-		$aKeys = array_keys($this->getRegistrars());
-		sort($aKeys);
-		foreach ($aKeys as $sKey)
-		{
-			$objPlugin = $this->getRegistrar($sKey);
-			$mResult   = $objPlugin->registerRequest($aArgs);
-			if ($mResult instanceof xajaxRequest)
-			{
-				return $mResult;
-			}
-
-			else
-			{
-				throw new RuntimeException(__FILE__ . ' ' . __LINE__ . 'Result is not an Xajax Request instance');
-			}
-
-			if (is_array($mResult))
-			{
-				return $mResult;
-			}
-			if (is_bool($mResult))
-			{
-				if (true === $mResult)
-				{
-					return true;
-				}
-			}
-		}
-//SkipDebug
-		$objLanguageManager = xajaxLanguageManager::getInstance();
-		trigger_error(
-		    $objLanguageManager->getText('XJXPM:MRMERR:01')
-		    . print_r($aArgs, true)
-		    , E_USER_ERROR
-		);
-
-		return false;
-//EndSkipDebug
-	}
-
-	/*
-		Function: register
-
-		Call each of the request plugins and give them the opportunity to
-		handle the registration of the specified function, event or callable object.
-
-		Parameters:
-		 $aArgs - (array) :
-	*/
-	/**
-	 * @param $aArgs
-	 *
-	 * @return bool
-	 * @deprecated  use registerRequest
-	 */
-	public function register($aArgs)
-	{
-		$aKeys = array_keys($this->aRegistrars);
-		sort($aKeys);
-		foreach ($aKeys as $sKey)
-		{
-			$objPlugin = $this->aRegistrars[$sKey];
-			$mResult   = $objPlugin->register($aArgs);
-			if ($mResult instanceof xajaxRequest)
-			{
-				return $mResult;
-			}
-			if (is_array($mResult))
-			{
-				return $mResult;
-			}
-			if (is_bool($mResult))
-			{
-				if (true === $mResult)
-				{
-					return true;
-				}
-			}
-		}
-//SkipDebug
-		$objLanguageManager = xajaxLanguageManager::getInstance();
-		trigger_error(
-		    $objLanguageManager->getText('XJXPM:MRMERR:01')
-		    . print_r($aArgs, true)
-		    , E_USER_ERROR
-		);
-//EndSkipDebug
 	}
 
 	/**
@@ -562,9 +341,9 @@ class Manager
 	 *
 	 * @return string
 	 */
-	private function _getScriptFilename(string $sFilename = ''): string
+	private function _getScriptFilename(?string $sFilename = null): string
 	{
-		if (false === $this->getConfig()->isUseUncompressedScripts())
+		if (is_string($sFilename) && false === $this->getConfig()->isUseUncompressedScripts())
 		{
 			return str_replace('.js', '.min.js', $sFilename);
 		}
@@ -587,7 +366,7 @@ class Manager
 
 		$aJsFiles = $this->aJsFiles;
 
-		if ($sJsURI !== '' && substr($sJsURI, - 1) !== '/')
+		if ('' !== $sJsURI && '/' !== substr($sJsURI, - 1))
 		{
 			$sJsURI .= '/';
 		}
@@ -766,8 +545,7 @@ class Manager
 
 				$sScriptCode = stripslashes(ob_get_clean());
 
-				require_once __DIR__ . '/xajaxCompress.inc.php';
-				$sScriptCode = xajaxCompressFile($sScriptCode);
+				$sScriptCode = Javascripts::xajaxCompressFile($sScriptCode);
 
 				if (!is_dir($sOutPath))
 				{
@@ -806,7 +584,7 @@ class Manager
 			echo '![CDATA[ */';
 			echo $sCrLf;
 
-			$this->printPluginScripts();
+			echo $this->printPluginScripts();
 
 			echo $sCrLf;
 			echo '/* ]]> */';
@@ -843,110 +621,66 @@ class Manager
 		return md5($sHash);
 	}
 
-	private function printPluginScripts()
+	/**
+	 * @return string
+	 */
+	private function printPluginScripts(): string
 	{
-		$aKeys = array_keys($this->aClientScriptGenerators);
-		sort($aKeys);
-		foreach ($aKeys as $sKey)
+		$scripts = [];
+		$method  = 'generateClientScript';
+		$plugins = $this->getRequestPlugins();
+		/** @var Data $plugin */
+		foreach ($plugins as $plugin)
 		{
-			$this->aClientScriptGenerators[$sKey]->generateClientScript();
-		}
-	}
-
-	/*
-		Function: getResponsePlugin
-
-		Locate the specified response plugin by name and return
-		a reference to it if one exists.
-
-		Parameters:
-			$sName - (string): Name of the plugin.
-
-		Returns:
-			mixed : Returns plugin or false if not found.
-	*/
-	public function getResponsePlugin($sName)
-	{
-		$aKeys = array_keys($this->aResponsePlugins);
-		sort($aKeys);
-		foreach ($aKeys as $sKey)
-		{
-			if ($this->aResponsePlugins[$sKey] instanceof $sName)
+			if ($plugin->hasPluginMethod($method))
 			{
-				return $this->aResponsePlugins[$sKey];
+				$string = $plugin->getPluginInstance()->{$method}();
+				if ('' !== $string)
+				{
+					$scripts[] = $string;
+				}
 			}
 		}
 
-		return false;
+		return implode("\n", $scripts);
 	}
 
-	/*
-		Function: getRequestPlugin
 
-		Locate the specified response plugin by name and return
-		a reference to it if one exists.
 
-		Parameters:
-			$sName - (string): Name of the plugin.
 
-		Returns:
-			mixed : Returns plugin or false if not found.
-	*/
+	// deprecated -----------
 
 	/**
-	 * Internal Adding an Plugin to Registrars
+	 * @deprecated hook with an other Plugin mechanism
+	 * @todo       use spl priority queue
 	 *
-	 * @param \Xajax\plugin_layer\RequestIface $plugin
-	 * @param int                              $nPriority
+	 * @param $aFolders
 	 */
-	private function addRegistrar(RequestIface $plugin, int $nPriority = 0)
+	public function loadPlugins(?array $aFolders = null)
 	{
-		// @todo check if need this ns priority counter
-
-		$registrars = $this->getRegistrars();
-		while (isset($registrars[$nPriority]))
-			$nPriority ++;
-
-		$registrars[$nPriority] = $plugin;
-		$this->setRegistrars($registrars);
-	}
-
-	/**
-	 * Access to registered Stack of Plugins
-	 *
-	 * @param string $name
-	 *
-	 * @return \Xajax\plugin_layer\RequestIface
-	 * @throws InvalidArgumentException
-	 */
-	private function getRegistrar(string $name = ''): \Xajax\plugin_layer\RequestIface
-	{
-		$registrars = $this->getRegistrars();
-		/** @var \Xajax\plugin_layer\RequestIface $plugin */
-		foreach ($registrars as $nPriority => $plugin)
+		if (is_array($aFolders) && 0 < count($aFolders))
 		{
-			if ($plugin->getName() === $name)
+			foreach ($aFolders as $sFolder)
 			{
-				return $plugin;
+				if (is_dir($sFolder) && $handle = opendir($sFolder))
+				{
+					while (!(false === ($sName = readdir($handle))))
+					{
+						$nLength = strlen($sName);
+						if (8 < $nLength)
+						{
+							$sFileName  = substr($sName, 0, $nLength - 8);
+							$sExtension = substr($sName, $nLength - 8, 8);
+							if ('.inc.php' === $sExtension)
+							{
+								require $sFolder . '/' . $sFileName . $sExtension;
+							}
+						}
+					}
+
+					closedir($handle);
+				}
 			}
 		}
-
-		throw new InvalidArgumentException('Registrar Plugin is not registered ' . $name);
-	}
-
-	/**
-	 * @return array
-	 */
-	public function getRegistrars(): array
-	{
-		return $this->aRegistrars;
-	}
-
-	/**
-	 * @param array $aRegistrars
-	 */
-	private function setRegistrars(array $aRegistrars = [])
-	{
-		$this->aRegistrars = $aRegistrars;
 	}
 }

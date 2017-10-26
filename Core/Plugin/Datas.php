@@ -14,26 +14,49 @@
 
 declare(strict_types=1);
 
-namespace Xajax\Core\Plugin\Request;
+namespace Xajax\Core\Plugin;
 
 /**
  * Class Plugins
  *
  * @package Xajax\Core\Plugin\Request
- * @method Data offsetGet($offset)
  */
 class Datas extends \Xajax\Core\Datas\Datas
 {
 	/**
 	 * @param      $nPriority
 	 * @param null $datas
+	 *
+	 * @todo implement fully
 	 */
 	public function addPlugin(?int $nPriority = null, $datas = null)
 	{
-		if (null === $nPriority)
+
+	}
+
+	/**
+	 * Try to find an Plugin by Name
+	 *
+	 * @param null|string $name the plugin-name
+	 *
+	 * @return bool|\Xajax\Core\Plugin\Data
+	 */
+	public function getByName(?string $name = null)
+	{
+		if (null === $name)
 		{
-			$nPriority = count($this->getContainer());
+			throw new \InvalidArgumentException(__METHOD__ . ' Name can not be NULL!');
 		}
-		$this->offsetSet($nPriority, $datas);
+
+		/** @var \Xajax\Core\Plugin\Data $plugin */
+		foreach ($this as $plugin)
+		{
+			if ($plugin->getName() === $name)
+			{
+				return $plugin;
+			}
+		}
+
+		return false;
 	}
 }

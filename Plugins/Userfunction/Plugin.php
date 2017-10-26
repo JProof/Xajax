@@ -17,10 +17,10 @@ declare(strict_types=1);
 namespace Xajax\Plugins\Userfunction;
 
 use InvalidArgumentException;
+use Xajax\Core\Argument;
+use Xajax\Core\Plugin\Request;
 use Xajax\Core\Plugin\Request\RequestPluginIface;
 use Xajax\Core\RequestIface;
-use Xajax\Plugin\Request;
-use xajaxArgumentManager;
 
 /**
  * Class Plugin
@@ -201,7 +201,7 @@ class Plugin extends Request implements RequestPluginIface
 			foreach (array_keys($this->aFunctions) as $sKey)
 			{
 
-				$script .= $this->getFunctionByIndex($sKey)->generateClientScript($this->sXajaxPrefix);
+				$script .= $this->getMethodByIndex($sKey)->generateClientScript($this->sXajaxPrefix);
 			}
 		}
 
@@ -230,12 +230,7 @@ class Plugin extends Request implements RequestPluginIface
 	*/
 	public function canProcessRequest(): bool
 	{
-		if (null === $this->sRequestedFunction)
-		{
-			return false;
-		}
-
-		return true;
+		return 0 < count($this->sRequestedFunction);
 	}
 
 	/*
@@ -251,18 +246,18 @@ class Plugin extends Request implements RequestPluginIface
 	*/
 	public function processRequest()
 	{
-		if (null === $this->sRequestedFunction)
+		if (false === $this->canProcessRequest())
 		{
 			return false;
 		}
 
-		$objArgumentManager = xajaxArgumentManager::getInstance();
+		$objArgumentManager = Argument::getInstance();
 		$aArgs              = $objArgumentManager->process();
 
-		foreach (array_keys($this->aFunctions) as $sKey)
+		foreach ($this->aFunctions as $method)
 		{
-			$xuf = $this->aFunctions[$sKey];
-
+			$xuf = $method;
+			//$xuf->call($aArgs);
 			if ($xuf->getName() == $this->sRequestedFunction)
 			{
 				$xuf->call($aArgs);

@@ -14,7 +14,7 @@
 
 declare(strict_types=1);
 
-namespace Xajax\Core\Plugin\Request;
+namespace Xajax\Core\Plugin\Response;
 
 /**
  * Class Plugins
@@ -30,10 +30,6 @@ class Datas extends \Xajax\Core\Datas\Datas
 	 */
 	public function addPlugin(?int $nPriority = null, $datas = null)
 	{
-		if (null === $nPriority)
-		{
-			$nPriority = count($this->getContainer());
-		}
-		$this->offsetSet($nPriority, $datas);
+
 	}
 }

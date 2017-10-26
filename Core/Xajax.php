@@ -34,7 +34,11 @@ namespace Xajax\Core;
 	<xajaxResponse> classes.
 */
 
+use RuntimeException;
 use Xajax\Configuration\Config;
+use Xajax\Core\Plugin\Manager;
+use Xajax\Core\Plugin\Plugin;
+use Xajax\Core\Response\Response;
 
 if (!defined('XAJAX_DEFAULT_CHAR_ENCODING'))
 {
@@ -86,10 +90,11 @@ if (!defined('XAJAX_PROCESSING_EVENT_INVALID'))
  *
  * @package Xajax\Core
  */
-final class Xajax
+class Xajax
 {
 	// temporarily Helper Method
 	use Config;
+	use \Xajax\Core\Errors\Call;
 
 	/*
 		Array: aSettings
@@ -200,7 +205,7 @@ final class Xajax
 		Stores a reference to the global <xajaxResponseManager>
 	*/
 	/**
-	 * @var \xajaxResponseManager
+	 * @var \Xajax\Core\Response\Manager
 	 */
 	private $objResponseManager;
 	/*
@@ -236,7 +241,7 @@ final class Xajax
 	 *
 	 * @param array $configuration
 	 */
-	public function __construct(array $configuration = [])
+	public function __construct(array $configuration = null)
 	{
 		$this->bErrorHandler     = false;
 		$this->aProcessingEvents = [];
@@ -274,22 +279,26 @@ final class Xajax
 		    ]
 		);
 
-		if (array_key_exists('sRequestURI', $configuration) && null !== ($sRequestURI = $configuration['sRequestURI']))
+		if (is_array($configuration))
 		{
-			$this->configure('requestURI', $sRequestURI);
-		}
-		else
-		{
-			$this->configure('requestURI', $this->_detectURI());
-		}
-		if (array_key_exists('language', $configuration) && null !== ($sLanguage = $configuration['language']))
-		{
-			$this->configure('language', $sLanguage);
-		}
 
-		if ('utf-8' !== XAJAX_DEFAULT_CHAR_ENCODING)
-		{
-			$this->configure('decodeUTF8Input', true);
+			if (array_key_exists('sRequestURI', $configuration) && null !== ($sRequestURI = $configuration['sRequestURI']))
+			{
+				$this->configure('requestURI', $sRequestURI);
+			}
+			else
+			{
+				$this->configure('requestURI', $this->_detectURI());
+			}
+			if (array_key_exists('language', $configuration) && null !== ($sLanguage = $configuration['language']))
+			{
+				$this->configure('language', $sLanguage);
+			}
+
+			if ('utf-8' !== XAJAX_DEFAULT_CHAR_ENCODING)
+			{
+				$this->configure('decodeUTF8Input', true);
+			}
 		}
 	}
 
@@ -331,6 +340,9 @@ final class Xajax
 	/*
 		Function: __wakeup
 	*/
+	/**
+	 *
+	 */
 	public function __wakeup()
 	{
 
@@ -360,9 +372,9 @@ final class Xajax
 		//$this->objPluginManager = xajaxPluginManager::getInstance();
 		$this->getObjPluginManager()->loadPlugins($aPluginFolders);
 
-		$this->objLanguageManager = xajaxLanguageManager::getInstance();
-		$this->objArgumentManager = xajaxArgumentManager::getInstance();
-		$this->objResponseManager = xajaxResponseManager::getInstance();
+		$this->objLanguageManager = Language::getInstance();
+		$this->objArgumentManager = Argument::getInstance();
+		$this->objResponseManager = \Xajax\Core\Response\Manager::getInstance();
 
 		$this->configureMany($this->aSettings);
 	}
@@ -379,9 +391,9 @@ final class Xajax
 		<xajaxResponse> : A <xajaxResponse> object which can be used to return
 			response commands.  See also the <xajaxResponseManager> class.
 	*/
-	public static function getGlobalResponse(): \xajaxResponse
+	public static function getGlobalResponse(): Response
 	{
-		return xajaxResponse::getInstance();
+		return Response::getInstance();
 	}
 
 	/*
@@ -402,8 +414,9 @@ final class Xajax
 	 * @param $sType
 	 * @param $mArg
 	 *
+	 * @deprecated use direct plugin methods
 	 * @return bool
-	 * @since 7.0
+	 * @since      7.0
 	 */
 	public function registerRequest($sType, $mArg): bool
 	{
@@ -542,7 +555,7 @@ final class Xajax
 		$this->objLanguageManager->configure($sName, $mValue);
 		$this->objArgumentManager->configure($sName, $mValue);
 		$this->getObjPluginManager()->configure($sName, $mValue);
-		$this->objResponseManager->configure($sName, $mValue);
+		$this->getObjResponseManager()->configure($sName, $mValue);
 
 		$this->getConfig()->{$sName} = $mValue;
 
@@ -593,12 +606,12 @@ final class Xajax
 	/**
 	 * xajaxPluginManager getter
 	 *
-	 * @return \xajaxPluginManager
+	 * @return Manager
 	 * @since 7.0
 	 */
-	public function getObjPluginManager(): xajaxPluginManager
+	public function getObjPluginManager(): Manager
 	{
-		return $this->objPluginManager instanceof xajaxPluginManager ? $this->objPluginManager : $this->setObjPluginManager(xajaxPluginManager::getInstance());
+		return $this->objPluginManager instanceof Manager ? $this->objPluginManager : $this->setObjPluginManager(Manager::getInstance());
 	}
 
 	/**
@@ -606,11 +619,11 @@ final class Xajax
 	 *
 	 * @since 7.0
 	 *
-	 * @param \xajaxPluginManager $objPluginManager
+	 * @param Manager $objPluginManager
 	 *
-	 * @return \xajaxPluginManager
+	 * @return Manager
 	 */
-	private function setObjPluginManager(xajaxPluginManager $objPluginManager): xajaxPluginManager
+	private function setObjPluginManager(Manager $objPluginManager): Manager
 	{
 		return $this->objPluginManager = $objPluginManager;
 	}
@@ -618,13 +631,77 @@ final class Xajax
 	/**
 	 * Public Getter of an Plugin
 	 *
-	 * @param string $string
+	 * @param null|string $plgName Userfunction or Custom RequestPlugin
 	 *
-	 * @return \Xajax\plugin_layer\RequestIface
+	 * @return  \Xajax\Core\Plugin\Request
 	 */
-	public function getPlugin($string = ''): \Xajax\plugin_layer\RequestIface
+	public function getRequestPlugin(?string $plgName = null): ?\Xajax\Core\Plugin\Request
 	{
-		return $this->getObjPluginManager()->getPlugin($string);
+		$instance   = null;
+		$reqPlugins = $this->getObjPluginManager()->getRequestPlugins();
+		if ($reqPlugins->offsetExists($plgName))
+		{
+
+			try
+			{
+				$instance = $reqPlugins->offsetGet($plgName)->getPluginInstance();
+			}
+			catch (RuntimeException$exception)
+			{
+				var_dump($exception);
+			}
+		}
+		else
+		{
+			$instance = $this->autoregisterRequestPlugin($plgName);
+		}
+
+		return $instance;
+	}
+
+	protected function autoregisterRequestPlugin(?string $plgName = null): ?\Xajax\Core\Plugin\Request
+	{
+		$plgObject      = $this->loadPlugin($plgName, Plugin::getRequestType());
+		$plugin         = $this->getObjPluginManager()->registerPlugin($plgObject);
+		$pluginInstance = null;
+		try
+		{
+
+			if ($plugin instanceof \Xajax\Core\Plugin\Request\Data)
+			{
+				$pluginInstance = $plugin->getPluginInstance();
+			}
+		}
+		catch (RuntimeException $exception)
+		{
+			throw $exception;
+		}
+
+		return $pluginInstance;
+	}
+
+	protected function autoregisterResponsePlugin(?string $plgName = null)
+	{
+		$plgObject = $this->loadPlugin($plgName, Plugin::getResponseType());
+	}
+
+	private function loadPlugin(?string $plgName = null, string $type)
+	{
+		$ns = 'Xajax\\Plugins\\';
+		try
+		{
+
+			$class = $ns . ucfirst($plgName) . '\\Plugin';
+
+			$pluginInstance = new $class;
+		}
+		catch (RuntimeException $exception)
+		{
+			var_dump($exception);
+			die;
+		}
+
+		return $pluginInstance;
 	}
 
 	/*
@@ -636,7 +713,7 @@ final class Xajax
 
 		boolean - True if this is a xajax request, false otherwise.
 	*/
-	public function canProcessRequest()
+	public function canProcessRequest(): bool
 	{
 		return $this->getObjPluginManager()->canProcessRequest();
 	}
@@ -652,7 +729,7 @@ final class Xajax
 		$sessionID = session_id();
 		if ($sessionID === '')
 		{
-			$this->objResponseManager->debug(
+			$this->getObjResponseManager()->debug(
 			    'Must enable sessions to use challenge/response.'
 			);
 
@@ -784,7 +861,7 @@ final class Xajax
 		{
 			// @todo check error handler
 			// Use xajax error handler if necessary
-			if ($this->bErrorHandler)
+			if ($this->getConfig()->isErrorHandler())
 			{
 				$GLOBALS['xajaxErrorHandlerText'] = '';
 				set_error_handler('xajaxErrorHandler');
@@ -829,8 +906,8 @@ final class Xajax
 
 					if (true === $bEndRequest)
 					{
-						$this->objResponseManager->clear();
-						$this->objResponseManager->append($aResult[1]);
+						$this->getObjResponseManager()->clear();
+						$this->getObjResponseManager()->append($aResult[1]);
 					}
 				}
 			}
@@ -849,8 +926,8 @@ final class Xajax
 				// handler.  replace the response, if one has been started
 				// and send a debug message.
 
-				$this->objResponseManager->clear();
-				$this->objResponseManager->append(new xajaxResponse());
+				$this->getObjResponseManager()->clear();
+				$this->getObjResponseManager()->append(new Response());
 
 				// handle invalidRequest event
 				if (isset($this->aProcessingEvents[XAJAX_PROCESSING_EVENT_INVALID]))
@@ -859,11 +936,11 @@ final class Xajax
 				}
 				else
 				{
-					$this->objResponseManager->debug($mResult);
+					$this->getObjResponseManager()->debug($mResult);
 				}
 			}
 
-			if ($this->bErrorHandler)
+			if ($this->getConfig()->isErrorHandler())
 			{
 				$sErrorMessage = $GLOBALS['xajaxErrorHandlerText'];
 				if (!empty($sErrorMessage))
@@ -885,27 +962,27 @@ final class Xajax
 						}
 						else
 						{
-							$this->objResponseManager->debug(
+							$this->getObjResponseManager()->debug(
 							    $this->objLanguageManager->getText('LOGERR:01')
 							    . $this->sLogFile
 							);
 						}
 					}
-					$this->objResponseManager->debug(
+					$this->getObjResponseManager()->debug(
 					    $this->objLanguageManager->getText('LOGMSG:01')
 					    . $sErrorMessage
 					);
 				}
 			}
 
-			$this->objResponseManager->send();
+			$this->getObjResponseManager()->send();
 
-			if ($this->bErrorHandler)
+			if ($this->getConfig()->isErrorHandler())
 			{
 				restore_error_handler();
 			}
 
-			if ($this->bExitAllowed)
+			if ($this->getConfig()->isExitAllowed())
 			{
 				exit();
 			}
@@ -924,11 +1001,10 @@ final class Xajax
 
 	*/
 	/**
-	 * @param bool $bDeferScriptGenerationForce forcing re-cache file
 	 */
-	public function printJavascript($bDeferScriptGenerationForce = false)
+	public function printJavascript()
 	{
-		$this->getObjPluginManager()->generateClientScript($bDeferScriptGenerationForce);
+		echo $this->getObjPluginManager()->generateClientScript();
 	}
 
 	/*
@@ -958,60 +1034,6 @@ final class Xajax
 			to be compressed.
 		bAlways - (boolean):  Compress the file, even if it already exists.
 	*/
-	/**
-	 * @param null $sJsFullFilename
-	 * @param bool $bAlways
-	 *
-	 * @deprecated use an other place
-	 */
-	public function autoCompressJavascript($sJsFullFilename = null, $bAlways = false)
-	{
-		$sJsFile = 'xajax_js/xajax_core.js';
-
-		if ($sJsFullFilename)
-		{
-			$realJsFile = $sJsFullFilename;
-		}
-		else
-		{
-			$realPath   = realpath(dirname(__DIR__));
-			$realJsFile = $realPath . '/' . $sJsFile;
-		}
-
-		// Create a compressed file if necessary
-		if (!file_exists($realJsFile) || true == $bAlways)
-		{
-			$srcFile = str_replace('.js', '_uncompressed.js', $realJsFile);
-			if (!file_exists($srcFile))
-			{
-				trigger_error(
-				    $this->objLanguageManager->getText('CMPRSJS:RDERR:01')
-				    . dirname($realJsFile)
-				    . $this->objLanguageManager->getText('CMPRSJS:RDERR:02')
-				    , E_USER_ERROR
-				);
-			}
-
-			require_once __DIR__ . '/xajaxCompress.inc.php';
-			$javaScript       = implode('', (array) file_get_contents($srcFile));
-			$compressedScript = xajaxCompressFile($javaScript);
-			$fH               = @fopen($realJsFile, 'wb');
-			if (!$fH)
-			{
-				trigger_error(
-				    $this->objLanguageManager->getText('CMPRSJS:WTERR:01')
-				    . dirname($realJsFile)
-				    . $this->objLanguageManager->getText('CMPRSJS:WTERR:02')
-				    , E_USER_ERROR
-				);
-			}
-			else
-			{
-				fwrite($fH, $compressedScript);
-				fclose($fH);
-			}
-		}
-	}
 
 	/*
 		Function: _detectURI
@@ -1190,188 +1212,11 @@ final class Xajax
 	}
 
 	/**
-	 * @param null $sFolder
-	 *
-	 * @deprecated use an other place
+	 * @return \Xajax\Core\Response\Manager
 	 */
-	private function _compressSelf($sFolder = null)
+	public function getObjResponseManager(): \Xajax\Core\Response\Manager
 	{
-		if (null === $sFolder)
-		{
-			$sFolder = dirname(__DIR__);
-		}
-
-		require_once __DIR__ . '/xajaxCompress.inc.php';
-
-		if ($handle = opendir($sFolder))
-		{
-			while (!(false === ($sName = readdir($handle))))
-			{
-				if ('.' != $sName && '..' != $sName && is_dir($sFolder . '/' . $sName))
-				{
-					$this->_compressSelf($sFolder . '/' . $sName);
-				}
-				else if (8 < strlen($sName) && 0 == strpos($sName, '.compressed'))
-				{
-					if ('.inc.php' == substr($sName, strlen($sName) - 8, 8))
-					{
-						$sName = substr($sName, 0, strlen($sName) - 8);
-						$sPath = $sFolder . '/' . $sName . '.inc.php';
-						if (file_exists($sPath))
-						{
-
-							$aParsed = [];
-							$aFile   = file($sPath);
-							$nSkip   = 0;
-							foreach (array_keys($aFile) as $sKey)
-							{
-								if ('//SkipDebug' == $aFile[$sKey])
-								{
-									++ $nSkip;
-								}
-								else if ('//EndSkipDebug' == $aFile[$sKey])
-								{
-									-- $nSkip;
-								}
-								else if (0 == $nSkip)
-								{
-									$aParsed[] = $aFile[$sKey];
-								}
-							}
-							unset($aFile);
-
-							$compressedScript = xajaxCompressFile(implode('', $aParsed));
-
-							$sNewPath = $sPath;
-							$fH       = @fopen($sNewPath, 'w');
-							if (!$fH)
-							{
-								trigger_error(
-								    $this->objLanguageManager->getText('CMPRSPHP:WTERR:01')
-								    . $sNewPath
-								    . $this->objLanguageManager->getText('CMPRSPHP:WTERR:02')
-								    , E_USER_ERROR
-								);
-							}
-							else
-							{
-								fwrite($fH, $compressedScript);
-								fclose($fH);
-							}
-						}
-					}
-				}
-			}
-
-			closedir($handle);
-		}
-	}
-
-	/**
-	 * @param null $sFolder
-	 * @param bool $bWriteFile
-	 *
-	 * @return string
-	 * @deprecated use an other place
-	 */
-	public function _compile($sFolder = null, $bWriteFile = true): string
-	{
-		if (null === $sFolder)
-		{
-			$sFolder = __DIR__;
-		}
-
-		require_once __DIR__ . '/xajaxCompress.inc.php';
-
-		$aOutput = [];
-
-		if ($handle = opendir($sFolder))
-		{
-			while (!(false === ($sName = readdir($handle))))
-			{
-				if ('.' != $sName && '..' != $sName && is_dir($sFolder . '/' . $sName))
-				{
-					$aOutput[] = $this->_compile($sFolder . '/' . $sName, false);
-				}
-				else if (8 < strlen($sName))
-				{
-					if ('.inc.php' === substr($sName, strlen($sName) - 8, 8))
-					{
-						$sName = substr($sName, 0, strlen($sName) - 8);
-						$sPath = $sFolder . '/' . $sName . '.inc.php';
-						if (
-						    'xajaxAIO' !== $sName &&
-						    'xajaxCompress' !== $sName
-						)
-						{
-							if (file_exists($sPath))
-							{
-
-								$aParsed = [];
-								$aFile   = file($sPath);
-								$nSkip   = 0;
-								foreach (array_keys($aFile) as $sKey)
-								{
-									if ('//SkipDebug' === substr($aFile[$sKey], 0, 11))
-									{
-										++ $nSkip;
-									}
-									else if ('//EndSkipDebug' === substr($aFile[$sKey], 0, 14))
-									{
-										-- $nSkip;
-									}
-									else if ('//SkipAIO' === substr($aFile[$sKey], 0, 9))
-									{
-										++ $nSkip;
-									}
-									else if ('//EndSkipAIO' === substr($aFile[$sKey], 0, 12))
-									{
-										-- $nSkip;
-									}
-									else if ('<' . '?php' === substr($aFile[$sKey], 0, 5))
-									{
-									}
-									else if ('?' . '>' === substr($aFile[$sKey], 0, 2))
-									{
-									}
-									else if (0 == $nSkip)
-									{
-										$aParsed[] = $aFile[$sKey];
-									}
-								}
-								unset($aFile);
-
-								$aOutput[] = xajaxCompressFile(implode('', $aParsed));
-							}
-						}
-					}
-				}
-			}
-
-			closedir($handle);
-		}
-
-		if ($bWriteFile)
-		{
-			$fH = @fopen($sFolder . '/xajaxAIO.inc.php', 'wb');
-			if (!$fH)
-			{
-				trigger_error(
-				    $this->objLanguageManager->getText('CMPRSAIO:WTERR:01')
-				    . $sFolder
-				    . $this->objLanguageManager->getText('CMPRSAIO:WTERR:02')
-				    , E_USER_ERROR
-				);
-			}
-			else
-			{
-				fwrite($fH, '<' . '?php ');
-				fwrite($fH, implode('', $aOutput));
-				fclose($fH);
-			}
-		}
-
-		return implode('', $aOutput);
+		return $this->objResponseManager;
 	}
 }
 
@@ -1387,6 +1232,14 @@ final class Xajax
 
 	See <xajax->bUserErrorHandler>
 */
+function addError(?\Exception $exception = null)
+{
+	if ($exception instanceof \Exception)
+	{
+		xajaxErrorHandler($exception->getCode(), $exception->getMessage(), $exception->getFile(), $exception->getLine());
+	}
+}
+
 function xajaxErrorHandler($errno, $errstr, $errfile, $errline)
 {
 	$errorReporting = error_reporting();
@@ -1414,6 +1267,10 @@ function xajaxErrorHandler($errno, $errstr, $errfile, $errline)
 	else if ($errno == E_USER_ERROR)
 	{
 		$errTypeStr = 'USER FATAL ERROR';
+	}
+	elseif (E_ERROR === $errno)
+	{
+		$errTypeStr = 'E_ERROR';
 	}
 	else if (defined('E_STRICT') && $errno == E_STRICT)
 	{

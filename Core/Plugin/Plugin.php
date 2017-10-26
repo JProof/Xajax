@@ -14,7 +14,7 @@
 
 declare(strict_types=1);
 
-namespace Xajax\Plugin;
+namespace Xajax\Core\Plugin;
 
 /**
  * Class Plugin
@@ -22,6 +22,7 @@ namespace Xajax\Plugin;
  *
  * @package Xajax\Plugin
  */
+
 /**
  * Class Plugin
  *
@@ -29,6 +30,7 @@ namespace Xajax\Plugin;
  */
 abstract class Plugin
 {
+	use \Xajax\Core\Errors\Call;
 	/**
 	 * Request-Plugin-Type
 	 */
@@ -42,7 +44,7 @@ abstract class Plugin
 	/**
 	 * The child-Plugin i.e. Userfunction has an Request-Type (self::REQUEST or self::RESPONSE)
 	 *
-	 * @var null
+	 * @var string
 	 */
 	private $pluginType;
 
@@ -51,7 +53,7 @@ abstract class Plugin
 	 *
 	 * @param string $pluginType
 	 */
-	public function __construct($pluginType = self::TYPE_REQUEST)
+	public function __construct(?string $pluginType = null)
 	{
 		$this->setPluginType($pluginType);
 	}
@@ -59,7 +61,7 @@ abstract class Plugin
 	/**
 	 * @return string
 	 */
-	public function getPluginType()
+	public function getPluginType(): string
 	{
 		if (null === $this->pluginType)
 		{
@@ -71,12 +73,14 @@ abstract class Plugin
 
 	/**
 	 * @param string $pluginType
+	 *
+	 * @return string
 	 */
-	public function setPluginType($pluginType = self::TYPE_REQUEST)
+	public function setPluginType(?string $pluginType = null): string
 	{
 		if ($this->isAllowedType($pluginType))
 		{
-			$this->pluginType = $pluginType;
+			return $this->pluginType = $pluginType;
 		}
 		throw new \InvalidArgumentException('The setPluginType($type) is not valid');
 	}
@@ -86,9 +90,9 @@ abstract class Plugin
 	 *
 	 * @return bool
 	 */
-	static public function isRequestType($type = '')
+	public static function isRequestType(?string $type = null): bool
 	{
-		return self::getRequestType() === (string) $type;
+		return null !== $type && self::getRequestType() === $type;
 	}
 
 	/**
@@ -96,15 +100,15 @@ abstract class Plugin
 	 *
 	 * @return bool
 	 */
-	static public function isResponseType($type = '')
+	public static function isResponseType(?string $type = null): bool
 	{
-		return self::getResponseType() === (string) $type;
+		return null !== $type && self::getResponseType() === $type;
 	}
 
 	/**
 	 * @return string
 	 */
-	static public function getRequestType()
+	public static function getRequestType(): string
 	{
 		return self::TYPE_REQUEST;
 	}
@@ -112,7 +116,7 @@ abstract class Plugin
 	/**
 	 * @return string
 	 */
-	static public function getResponseType()
+	public static function getResponseType(): string
 	{
 		return self::TYPE_RESPONSE;
 	}
@@ -120,12 +124,12 @@ abstract class Plugin
 	/**
 	 * Check the Typ is listed in Plugins
 	 *
-	 * @param null $type
+	 * @param null|string $pluginType
 	 *
 	 * @return bool
 	 */
-	protected function isAllowedType($type = null)
+	protected function isAllowedType(?string $pluginType = null): bool
 	{
-		return ($type === self::getRequestType() || $type === self::getResponseType());
+		return ($pluginType === self::getRequestType() || $pluginType === self::getResponseType());
 	}
 }

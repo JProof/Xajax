@@ -18,7 +18,7 @@ namespace Xajax\Plugins\Userfunction;
 
 use Xajax\Configuration\RequestConfigurationIface;
 use Xajax\Core\RequestIface;
-use xajaxResponseManager;
+use Xajax\Core\Response\Manager;
 
 /**
  * Class Handler
@@ -218,17 +218,17 @@ class Handler
 			$sAlias = $this->sAlias;
 		}
 		$string .= "{$sXajaxPrefix}{$sAlias} = function() { ";
-		$string .= "return xajax.request( ";
+		$string .= 'return xajax.request( ';
 		$string .= "{ xjxfun: '{$sFunction}' }, ";
-		$string .= "{ parameters: arguments";
+		$string .= '{ parameters: arguments';
 
-		$sSeparator = ", ";
+		$sSeparator = ', ';
 		foreach ($this->aConfiguration as $sKey => $sValue)
 		{
 			$string .= "{$sSeparator}{$sKey}: {$sValue}";
 		}
 
-		$string .= " } ); ";
+		$string .= ' } ); ';
 		$string .= "};\n";
 
 		return $string;
@@ -244,9 +244,9 @@ class Handler
 	*/
 	public function call($aArgs = [])
 	{
-		$objResponseManager = xajaxResponseManager::getInstance();
+		$objResponseManager = Manager::getInstance();
 
-		if (null != $this->sInclude)
+		if (null !== $this->sInclude)
 		{
 			ob_start();
 			require_once $this->sInclude;

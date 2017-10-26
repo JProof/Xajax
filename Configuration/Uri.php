@@ -44,7 +44,7 @@ trait Uri
 	 */
 	public function getRequestURI(): string
 	{
-		return $this->requestURI;
+		return (string) $this->requestURI;
 	}
 
 	/**
@@ -52,7 +52,7 @@ trait Uri
 	 *
 	 * @param string $requestURI
 	 */
-	public function setRequestURI(string $requestURI = '')
+	public function setRequestURI(?string $requestURI = null)
 	{
 		$this->requestURI = $requestURI;
 	}
@@ -71,7 +71,7 @@ trait Uri
 	 *
 	 * @param string $javascriptURI
 	 */
-	public function setJavascriptURI(string $javascriptURI = '')
+	public function setJavascriptURI(?string $javascriptURI = null)
 	{
 		$this->javascriptURI = $javascriptURI;
 	}

@@ -14,7 +14,7 @@
 
 declare(strict_types=1);
 
-namespace Xajax\Core;
+namespace Xajax\Core\Request;
 
 /**ability to configure each request particular with his own config*/
 use Xajax\Configuration\RequestConfigurationIface;
@@ -73,6 +73,7 @@ if (!defined('XAJAX_JS_VALUE'))
  */
 abstract class Request
 {
+	use \Xajax\Core\Errors\Call;
 	/*
 		String: sName
 
@@ -118,6 +119,8 @@ abstract class Request
 	public function useSingleQuote()
 	{
 		$this->sQuoteCharacter = "'";
+
+		return $this;
 	}
 
 	/*
@@ -129,6 +132,8 @@ abstract class Request
 	public function useDoubleQuote()
 	{
 		$this->sQuoteCharacter = '"';
+
+		return $this;
 	}
 
 	/*
@@ -139,6 +144,71 @@ abstract class Request
 	public function clearParameters()
 	{
 		$this->aParameters = [];
+
+		return $this;
+	}
+
+	/**
+	 * Adding an Array Parameter
+	 *
+	 * @example $object=['my'=>'1','your'=>'3']; will be to js {my:'1',your:'3'}
+	 *
+	 * @param null|string   $name
+	 * @param null|iterable $object
+	 * @param null|string   $sQuote
+	 *
+	 * @return $this
+	 * @todo    nested iteratable
+	 * @todo    unittest
+	 */
+	public function addParameterArray(?string $name = null, ?iterable $object = null, ?string $sQuote = null)
+	{
+		if ($name)
+		{
+			$string = $this->iterateKeyValuePairs($object);
+			if ($string)
+			{
+				$this->aParameters[$name] = $string;
+			}
+		}
+
+		return $this;
+	}
+
+	/**
+	 * KeyValuePairIterator to get an valid js String
+	 *
+	 * @todo unittest
+	 *
+	 * @param iterable|null $object
+	 * @param null|string   $sQuote
+	 * @param int|null      $depth
+	 *
+	 * @return null|string
+	 */
+	protected function iterateKeyValuePairs(?iterable $object = null, ?string $sQuote = null, ?int $depth = null): ?string
+	{
+		if (is_iterable($object) && 0 < count($object))
+		{
+			$parts  = [];
+			$sQuote = $sQuote ?: $this->sQuoteCharacter;
+			/** @var iterable $object */
+			foreach ($object as $k => $v)
+			{
+				if (is_iterable($v) && ($s = $this->iterateKeyValuePairs($v, $sQuote, 1)))
+				{
+					$parts[] = $k . ':' . $s;
+				}
+				else
+				{
+					$parts[] = $k . ':' . $sQuote . $v . $sQuote;
+				}
+			}
+
+			return '{' . implode(',', $parts) . '}';
+		}
+
+		return null;
 	}
 
 	/*
@@ -163,6 +233,8 @@ abstract class Request
 			    $aArgs[0],
 			    $aArgs[1]);
 		}
+
+		return $this;
 	}
 
 	/*
@@ -190,81 +262,115 @@ abstract class Request
 	*/
 	public function setParameter()
 	{
-		$aArgs = func_get_args();
-
-		if (2 < count($aArgs))
+		$aArgs   = func_get_args();
+		$cntArgs = count($aArgs);
+		if (1 < $cntArgs)
 		{
-			$nParameter = $aArgs[0];
-			$sType      = $aArgs[1];
+			list($nParameter, $sType) = $aArgs;
+			if (2 === $cntArgs)
+			{
+				$this->aParameters[$nParameter] = $this->sQuoteCharacter . $sType . $this->sQuoteCharacter;
+			}
+			else if (2 < $cntArgs)
+			{
 
-			if (XAJAX_FORM_VALUES == $sType)
-			{
-				$sFormID                        = $aArgs[2];
-				$this->aParameters[$nParameter] =
-				    "xajax.getFormValues("
-				    . $this->sQuoteCharacter
-				    . $sFormID
-				    . $this->sQuoteCharacter
-				    . ")";
-			}
-			else if (XAJAX_INPUT_VALUE == $sType)
-			{
-				$sInputID                       = $aArgs[2];
-				$this->aParameters[$nParameter] =
-				    "xajax.$("
-				    . $this->sQuoteCharacter
-				    . $sInputID
-				    . $this->sQuoteCharacter
-				    . ").value";
-			}
-			else if (XAJAX_CHECKED_VALUE == $sType)
-			{
-				$sCheckedID                     = $aArgs[2];
-				$this->aParameters[$nParameter] =
-				    "xajax.$("
-				    . $this->sQuoteCharacter
-				    . $sCheckedID
-				    . $this->sQuoteCharacter
-				    . ").checked";
-			}
-			else if (XAJAX_ELEMENT_INNERHTML == $sType)
-			{
-				$sElementID                     = $aArgs[2];
-				$this->aParameters[$nParameter] =
-				    "xajax.$("
-				    . $this->sQuoteCharacter
-				    . $sElementID
-				    . $this->sQuoteCharacter
-				    . ").innerHTML";
-			}
-			else if (XAJAX_QUOTED_VALUE == $sType)
-			{
-				$sValue                         = $aArgs[2];
-				$this->aParameters[$nParameter] =
-				    $this->sQuoteCharacter
-				    . $sValue
-				    . $this->sQuoteCharacter;
-			}
-			else if (XAJAX_JS_VALUE == $sType)
-			{
-				$sValue                         = $aArgs[2];
-				$this->aParameters[$nParameter] = $sValue;
+
+				if (XAJAX_FORM_VALUES == $sType)
+				{
+					$sFormID                        = $aArgs[2];
+					$this->aParameters[$nParameter] =
+					    "xajax.getFormValues("
+					    . $this->sQuoteCharacter
+					    . $sFormID
+					    . $this->sQuoteCharacter
+					    . ")";
+				}
+				else if (XAJAX_INPUT_VALUE == $sType)
+				{
+					$sInputID                       = $aArgs[2];
+					$this->aParameters[$nParameter] =
+					    "xajax.$("
+					    . $this->sQuoteCharacter
+					    . $sInputID
+					    . $this->sQuoteCharacter
+					    . ").value";
+				}
+				else if (XAJAX_CHECKED_VALUE == $sType)
+				{
+					$sCheckedID                     = $aArgs[2];
+					$this->aParameters[$nParameter] =
+					    "xajax.$("
+					    . $this->sQuoteCharacter
+					    . $sCheckedID
+					    . $this->sQuoteCharacter
+					    . ").checked";
+				}
+				else if (XAJAX_ELEMENT_INNERHTML == $sType)
+				{
+					$sElementID                     = $aArgs[2];
+					$this->aParameters[$nParameter] =
+					    "xajax.$("
+					    . $this->sQuoteCharacter
+					    . $sElementID
+					    . $this->sQuoteCharacter
+					    . ").innerHTML";
+				}
+				else if (XAJAX_QUOTED_VALUE == $sType)
+				{
+					$sValue                         = $aArgs[2];
+					$this->aParameters[$nParameter] =
+					    $this->sQuoteCharacter
+					    . $sValue
+					    . $this->sQuoteCharacter;
+				}
+				else if (XAJAX_JS_VALUE == $sType)
+				{
+					$sValue                         = $aArgs[2];
+					$this->aParameters[$nParameter] = $sValue;
+				}
 			}
 		}
+
+		return $this;
 	}
 
-	/*
-		Function: getScript
-
-		Returns a string representation of the script output (javascript) from
-		this request object.  See also:  <xajaxRequest::printScript>
-	*/
-	public function getScript()
+	/**
+	 * Get the Method-Script
+	 * Returns a string representation of the script output (javascript) from this request object.
+	 *
+	 * @example
+	 * Config:
+	 * $anXajaxUserFunction->useSingleQuote()->setParameter('anName', 'anAutoQuotedValue');
+	 * Base-Mechanism as example
+	 * echo $anXajaxUserFunction->getScript(); Echos :  xajax_linkButton('anAutoQuotedValue');
+	 * PHP/HTML Rendering:
+	 * <a onclick="<?php echo $anXajaxUserFunction->printScript() ?>">anButton</a>
+	 * Parsed in Browser to:
+	 * <a onclick="xajax_listDirectory('anAutoQuotedValue')">anButton</a>
+	 * @see \Xajax\Core\Request\Request::printScript()
+	 * @return string
+	 */
+	public function getScript(): string
 	{
-		ob_start();
-		$this->printScript();
+		$lines   = [];
+		$lines[] = $this->sName;
+		$lines[] = '(';
 
-		return ob_get_clean();
+		$sSeparator = null;
+
+		foreach ($this->aParameters as $sParameter)
+		{
+			if ($sSeparator)
+			{
+				$lines[] = $sSeparator;
+			}
+			$lines[]    = $sParameter;
+			$sSeparator = ',';
+		}
+
+		$lines[] = ');';
+
+		return implode($lines);
 	}
 
 	/*
@@ -273,20 +379,18 @@ abstract class Request
 		Generates a block of javascript code that can be used to invoke
 		the specified xajax request.
 	*/
-	public function printScript()
+	/**
+	 * Echos the Script
+	 * Generates a block of javascript code that can be used to invoke
+	 * the specified xajax request.
+	 *
+	 * @see \Xajax\Core\Request\Request::getScript()
+	 * @return bool
+	 */
+	public function printScript(): bool
 	{
-		echo $this->sName;
-		echo '(';
+		echo $this->getScript();
 
-		$sSeparator = '';
-
-		foreach ($this->aParameters as $sParameter)
-		{
-			echo $sSeparator;
-			echo $sParameter;
-			$sSeparator = ', ';
-		}
-
-		echo ')';
+		return true;
 	}
 }
