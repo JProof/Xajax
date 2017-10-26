@@ -43,10 +43,23 @@ namespace Xajax\Core\Response;
 
 use Xajax\Core\Argument;
 use xajaxLanguageManager;
+use function Xajax\Core\addError;
 
+/**
+ * Class Response
+ *
+ * @todo    make abstract such as Request Class
+ * @package Xajax\Core\Response
+ */
 class Response
 {
 	use \Xajax\Core\Errors\Call;
+	/**
+	 * Primary Response instance
+	 *
+	 * @var int
+	 */
+	private static $mainInstanceId = 50;
 	private static $instances;
 	/*
 		Array: aCommands
@@ -88,12 +101,12 @@ class Response
 		
 		Create and initialize a xajaxResponse object.
 	*/
+
 	/**
-	 * xajaxResponse constructor.
-	 *
-	 * @deprecated use getInstance
+	 * Response constructor.
+	 * Singleton Pattern
 	 */
-	public function __construct()
+	private function __construct()
 	{
 		//SkipDebug
 		if (0 < func_num_args())
@@ -122,20 +135,21 @@ class Response
 	 *
 	 * @since 7.0
 	 *
-	 * @param int $name
+	 * @param null|int $instanceNr
 	 *
 	 * @return Response
 	 */
-	public static function getInstance($name = 50): Response
+	public static function getInstance(?int $instanceNr = null): Response
 	{
-		$instances = self::getInstances();
-		if (!array_key_exists($name, $instances))
+		$instanceNr = $instanceNr ?: self::getMainInstanceId();
+		$instances  = self::getInstances();
+		if (!array_key_exists($instanceNr, $instances))
 		{
-			$instances[$name] = new Response;
+			$instances[$instanceNr] = new Response;
 			self::setInstances($instances);
 		}
 
-		return self::$instances[$name];
+		return self::$instances[$instanceNr];
 	}
 
 	/**
@@ -176,9 +190,9 @@ class Response
 	 *
 	 * @return bool has set or not
 	 */
-	public function setResponseType(string $sResponseType = ''): bool
+	public function setResponseType(?string $sResponseType = null): bool
 	{
-		$sResponseType = strtoupper($sResponseType);
+		$sResponseType = strtoupper((string) $sResponseType);
 
 		if ('XML' === $sResponseType)
 		{
@@ -232,9 +246,9 @@ class Response
 	 *
 	 * @return $this
 	 */
-	public function setOutputEntities($bOutputEntities = false)
+	public function setOutputEntities(?bool $bOutputEntities = null)
 	{
-		$this->bOutputEntities = (boolean) $bOutputEntities;
+		$this->bOutputEntities = (bool) $bOutputEntities;
 
 		return $this;
 	}
@@ -316,9 +330,16 @@ class Response
 	*/
 	public function __get($sPluginName)
 	{
-		$objPlugin = $this->plugin($sPluginName);
+		try
+		{
+			return $this->plugin($sPluginName);
+		}
+		catch (\RuntimeException$runtimeException)
+		{
+			addError($runtimeException);
+		}
 
-		return $objPlugin;
+		return false;
 	}
 
 	/*
@@ -338,7 +359,7 @@ class Response
 		
 		object : The xajaxResponse object.
 	*/
-	public function confirmCommands($iCmdNumber, $sMessage)
+	public function confirmCommands($iCmdNumber, $sMessage): Response
 	{
 		return $this->addCommand(
 		    [
@@ -366,7 +387,7 @@ class Response
 		object : The <xajaxResponse> object.
 		
 	*/
-	public function assign($sTarget, $sAttribute, $sData)
+	public function assign($sTarget, $sAttribute, $sData): Response
 	{
 		return $this->addCommand(
 		    [
@@ -394,7 +415,7 @@ class Response
 		
 		object : The <xajaxResponse> object.
 	*/
-	public function append($sTarget, $sAttribute, $sData)
+	public function append($sTarget, $sAttribute, $sData): Response
 	{
 		return $this->addCommand(
 		    [
@@ -422,7 +443,7 @@ class Response
 		
 		object : The <xajaxResponse> object.
 	*/
-	public function prepend($sTarget, $sAttribute, $sData)
+	public function prepend($sTarget, $sAttribute, $sData): Response
 	{
 		return $this->addCommand(
 		    [
@@ -447,7 +468,7 @@ class Response
 		sSearch - (string):  The needle to search for.
 		sData - (string):  The data to use in place of the needle.
 	*/
-	public function replace($sTarget, $sAttribute, $sSearch, $sData)
+	public function replace($sTarget, $sAttribute, $sSearch, $sData): Response
 	{
 		return $this->addCommand(
 		    [
@@ -477,7 +498,7 @@ class Response
 		
 		object - The <xajaxResponse> object.
 	*/
-	public function clear($sTarget, $sAttribute)
+	public function clear($sTarget, $sAttribute): Response
 	{
 		return $this->assign(
 		    $sTarget,
@@ -2249,6 +2270,18 @@ class Response
 		}
 
 		return $aData;
+	}
+
+	/**
+	 * ObjResponse instances can be ordered by getInstance($int);
+	 * The MainInstanceId is the default instanceId
+	 *
+	 * @see
+	 * @return int
+	 */
+	public static function getMainInstanceId(): int
+	{
+		return self::$mainInstanceId;
 	}
 }// end class xajaxResponse
 

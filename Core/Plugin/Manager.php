@@ -18,7 +18,7 @@ namespace Xajax\Core\Plugin;
 
 use InvalidArgumentException;
 use Xajax\Configuration\Config;
-use Xajax\Core\Helper\Compress\Javascripts;
+use Xajax\Core\Helper\Javascripts;
 use Xajax\Core\Plugin\Request\Data;
 use Xajax\Core\Plugin\Request\RequestPluginIface;
 use xajaxLanguageManager;
@@ -27,11 +27,6 @@ class Manager
 {
 	use Config;
 	use \Xajax\Core\Errors\Call;
-
-	/*
-		Array: aResponsePlugins
-	*/
-
 	/**
 	 * The Request-Plugins as own Objects with getters and setters
 	 *
@@ -45,12 +40,11 @@ class Manager
 	 */
 	private $responsePlugins;
 	/*
-		Array: aRegistrars
-	*/
-
-	/*
 		Array: aClientScriptGenerators
 	*/
+	/**
+	 * @var array
+	 */
 	private $aClientScriptGenerators;
 	/*
 		Function: xajaxPluginManager
@@ -58,15 +52,27 @@ class Manager
 		Construct and initialize the one and only xajax plugin manager.
 	*/
 
-	private $sJsURI;
 	/**
+	 * @deprecated use the loader
 	 * @var array
 	 */
-	public  $aJsFiles = [];
+	public $aJsFiles = [];
+	/**
+	 * @var int
+	 */
 	private $nScriptLoadTimeout;
+	/**
+	 * @var
+	 */
 	private $nResponseQueueSize;
+	/**
+	 * @var
+	 */
 	private $sDebugOutputID;
 
+	/**
+	 * Manager constructor.
+	 */
 	private function __construct()
 	{
 
@@ -81,16 +87,18 @@ class Manager
 	}
 
 	/*
-		Function: getInstance
 
-		Implementation of the singleton pattern: returns the one and only instance of the
-		xajax plugin manager.
-
-		Returns:
-
-		object : a reference to the one and only instance of the
-			plugin manager.
 	*/
+	/**
+	 * Function: getInstance
+	 * Implementation of the singleton pattern: returns the one and only instance of the
+	 * xajax plugin manager.
+	 * Returns:
+	 * object : a reference to the one and only instance of the
+	 * plugin manager.
+	 *
+	 * @return \Xajax\Core\Plugin\Manager
+	 */
 	public static function &getInstance(): Manager
 	{
 		static $obj;
@@ -101,15 +109,6 @@ class Manager
 
 		return $obj;
 	}
-
-	/*
-		Function: loadPlugins
-
-		Loads plugins from the folders specified.
-
-		Parameters:
-			$aFolders - (array): Array of folders to check for plugins
-	*/
 
 	/**
 	 * Register Request Plugin
@@ -176,6 +175,12 @@ class Manager
 		1000 thru 8999: User created plugins, typically, these plugins don't care about order
 		9000 thru 9999: Plugins that generally need to be last or near the end of the plugin list
 	*/
+	/**
+	 * @param \Xajax\Core\Plugin\Plugin $objPlugin
+	 * @param int|null                  $nPriority
+	 *
+	 * @return void|\Xajax\Core\Plugin\Request\Data
+	 */
 	public function registerPlugin(Plugin $objPlugin, ?int $nPriority = null)
 	{
 		if ($objPlugin instanceof Request)
@@ -280,6 +285,10 @@ class Manager
 		sName - (string):  The name of the configuration setting to set.
 		mValue - (mixed):  The value to be set.
 	*/
+	/**
+	 * @param $sName
+	 * @param $mValue
+	 */
 	public function configure($sName, $mValue)
 	{
 
@@ -359,6 +368,9 @@ class Manager
 		is called only when the page is being loaded initially.  This is not
 		called when processing a request.
 	*/
+	/**
+	 *
+	 */
 	public function generateClientScript()
 	{
 
@@ -608,6 +620,9 @@ class Manager
 		}
 	}
 
+	/**
+	 * @return string
+	 */
 	private function generateHash(): string
 	{
 		$aKeys = array_keys($this->aClientScriptGenerators);

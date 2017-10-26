@@ -32,10 +32,6 @@ class Factory
 	 * @var array
 	 */
 	private static $instances = [];
-	/**
-	 * @var Response
-	 */
-	private static $responseInstance;
 
 	/**
 	 * Factory constructor.
@@ -94,23 +90,14 @@ class Factory
 	}
 
 	/**
+	 * Getting the Response instances
+	 *
+	 * @param int|null $instanceNr let null to get default instance
+	 *
 	 * @return Response
 	 */
-	public static function getResponseInstance(): Response
+	public static function getResponseInstance(?int $instanceNr = null): Response
 	{
-		if (!self::$responseInstance instanceof Response)
-		{
-			self::setResponseInstance(Response::getInstance());
-		}
-
-		return self::$responseInstance;
-	}
-
-	/**
-	 * @param Response $responseInstance
-	 */
-	private static function setResponseInstance(Response $responseInstance)
-	{
-		self::$responseInstance = $responseInstance;
+		return Response::getInstance($instanceNr);
 	}
 }

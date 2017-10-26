@@ -58,18 +58,30 @@ if (!defined('XAJAX_DEFAULT_CHAR_ENCODING'))
 */
 if (!defined('XAJAX_PROCESSING_EVENT'))
 {
+	/**
+	 *
+	 */
 	define('XAJAX_PROCESSING_EVENT', 'xajax processing event');
 }
 if (!defined('XAJAX_PROCESSING_EVENT_BEFORE'))
 {
+	/**
+	 *
+	 */
 	define('XAJAX_PROCESSING_EVENT_BEFORE', 'beforeProcessing');
 }
 if (!defined('XAJAX_PROCESSING_EVENT_AFTER'))
 {
+	/**
+	 *
+	 */
 	define('XAJAX_PROCESSING_EVENT_AFTER', 'afterProcessing');
 }
 if (!defined('XAJAX_PROCESSING_EVENT_INVALID'))
 {
+	/**
+	 *
+	 */
 	define('XAJAX_PROCESSING_EVENT_INVALID', 'invalidRequest');
 }
 
@@ -132,6 +144,9 @@ class Xajax
 		Stores the processing event handlers that have been assigned during this run
 		of the script.
 	*/
+	/**
+	 * @var array
+	 */
 	private $aProcessingEvents;
 	/*
 		Boolean: bExitAllowed
@@ -217,14 +232,10 @@ class Xajax
 	 * @var \xajaxLanguageManager
 	 **/
 	private $objLanguageManager;
-	private $challengeResponse;
 	/**
-	 * Global Config Object
-	 *
-	 * @since xajax 7.0.1
-	 * @var \Xajax\Configuration
+	 * @var
 	 */
-	private $configuration;
+	private $challengeResponse;
 	/*
 		Constructor: xajax
 
@@ -305,6 +316,9 @@ class Xajax
 	/*
 		Function: __sleep
 	*/
+	/**
+	 * @return array
+	 */
 	public function __sleep()
 	{
 		$aMembers = get_class_vars(get_class($this));
@@ -391,6 +405,9 @@ class Xajax
 		<xajaxResponse> : A <xajaxResponse> object which can be used to return
 			response commands.  See also the <xajaxResponseManager> class.
 	*/
+	/**
+	 * @return \Xajax\Core\Response\Response
+	 */
 	public static function getGlobalResponse(): Response
 	{
 		return Response::getInstance();
@@ -403,46 +420,14 @@ class Xajax
 
 		string : The current xajax version.
 	*/
+	/**
+	 * @return string
+	 */
 	public static function getVersion(): string
 	{
-		return 'xajax 0.7.1';
+		return 'xajax 0.7.2';
 	}
 
-	/**
-	 * New Way to Register an Request
-	 *
-	 * @param $sType
-	 * @param $mArg
-	 *
-	 * @deprecated use direct plugin methods
-	 * @return bool
-	 * @since      7.0
-	 */
-	public function registerRequest($sType, $mArg): bool
-	{
-		$aArgs = func_get_args();
-		$nArgs = func_num_args();
-
-		if (2 < $nArgs)
-		{
-			if (XAJAX_PROCESSING_EVENT == $aArgs[0])
-			{
-				$sEvent = $aArgs[1];
-				$xuf    = $aArgs[2];
-
-				if (false === is_a($xuf, 'xajaxUserFunction'))
-				{
-					$xuf = new xajaxUserFunction($xuf);
-				}
-
-				$this->aProcessingEvents[$sEvent] = $xuf;
-
-				return true;
-			}
-		}
-
-		return $this->getPlugin($sType)->register($mArg);
-	}
 
 	/*
 		Function: register
@@ -571,6 +556,9 @@ class Xajax
 		
 		$aOptions - (array): Associative array of configuration settings
 	*/
+	/**
+	 * @param $aOptions
+	 */
 	public function configureMany($aOptions)
 	{
 		foreach ($aOptions as $sName => $mValue)
@@ -593,6 +581,11 @@ class Xajax
 		
 		$mValue : (mixed):  The value of the setting if set, null otherwise.
 	*/
+	/**
+	 * @param $sName
+	 *
+	 * @return mixed|null
+	 */
 	public function getConfiguration($sName)
 	{
 		if (isset($this->aSettings[$sName]))
@@ -659,6 +652,11 @@ class Xajax
 		return $instance;
 	}
 
+	/**
+	 * @param null|string $plgName
+	 *
+	 * @return null|\Xajax\Core\Plugin\Request
+	 */
 	protected function autoregisterRequestPlugin(?string $plgName = null): ?\Xajax\Core\Plugin\Request
 	{
 		$plgObject      = $this->loadPlugin($plgName, Plugin::getRequestType());
@@ -680,11 +678,20 @@ class Xajax
 		return $pluginInstance;
 	}
 
+	/**
+	 * @param null|string $plgName
+	 */
 	protected function autoregisterResponsePlugin(?string $plgName = null)
 	{
 		$plgObject = $this->loadPlugin($plgName, Plugin::getResponseType());
 	}
 
+	/**
+	 * @param null|string $plgName
+	 * @param string      $type
+	 *
+	 * @return mixed
+	 */
 	private function loadPlugin(?string $plgName = null, string $type)
 	{
 		$ns = 'Xajax\\Plugins\\';
@@ -713,6 +720,9 @@ class Xajax
 
 		boolean - True if this is a xajax request, false otherwise.
 	*/
+	/**
+	 * @return bool
+	 */
 	public function canProcessRequest(): bool
 	{
 		return $this->getObjPluginManager()->canProcessRequest();
@@ -724,6 +734,9 @@ class Xajax
 		Ensure that an active session is available (primarily used
 		for storing challenge / response codes).
 	*/
+	/**
+	 * @return bool
+	 */
 	private function verifySession(): bool
 	{
 		$sessionID = session_id();
@@ -739,6 +752,11 @@ class Xajax
 		return true;
 	}
 
+	/**
+	 * @param $sessionKey
+	 *
+	 * @return array
+	 */
 	private function loadChallenges($sessionKey): array
 	{
 		$challenges = [];
@@ -751,6 +769,10 @@ class Xajax
 		return $challenges;
 	}
 
+	/**
+	 * @param $sessionKey
+	 * @param $challenges
+	 */
 	private function saveChallenges($sessionKey, $challenges)
 	{
 		if (count($challenges) > 10)
@@ -761,6 +783,13 @@ class Xajax
 		$_SESSION[$sessionKey] = $challenges;
 	}
 
+	/**
+	 * @param $algo
+	 * @param $value
+	 *
+	 * @return string
+	 * @throws \Exception
+	 */
 	private function makeChallenge($algo, $value): string
 	{
 		// TODO: Move to configuration option
@@ -787,6 +816,13 @@ class Xajax
 
 		NOTE:  Sessions must be enabled to use this feature.
 	*/
+	/**
+	 * @param null $algo
+	 * @param null $value
+	 *
+	 * @return bool
+	 * @throws \Exception
+	 */
 	public function challenge($algo = null, $value = null): bool
 	{
 		if (false === $this->verifySession())
@@ -838,6 +874,9 @@ class Xajax
 
 		This function may exit, if a request is processed.  See <xajax->bAllowExit>
 	*/
+	/**
+	 *
+	 */
 	public function processRequest()
 	{
 		if (isset($_SERVER['HTTP_CHALLENGE_RESPONSE']))
@@ -927,7 +966,7 @@ class Xajax
 				// and send a debug message.
 
 				$this->getObjResponseManager()->clear();
-				$this->getObjResponseManager()->append(new Response());
+				$this->getObjResponseManager()->append(Response::getInstance());
 
 				// handle invalidRequest event
 				if (isset($this->aProcessingEvents[XAJAX_PROCESSING_EVENT_INVALID]))
@@ -1012,6 +1051,9 @@ class Xajax
 
 		See <xajax->printJavascript> for more information.
 	*/
+	/**
+	 * @return string
+	 */
 	public function getJavascript()
 	{
 		ob_start();
@@ -1232,6 +1274,9 @@ class Xajax
 
 	See <xajax->bUserErrorHandler>
 */
+/**
+ * @param \Exception|null $exception
+ */
 function addError(?\Exception $exception = null)
 {
 	if ($exception instanceof \Exception)
@@ -1240,6 +1285,12 @@ function addError(?\Exception $exception = null)
 	}
 }
 
+/**
+ * @param $errno
+ * @param $errstr
+ * @param $errfile
+ * @param $errline
+ */
 function xajaxErrorHandler($errno, $errstr, $errfile, $errline)
 {
 	$errorReporting = error_reporting();

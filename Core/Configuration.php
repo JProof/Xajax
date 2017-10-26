@@ -14,14 +14,14 @@
 
 declare(strict_types=1);
 
-namespace Xajax;
+namespace Xajax\Core;
 
 use BadMethodCallException;
 use Xajax\Configuration\Deprecated;
 use Xajax\Configuration\Language;
 use Xajax\Configuration\Scripts;
 use Xajax\Configuration\Uri;
-use Xajax\Helper\Encoding;
+use Xajax\Core\Helper\Encoding;
 
 /**
  * Class Config
