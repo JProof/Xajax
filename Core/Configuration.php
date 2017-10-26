@@ -172,7 +172,14 @@ class Configuration
 	/**
 	 * @var string
 	 */
-	protected $version = 'jproof/xajax 0.7.1';
+	protected $version = 'jproof/xajax 0.7.2';
+
+	/**
+	 * Config constructor.
+	 */
+	protected function __construct()
+	{
+	}
 
 	/**
 	 *  Getter
@@ -198,7 +205,9 @@ class Configuration
 		}
 
 		// never giveback an parameter without getter
-		throw new BadMethodCallException(__CLASS__ . '::' . __METHOD__ . ' Method ' . $method . ' for variable ' . $name . ' does not exists');
+		addError(new BadMethodCallException(__CLASS__ . '::' . __METHOD__ . ' Method ' . $method . ' for variable ' . $name . ' does not exists'));
+
+		return null;
 	}
 
 	/**
@@ -224,7 +233,9 @@ class Configuration
 			return $this->$method($value);
 		}
 		// never overload the setter! Make sure you have an
-		throw new BadMethodCallException(__CLASS__ . '::' . __METHOD__ . ' Method ' . $method . ' for variable ' . $name . ' does not exists');
+		addError(new BadMethodCallException(__CLASS__ . '::' . __METHOD__ . ' Method ' . $method . ' for variable ' . $name . ' does not exists'));
+
+		return null;
 	}
 
 	/**
@@ -258,7 +269,7 @@ class Configuration
 	 * @deprecated jproof/xajax 0.7.2
 	 * @return string
 	 */
-	protected static function deprecatedNameAlias(string $name = '')
+	protected static function deprecatedNameAlias(?string $name = null)
 	{
 		switch ($name)
 		{
@@ -277,9 +288,9 @@ class Configuration
 	 *
 	 * @return string
 	 */
-	private static function getMethodName($type = '', $name = ''): string
+	private static function getMethodName(?string $type = null, ?string $name = null): string
 	{
-		return $type . ucfirst($name);
+		return (string) $type . ucfirst((string) $name);
 	}
 
 	/**
@@ -299,7 +310,7 @@ class Configuration
 	/**
 	 * @param string $characterEncoding
 	 */
-	public function setCharacterEncoding($characterEncoding = '')
+	public function setCharacterEncoding(?string $characterEncoding = null)
 	{
 		// @todo check the Setter, the encoding is valid
 		if (Encoding::getEncoding($characterEncoding, true))
@@ -330,24 +341,17 @@ class Configuration
 	}
 
 	/**
-	 * Config constructor.
-	 */
-	protected function __construct()
-	{
-	}
-
-	/**
 	 * @return bool
 	 */
 	public function isDecodeUTF8Input(): bool
 	{
-		return $this->decodeUTF8Input;
+		return (bool) $this->decodeUTF8Input;
 	}
 
 	/**
 	 * @param bool $decodeUTF8Input
 	 */
-	public function setDecodeUTF8Input($decodeUTF8Input = false)
+	public function setDecodeUTF8Input(?bool $decodeUTF8Input = null)
 	{
 		$this->decodeUTF8Input = (bool) $decodeUTF8Input;
 	}
@@ -357,13 +361,13 @@ class Configuration
 	 */
 	public function isOutputEntities(): bool
 	{
-		return $this->outputEntities;
+		return (bool) $this->outputEntities;
 	}
 
 	/**
 	 * @param bool $outputEntities
 	 */
-	public function setOutputEntities($outputEntities = false)
+	public function setOutputEntities(?bool $outputEntities = null)
 	{
 		$this->outputEntities = (bool) $outputEntities;
 	}

@@ -57,15 +57,15 @@ trait Scripts
 	 */
 	public function isUseUncompressedScripts(): bool
 	{
-		return $this->useUncompressedScripts;
+		return (bool) $this->useUncompressedScripts;
 	}
 
 	/**
 	 * @param bool $useUncompressedScripts
 	 */
-	public function setUseUncompressedScripts(bool $useUncompressedScripts = true)
+	public function setUseUncompressedScripts(?bool $useUncompressedScripts = null)
 	{
-		$this->useUncompressedScripts = $useUncompressedScripts;
+		$this->useUncompressedScripts = (bool) $useUncompressedScripts;
 	}
 
 	/**
@@ -73,15 +73,15 @@ trait Scripts
 	 */
 	public function isStatusMessages(): bool
 	{
-		return $this->statusMessages;
+		return (bool) $this->statusMessages;
 	}
 
 	/**
 	 * @param bool $statusMessages
 	 */
-	public function setStatusMessages(bool $statusMessages = false)
+	public function setStatusMessages(?bool $statusMessages = null)
 	{
-		$this->statusMessages = $statusMessages;
+		$this->statusMessages = (bool) $statusMessages;
 	}
 
 	/**
@@ -89,15 +89,15 @@ trait Scripts
 	 */
 	public function isWaitCursor(): bool
 	{
-		return $this->waitCursor;
+		return (bool) $this->waitCursor;
 	}
 
 	/**
 	 * @param bool $waitCursor
 	 */
-	public function setWaitCursor(bool $waitCursor = true)
+	public function setWaitCursor(?bool $waitCursor = null)
 	{
-		$this->waitCursor = $waitCursor;
+		$this->waitCursor = (bool) $waitCursor;
 	}
 
 	/**
@@ -105,14 +105,14 @@ trait Scripts
 	 */
 	public function isDeferScriptGeneration(): bool
 	{
-		return $this->deferScriptGeneration;
+		return (bool) $this->deferScriptGeneration;
 	}
 
 	/**
 	 * @param bool $deferScriptGeneration
 	 */
-	public function setDeferScriptGeneration(bool $deferScriptGeneration = true)
+	public function setDeferScriptGeneration(?bool $deferScriptGeneration = null)
 	{
-		$this->deferScriptGeneration = $deferScriptGeneration;
+		$this->deferScriptGeneration = (bool) $deferScriptGeneration;
 	}
 }
