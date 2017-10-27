@@ -29,8 +29,8 @@ class Request extends \Xajax\Core\Request\Request implements RequestIface
 	/**
 	 * Automatic Register-Plugin-Method on demand
 	 *
-	 * @param object $object
-	 * @param null   $localConfig
+	 * @param mixed|object $object
+	 * @param null         $localConfig
 	 *
 	 * @return \Xajax\Plugins\Callableobject\Request
 	 * @throws \RuntimeException
