@@ -62,10 +62,14 @@ trait Scripts
 
 	/**
 	 * @param bool $useUncompressedScripts
+	 *
+	 * @return \Xajax\Configuration\Scripts
 	 */
 	public function setUseUncompressedScripts(?bool $useUncompressedScripts = null)
 	{
 		$this->useUncompressedScripts = (bool) $useUncompressedScripts;
+
+		return $this;
 	}
 
 	/**
@@ -82,6 +86,8 @@ trait Scripts
 	public function setStatusMessages(?bool $statusMessages = null)
 	{
 		$this->statusMessages = (bool) $statusMessages;
+
+		return $this;
 	}
 
 	/**
@@ -98,6 +104,8 @@ trait Scripts
 	public function setWaitCursor(?bool $waitCursor = null)
 	{
 		$this->waitCursor = (bool) $waitCursor;
+
+		return $this;
 	}
 
 	/**
@@ -114,5 +122,7 @@ trait Scripts
 	public function setDeferScriptGeneration(?bool $deferScriptGeneration = null)
 	{
 		$this->deferScriptGeneration = (bool) $deferScriptGeneration;
+
+		return $this;
 	}
 }

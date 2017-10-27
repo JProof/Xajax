@@ -40,15 +40,17 @@ trait Language
 	 */
 	public function getLanguage(): string
 	{
-		return $this->language;
+		return (string) $this->language;
 	}
 
 	/**
 	 * @param string $language
 	 */
-	public function setLanguage(string $language)
+	public function setLanguage(?string $language = null)
 	{
-		$this->language = $language;
+		$this->language = (string) $language;
+
+		return $this;
 	}
 
 	/**
@@ -56,14 +58,16 @@ trait Language
 	 */
 	public function isUseDebugLanguage(): bool
 	{
-		return $this->useDebugLanguage;
+		return (bool) $this->useDebugLanguage;
 	}
 
 	/**
 	 * @param bool $useDebugLanguage
 	 */
-	public function setUseDebugLanguage(bool $useDebugLanguage = true)
+	public function setUseDebugLanguage(?bool $useDebugLanguage = null)
 	{
-		$this->useDebugLanguage = $useDebugLanguage;
+		$this->useDebugLanguage = (bool) $useDebugLanguage;
+
+		return $this;
 	}
 }

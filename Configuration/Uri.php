@@ -55,6 +55,8 @@ trait Uri
 	public function setRequestURI(?string $requestURI = null)
 	{
 		$this->requestURI = $requestURI;
+
+		return $this;
 	}
 
 	/**
@@ -74,5 +76,7 @@ trait Uri
 	public function setJavascriptURI(?string $javascriptURI = null)
 	{
 		$this->javascriptURI = $javascriptURI;
+
+		return $this;
 	}
 }
