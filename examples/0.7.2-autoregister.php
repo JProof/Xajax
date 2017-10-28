@@ -26,7 +26,7 @@ $xConfig->setErrorHandler(true);
 
 
 $xScripts = Factory::getScripts();
-$xScripts->getConfiguration()->setDeferScriptGeneration(false)->setUseUncompressedScripts(true)->setDebug(true)->setVerbose(false);
+$xScripts->getConfiguration()->setDeferScriptGeneration(false)->setUseUncompressedScripts(true)->setDebug(true)->setVerbose(true);
 $xScripts->addScriptDir('/xajax-php-7/scripts');
 
 // override the core Script-Location

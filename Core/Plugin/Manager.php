@@ -377,7 +377,7 @@ namespace Xajax\Core\Plugin {
 				{
 					$xCoreVerboseConfig = new Core();
 					$xCoreVerboseConfig->setScriptName('xajax.debug.verbose')->setFileName('xajax_verbose.js')->setPriority(0);
-					$scripts->addScript($xCoreDebugConfig, 48);
+					$scripts->addScript($xCoreVerboseConfig, 48);
 				}
 				else
 				{
