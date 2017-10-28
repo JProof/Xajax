@@ -7,6 +7,8 @@ Current development xajax 0.7.1
 * UTF-8
 * remove procedurally "php-echo" inside Scripts
 
+* removed the JSON-Extralibrary
+
 Changes
 
 Javascript-Structure:

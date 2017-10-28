@@ -59,24 +59,5 @@ trait Uri
 		return $this;
 	}
 
-	/**
-	 * @todo testings
-	 * @return string
-	 */
-	public function getJavascriptURI(): string
-	{
-		return $this->javascriptURI;
-	}
 
-	/**
-	 * @todo testings
-	 *
-	 * @param string $javascriptURI
-	 */
-	public function setJavascriptURI(?string $javascriptURI = null)
-	{
-		$this->javascriptURI = $javascriptURI;
-
-		return $this;
-	}
 }

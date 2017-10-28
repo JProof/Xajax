@@ -21,7 +21,7 @@ namespace Xajax\Configuration;
  *
  * @package Xajax\Config
  */
-trait Scripts
+class Scripts extends Base
 {
 	/**
 	 * Uncompressed Javascript if exists
@@ -51,6 +51,44 @@ trait Scripts
 	 * @var bool
 	 */
 	protected $deferScriptGeneration = true;
+	/**
+	 * @var array
+	 */
+	protected static $modes = ['asynchronous', 'synchronous',];
+	/**
+	 * @var self
+	 */
+	private static $instance;
+	/**
+	 * The request mode.
+	 * 'asynchronous' - The request will immediately return, the
+	 * response will be processed when (and if) it is received.
+	 * 'synchronous' - The request will block, waiting for the
+	 * response.  This option allows the server to return
+	 * a value directly to the caller.
+	 *
+	 * @var string
+	 */
+	protected $defaultMode;
+	/**
+	 * POST or GET case-insensitive automatic default is post
+	 *
+	 * @var string
+	 */
+	protected $defaultMethod;
+
+	/**
+	 * @return \Xajax\Configuration\Scripts
+	 */
+	public static function getInstance(): self
+	{
+		if (!self::$instance instanceof self)
+		{
+			self::$instance = new self();
+		}
+
+		return self::$instance;
+	}
 
 	/**
 	 * @return bool
@@ -65,7 +103,7 @@ trait Scripts
 	 *
 	 * @return \Xajax\Configuration\Scripts
 	 */
-	public function setUseUncompressedScripts(?bool $useUncompressedScripts = null)
+	public function setUseUncompressedScripts(?bool $useUncompressedScripts = null): Scripts
 	{
 		$this->useUncompressedScripts = (bool) $useUncompressedScripts;
 
@@ -82,8 +120,10 @@ trait Scripts
 
 	/**
 	 * @param bool $statusMessages
+	 *
+	 * @return \Xajax\Configuration\Scripts
 	 */
-	public function setStatusMessages(?bool $statusMessages = null)
+	public function setStatusMessages(?bool $statusMessages = null): Scripts
 	{
 		$this->statusMessages = (bool) $statusMessages;
 
@@ -100,8 +140,10 @@ trait Scripts
 
 	/**
 	 * @param bool $waitCursor
+	 *
+	 * @return \Xajax\Configuration\Scripts
 	 */
-	public function setWaitCursor(?bool $waitCursor = null)
+	public function setWaitCursor(?bool $waitCursor = null): Scripts
 	{
 		$this->waitCursor = (bool) $waitCursor;
 
@@ -118,11 +160,89 @@ trait Scripts
 
 	/**
 	 * @param bool $deferScriptGeneration
+	 *
+	 * @return \Xajax\Configuration\Scripts
 	 */
-	public function setDeferScriptGeneration(?bool $deferScriptGeneration = null)
+	public function setDeferScriptGeneration(?bool $deferScriptGeneration = null): Scripts
 	{
 		$this->deferScriptGeneration = (bool) $deferScriptGeneration;
 
 		return $this;
+	}
+
+	/**
+	 * JS Mode POST or GET
+	 *
+	 * @return string
+	 */
+	public function getDefaultMode(): string
+	{
+		// Automatic setup
+		if (null === $this->defaultMode)
+		{
+			return $this->setDefaultMode(self::getJSDefaultMode());
+		}
+
+		return $this->defaultMode;
+	}
+
+	/**
+	 * @param string $defaultMode
+	 *
+	 * @return string the set'd default mode
+	 */
+	public function setDefaultMode(string $defaultMode): string
+	{
+		$defaultMode = strtolower($defaultMode);
+		if (in_array($defaultMode, self::getModes(), true))
+		{
+			$this->defaultMode = $defaultMode;
+		}
+		else
+		{
+			$this->defaultMode = self::getJSDefaultMode();
+		}
+
+		return $this->defaultMode;
+	}
+
+	/**
+	 * internal modes
+	 *
+	 * @see $defaultMode
+	 * @return array
+	 */
+	public static function getModes(): array
+	{
+		return self::$modes;
+	}
+
+	/**
+	 * @return string
+	 */
+	public static function getJSDefaultMode(): string
+	{
+		return self::getModes()[0];
+	}
+
+	/**
+	 * @todo test
+	 * @return string
+	 */
+	public function getDefaultMethod(): string
+	{
+		return $this->defaultMethod ?? $this->setDefaultMethod('');
+	}
+
+	/**
+	 * @param string $defaultMethod
+	 *
+	 * @return string
+	 */
+	public function setDefaultMethod(?string $defaultMethod = null): string
+	{
+		$defaultMethod = strtoupper((string) $defaultMethod);
+
+		return $this->defaultMethod = 'GET' === $defaultMethod ? 'GET' : 'POST';
 	}
 }

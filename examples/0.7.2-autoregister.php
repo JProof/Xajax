@@ -15,18 +15,33 @@ declare(strict_types=1);
 require_once __DIR__ . '/bootstrap.php';
 
 use Xajax\Core\Factory;use Xajax\Plugins\Userfunction\Request;
+
+
 $xConfig = Factory::getInstance()->getConfig();
 
-$xConfig->setJavascriptURI('/xajax-php-7/');
+
 $xConfig->setDeferScriptGeneration(false);
 $anXajaxUserFunction = Request::autoRegister('listDirectory');
 $xConfig->setErrorHandler(true);
-$xConfig->setDebug(false);
+$xConfig->setDebug(true);
+$xConfig->setVerbose(false);
+
+$xScripts = Factory::getScripts();
+$xScripts->addScriptDir('/xajax-php-7/scripts');
+// override the core Script-Location
+#$xScripts->addScript(new Core(['scriptName' => 'xajax', 'fileName' => 'xajax_core2.js']));
+#$xScripts->addScript(new Core(['scriptName' => 'xajax', 'fileName' => 'xajax_core3.js', 'dir' => '/media/scripts']));
+
+// lock the core-script completely
+#$xScripts->setLockScript('xajax');
+
+echo $xScripts->getScriptUrl('xajax');
 
 function listDirectory()
 {
 	$objResponse = Factory::getResponseInstance();
 	$objResponse->alert('geth');
+
 	try
 	{
 		$objResponse->calls();

@@ -16,11 +16,11 @@ declare(strict_types=1);
 
 namespace Xajax\Core;
 
-use BadMethodCallException;
+use Xajax\Configuration\Base;
 use Xajax\Configuration\Deprecated;
 use Xajax\Configuration\Language;
-use Xajax\Configuration\Scripts;
 use Xajax\Configuration\Uri;
+use Xajax\Core\Errors\Call;
 use Xajax\Core\Helper\Encoding;
 
 /**
@@ -28,28 +28,19 @@ use Xajax\Core\Helper\Encoding;
  *
  * @package Xajax
  */
-class Configuration
+class Configuration extends Base
 {
 	/** Useless Stuff to Remove next Version**/
 	use Deprecated;
-	/** Better Overview in the configuration Class **/
-	use Scripts;
+
 	/** Handling the Uri's**/
 	use Uri;
 
 	/** Language for errors an explanations **/
 	use Language;
-	/**
-	 * @var self
-	 */
-	private static $instance;
-	/**
-	 * Legacy-Mode can be used to refacture xajax 6 versions. The Legacy-Flag allows to get and set vars without type checking
-	 *
-	 * @deprecated jproof/xajax 0.7.2 Legacy Mode will be removed
-	 * @var bool
-	 */
-	static protected $legacy = false;
+
+	/** error handling **/
+	use Call;
 	/**
 	 * String: XAJAX_DEFAULT_CHAR_ENCODING UTF-8
 	 * Default character encoding used by both the <xajax> and
@@ -93,27 +84,6 @@ class Configuration
 	 * @var string
 	 */
 	protected $contentType;
-	/**
-	 * @var array
-	 */
-	protected static $modes = ['asynchronous', 'synchronous',];
-	/**
-	 * The request mode.
-	 * 'asynchronous' - The request will immediately return, the
-	 * response will be processed when (and if) it is received.
-	 * 'synchronous' - The request will block, waiting for the
-	 * response.  This option allows the server to return
-	 * a value directly to the caller.
-	 *
-	 * @var string
-	 */
-	protected $defaultMode;
-	/**
-	 * POST or GET case-insensitive automatic default is post
-	 *
-	 * @var string
-	 */
-	protected $defaultMethod;
 	/**
 	 * JS-Method they was rendered during Xajax have there own method Prefix
 	 *
@@ -169,128 +139,19 @@ class Configuration
 	 * @var bool
 	 */
 	protected $cleanBuffer = false;
-	/**
-	 * @var string
-	 */
-	protected $version = 'jproof/xajax 0.7.2';
 
 	/**
-	 * Config constructor.
+	 * @return self
 	 */
-	protected function __construct()
+	public static function getInstance(): Configuration
 	{
-	}
-
-	/**
-	 *  Getter
-	 *
-	 * @param $name
-	 *
-	 * @return mixed
-	 * @throws BadMethodCallException
-	 * @throws BadMethodCallException
-	 */
-	public function __get($name)
-	{
-		$name = self::deprecatedNameAlias($name);
-		if (self::isLegacy())
+		static $instance;
+		if (!$instance)
 		{
-			return $this->{$name};
+			$instance = new self();
 		}
 
-		$method = self::getMethodName('get', $name);
-		if (method_exists($this, $method))
-		{
-			return $this->{$method()};
-		}
-
-		// never giveback an parameter without getter
-		addError(new BadMethodCallException(__CLASS__ . '::' . __METHOD__ . ' Method ' . $method . ' for variable ' . $name . ' does not exists'));
-
-		return null;
-	}
-
-	/**
-	 * Setter
-	 *
-	 * @param $name
-	 * @param $value
-	 *
-	 * @return mixed
-	 */
-	public function __set($name, $value)
-	{
-		$name = self::deprecatedNameAlias($name);
-
-		if (self::isLegacy())
-		{
-			return $this->{$name} = $value;
-		}
-
-		$method = self::getMethodName('set', $name);
-		if (method_exists($this, $method))
-		{
-			return $this->$method($value);
-		}
-		// never overload the setter! Make sure you have an
-		addError(new BadMethodCallException(__CLASS__ . '::' . __METHOD__ . ' Method ' . $method . ' for variable ' . $name . ' does not exists'));
-
-		return null;
-	}
-
-	/**
-	 * @param $name
-	 *
-	 * @example create an method isTestVar() then  isset(Config::getInstance()->testVar) will be checked by the method
-	 * @return bool|mixed
-	 */
-	public function __isset($name)
-	{
-		$name = self::deprecatedNameAlias($name);
-		if (self::isLegacy())
-		{
-			return isset($this->{$name});
-		}
-
-		$method = self::getMethodName('is', $name);
-		if (method_exists($this, $method))
-		{
-			return $this->{$method()};
-		}
-
-		return isset($this->{$name});
-	}
-
-	/**
-	 * Old Array Key names
-	 *
-	 * @param string $name
-	 *
-	 * @deprecated jproof/xajax 0.7.2
-	 * @return string
-	 */
-	protected static function deprecatedNameAlias(?string $name = null)
-	{
-		switch ($name)
-		{
-			case 'javascript URI':
-				return 'javascriptUri';
-			default:
-				return $name;
-		}
-	}
-
-	/**
-	 * Internal MethodName Compiler
-	 *
-	 * @param string $type get|set|is
-	 * @param string $name variable-name which should interact with the method
-	 *
-	 * @return string
-	 */
-	private static function getMethodName(?string $type = null, ?string $name = null): string
-	{
-		return (string) $type . ucfirst((string) $name);
+		return $instance;
 	}
 
 	/**
@@ -309,14 +170,18 @@ class Configuration
 
 	/**
 	 * @param string $characterEncoding
+	 *
+	 * @return \Xajax\Core\Configuration
 	 */
-	public function setCharacterEncoding(?string $characterEncoding = null)
+	public function setCharacterEncoding(?string $characterEncoding = null): Configuration
 	{
 		// @todo check the Setter, the encoding is valid
 		if (Encoding::getEncoding($characterEncoding, true))
 		{
 			$this->characterEncoding = (string) $characterEncoding;
 		}
+
+		return $this;
 	}
 
 	/**
@@ -325,19 +190,6 @@ class Configuration
 	public static function getDefaultCharacterEncoding(): string
 	{
 		return self::$defaultCharacterEncoding;
-	}
-
-	/**
-	 * @return Configuration
-	 */
-	public static function getInstance(): Configuration
-	{
-		if (!self::$instance instanceof self)
-		{
-			self::$instance = new self();
-		}
-
-		return self::$instance;
 	}
 
 	/**
@@ -350,10 +202,14 @@ class Configuration
 
 	/**
 	 * @param bool $decodeUTF8Input
+	 *
+	 * @return \Xajax\Core\Configuration
 	 */
-	public function setDecodeUTF8Input(?bool $decodeUTF8Input = null)
+	public function setDecodeUTF8Input(?bool $decodeUTF8Input = null): Configuration
 	{
 		$this->decodeUTF8Input = (bool) $decodeUTF8Input;
+
+		return $this;
 	}
 
 	/**
@@ -366,10 +222,14 @@ class Configuration
 
 	/**
 	 * @param bool $outputEntities
+	 *
+	 * @return \Xajax\Core\Configuration
 	 */
-	public function setOutputEntities(?bool $outputEntities = null)
+	public function setOutputEntities(?bool $outputEntities = null): Configuration
 	{
 		$this->outputEntities = (bool) $outputEntities;
+
+		return $this;
 	}
 
 	/**
@@ -392,9 +252,9 @@ class Configuration
 	 *
 	 * @param string $responseType case-insensitive xMl|JsON ..always valid
 	 *
-	 * @return bool has set or not
+	 * @return \Xajax\Core\Configuration has set or not
 	 */
-	public function setResponseType(string $responseType = ''): bool
+	public function setResponseType(?string $responseType = null): Configuration
 	{
 		$responseType = strtoupper($responseType);
 
@@ -402,14 +262,14 @@ class Configuration
 		{
 			$this->responseType = $responseType;
 			$this->setContentType('text/xml');
-
-			return true;
+		}
+		else
+		{
+			$this->responseType = 'JSON';
+			$this->setContentType('application/json');
 		}
 
-		$this->responseType = 'JSON';
-		$this->setContentType('application/json');
-
-		return true;
+		return $this;
 	}
 
 	/**
@@ -435,103 +295,14 @@ class Configuration
 	 * @example $xajax->getConfiguration()->setResponseType(Json|Xml)
 	 *
 	 * @param string $contentType
+	 *
+	 * @return \Xajax\Core\Configuration
 	 */
-	protected function setContentType(string $contentType)
+	protected function setContentType(string $contentType): Configuration
 	{
 		$this->contentType = $contentType;
-	}
 
-	/**
-	 * @return string
-	 */
-	public function getDefaultMode(): string
-	{
-		// Automatic setup
-		if (null === $this->defaultMode)
-		{
-			return $this->setDefaultMode(self::getJSDefaultMode());
-		}
-
-		return $this->defaultMode;
-	}
-
-	/**
-	 * @param string $defaultMode
-	 *
-	 * @return string the set'd default mode
-	 */
-	public function setDefaultMode(string $defaultMode): string
-	{
-		$defaultMode = strtolower($defaultMode);
-		if (in_array($defaultMode, self::getModes(), true))
-		{
-			$this->defaultMode = $defaultMode;
-		}
-		else
-		{
-			$this->defaultMode = self::getJSDefaultMode();
-		}
-
-		return $this->defaultMode;
-	}
-
-	/**
-	 * internal modes
-	 *
-	 * @see $defaultMode
-	 * @return array
-	 */
-	public static function getModes(): array
-	{
-		return self::$modes;
-	}
-
-	/**
-	 * @return string
-	 */
-	public static function getJSDefaultMode(): string
-	{
-		return self::getModes()[0];
-	}
-
-	/**
-	 * @todo test
-	 * @return string
-	 */
-	public function getDefaultMethod(): string
-	{
-		return $this->defaultMethod ?? $this->setDefaultMethod('');
-	}
-
-	/**
-	 * @param string $defaultMethod
-	 *
-	 * @return string
-	 */
-	public function setDefaultMethod(string $defaultMethod = ''): string
-	{
-		$defaultMethod = strtoupper($defaultMethod);
-
-		return $this->defaultMethod = $defaultMethod === 'GET' ? 'GET' : 'POST';
-	}
-
-	/**
-	 * @return bool
-	 * @deprecated jproof/xajax 0.7.2 will be removed
-	 */
-	public static function isLegacy(): bool
-	{
-		return self::$legacy;
-	}
-
-	/**
-	 * @param bool $legacy
-	 *
-	 * @deprecated jproof/xajax 0.7.2 will be removed
-	 */
-	public static function setLegacy($legacy = true)
-	{
-		self::$legacy = (bool) $legacy;
+		return $this;
 	}
 
 	/**
@@ -539,17 +310,22 @@ class Configuration
 	 */
 	public function getWrapperPrefix(): string
 	{
-		return $this->wrapperPrefix;
+		return (string) $this->wrapperPrefix;
 	}
 
 	/**
 	 * @todo  explain
+	 * @todo  check against prefixes
 	 *
 	 * @param string $wrapperPrefix
+	 *
+	 * @return \Xajax\Core\Configuration
 	 */
-	public function setWrapperPrefix(string $wrapperPrefix)
+	public function setWrapperPrefix(?string $wrapperPrefix = null): Configuration
 	{
-		$this->wrapperPrefix = $wrapperPrefix;
+		$this->wrapperPrefix = (string) $wrapperPrefix;
+
+		return $this;
 	}
 
 	/**
@@ -558,31 +334,43 @@ class Configuration
 	 */
 	public function isDebug(): bool
 	{
-		return $this->debug;
+		return (bool) $this->debug;
 	}
 
 	/**
 	 * enable debug
+	 *
+	 * @return \Xajax\Core\Configuration
 	 */
-	public function enableDebug()
+	public function enableDebug(): Configuration
 	{
 		$this->setDebug(true);
+
+		return $this;
 	}
 
 	/**
 	 * disable debug
+	 *
+	 * @return \Xajax\Core\Configuration
 	 */
-	public function disableDebug()
+	public function disableDebug(): Configuration
 	{
 		$this->setDebug(false);
+
+		return $this;
 	}
 
 	/**
 	 * @param bool $debug
+	 *
+	 * @return \Xajax\Core\Configuration
 	 */
-	public function setDebug(bool $debug = true)
+	public function setDebug(?bool $debug = null): Configuration
 	{
-		$this->debug = $debug;
+		$this->debug = (bool) $debug;
+
+		return $this;
 	}
 
 	/**
@@ -596,10 +384,14 @@ class Configuration
 
 	/**
 	 * @param bool $verbose
+	 *
+	 * @return \Xajax\Core\Configuration
 	 */
-	public function setVerbose(bool $verbose = true)
+	public function setVerbose(?bool $verbose = null): Configuration
 	{
-		$this->verbose = $verbose;
+		$this->verbose = (bool) $verbose;
+
+		return $this;
 	}
 
 	/**
@@ -612,10 +404,14 @@ class Configuration
 
 	/**
 	 * @param bool $exitAllowed
+	 *
+	 * @return \Xajax\Core\Configuration
 	 */
-	public function setExitAllowed(bool $exitAllowed = true)
+	public function setExitAllowed(?bool $exitAllowed = null): Configuration
 	{
-		$this->exitAllowed = $exitAllowed;
+		$this->exitAllowed = (bool) $exitAllowed;
+
+		return $this;
 	}
 
 	/**
@@ -628,10 +424,14 @@ class Configuration
 
 	/**
 	 * @param bool $errorHandler
+	 *
+	 * @return \Xajax\Core\Configuration
 	 */
-	public function setErrorHandler(bool $errorHandler = true)
+	public function setErrorHandler(?bool $errorHandler = null): Configuration
 	{
-		$this->errorHandler = $errorHandler;
+		$this->errorHandler = (bool) $errorHandler;
+
+		return $this;
 	}
 
 	/**
@@ -639,9 +439,9 @@ class Configuration
 	 * @todo  refacture this parameter
 	 * @return string
 	 */
-	public function getLogFile(): string
+	public function getLogFile(): ?string
 	{
-		return $this->logFile;
+		return (string) $this->logFile;
 	}
 
 	/**
@@ -649,10 +449,14 @@ class Configuration
 	 * @todo  refacture this parameter
 	 *
 	 * @param string $logFile
+	 *
+	 * @return \Xajax\Core\Configuration
 	 */
-	public function setLogFile(string $logFile = '')
+	public function setLogFile(?string $logFile = null): Configuration
 	{
 		$this->logFile = $logFile;
+
+		return $this;
 	}
 
 	/**
@@ -665,19 +469,13 @@ class Configuration
 
 	/**
 	 * @param bool $cleanBuffer
-	 */
-	public function setCleanBuffer(bool $cleanBuffer = true)
-	{
-		$this->cleanBuffer = $cleanBuffer;
-	}
-
-	/**
-	 * Current Version
 	 *
-	 * @return string
+	 * @return \Xajax\Core\Configuration
 	 */
-	public function getVersion(): string
+	public function setCleanBuffer(?bool $cleanBuffer = null): Configuration
 	{
-		return $this->version;
+		$this->cleanBuffer = (bool) $cleanBuffer;
+
+		return $this;
 	}
 }

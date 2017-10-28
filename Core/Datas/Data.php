@@ -33,6 +33,19 @@ class Data implements IteratorAggregate, \Countable
 	private $properties = [];
 
 	/**
+	 * Data constructor.
+	 *
+	 * @param null $properties
+	 */
+	public function __construct($properties = null)
+	{
+		if (is_array($properties))
+		{
+			$this->bind($properties);
+		}
+	}
+
+	/**
 	 * @param $name
 	 * @param $value
 	 *
@@ -126,6 +139,20 @@ class Data implements IteratorAggregate, \Countable
 		}
 
 		return $propertiesObject;
+	}
+
+	/**
+	 * @param array|null $properties
+	 */
+	public function bind(?array $properties = null)
+	{
+		if (is_array($properties))
+		{
+			foreach ($properties as $key => $value)
+			{
+				$this->setProperty($key, $value);
+			}
+		}
 	}
 
 	/**

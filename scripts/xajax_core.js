@@ -3823,5 +3823,3 @@ xjx.$ = xajax.tools.$;
 xjx.getFormValues = xajax.tools.getFormValues;
 
 xjx.request = xajax.request;
-
-if('undefined' == typeof JSON) xajax.js.includeScript({data: xajax.config.JavaScriptURI + 'xajax_js/JSON.js'});

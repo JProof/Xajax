@@ -17,6 +17,7 @@ declare(strict_types=1);
 namespace Xajax\Core;
 
 use Xajax\Core\Response\Response;
+use Xajax\Core\Scripts\Scripts;
 
 /**
  * Class Factory
@@ -61,6 +62,16 @@ class Factory
 		self::setInstances($instances);
 
 		return $instances[$instance];
+	}
+
+	/**
+	 * Getting the Script-Handler
+	 *
+	 * @return \Xajax\Core\Scripts\Scripts
+	 */
+	public static function getScripts(): \Xajax\Core\Scripts\Scripts
+	{
+		return Scripts::getInstance();
 	}
 
 	/**

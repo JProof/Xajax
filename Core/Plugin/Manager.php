@@ -21,7 +21,8 @@ namespace Xajax\Core\Plugin {
 	use Xajax\Core\Helper\Javascripts;
 	use Xajax\Core\Plugin\Request\Data;
 	use Xajax\Core\Plugin\Request\RequestPluginIface;
-	use xajaxLanguageManager;
+	use Xajax\Core\Scripts\Core;
+	use Xajax\Core\Scripts\Scripts;
 
 	class Manager
 	{
@@ -352,7 +353,7 @@ namespace Xajax\Core\Plugin {
 		 */
 		private function _getScriptFilename(?string $sFilename = null): string
 		{
-			if (is_string($sFilename) && false === $this->getConfig()->isUseUncompressedScripts())
+			if (is_string($sFilename) && false === Scripts::getInstance()->getConfiguration()->isUseUncompressedScripts())
 			{
 				return str_replace('.js', '.min.js', $sFilename);
 			}
@@ -374,36 +375,36 @@ namespace Xajax\Core\Plugin {
 		public function generateClientScript()
 		{
 
-			$sJsURI = $this->getConfig()->getJavascriptURI();
+			$scripts       = Scripts::getInstance();
+			$configScripts = $scripts->getConfiguration();
 
-			$aJsFiles = $this->aJsFiles;
-
-			if ('' !== $sJsURI && '/' !== substr($sJsURI, - 1))
-			{
-				$sJsURI .= '/';
-			}
-
-			// @todo check useless
-			if ($this->getConfig()->isDeferScriptGeneration())
-			{
-				$sJsURI .= 'xajax_js/';
-			}
-
-			$aJsFiles[] = [$this->_getScriptFilename('xajax_js/xajax_core.js'), 'xajax'];
+			$xCoreConfig = new Core();
+			$xCoreConfig->setScriptName('xajax')->setFileName('xajax_core.js')->setPriority(0);
+			$scripts->addScript($xCoreConfig, 50);
 
 			if ($this->getConfig()->isDebug())
 			{
-				$aJsFiles[] = [$this->_getScriptFilename('xajax_js/xajax_debug.js'), 'xajax.debug'];
+				$xCoreDebugConfig = new Core();
+				$xCoreDebugConfig->setScriptName('xajax.debug')->setFileName('xajax_debug.js')->setPriority(0);
+				$scripts->addScript($xCoreDebugConfig, 49);
+
 				if ($this->getConfig()->isVerbose())
 				{
-					$aJsFiles[] = [$this->_getScriptFilename('xajax_js/xajax_verbose.js'), 'xajax.debug.verbose'];
+					$xCoreVerboseConfig = new Core();
+					$xCoreVerboseConfig->setScriptName('xajax.debug.verbose')->setFileName('xajax_verbose.js')->setPriority(0);
+					$scripts->addScript($xCoreDebugConfig, 48);
 				}
-				if ($this->getConfig()->isUseDebugLanguage())
+				else
 				{
-					$aJsFiles[] = [$this->_getScriptFilename('xajax_js/xajax_lang_' . $this->getConfig()->getLanguage() . '.js'),
-					               'xajax'];
+					$scripts->setLockScript('xajax.debug.verbose');
 				}
 			}
+			else
+			{
+				$scripts->setLockScript('xajax.debug');
+			}
+
+			$xScripts = Scripts::getInstance()->getScriptUrls();
 
 			$sCrLf = "\n";
 			ob_start();
@@ -411,11 +412,10 @@ namespace Xajax\Core\Plugin {
 			echo $sCrLf;
 			echo '<';
 			echo 'script type="text/javascript" ';
-			echo $this->getConfig()->isDeferScriptGeneration() ? 'defer ' : '';
+			echo $configScripts->isDeferScriptGeneration() ? 'defer ' : '';
 			echo 'charset="UTF-8">';
 			echo $sCrLf;
-			echo '/* <';
-			echo '![CDATA[ */';
+			echo '/* <![CDATA[ */';
 			echo $sCrLf;
 			echo 'try { if (undefined == typeof xajax.config) xajax.config = {};  } catch (e) { xajax = {}; xajax.config = {};  };';
 			echo $sCrLf;
@@ -424,11 +424,11 @@ namespace Xajax\Core\Plugin {
 			echo '";';
 			echo $sCrLf;
 			echo 'xajax.config.statusMessages = ';
-			echo $this->getConfig()->isStatusMessages() ? 'true' : 'false';
+			echo $configScripts->isStatusMessages() ? 'true' : 'false';
 			echo ';';
 			echo $sCrLf;
 			echo 'xajax.config.waitCursor = ';
-			echo $this->getConfig()->isWaitCursor() ? 'true' : 'false';
+			echo $configScripts->isWaitCursor() ? 'true' : 'false';
 			echo ';';
 			echo $sCrLf;
 			echo 'xajax.config.version = "';
@@ -436,15 +436,11 @@ namespace Xajax\Core\Plugin {
 			echo '";';
 			echo $sCrLf;
 			echo 'xajax.config.defaultMode = "';
-			echo $this->getConfig()->getDefaultMode();
+			echo $configScripts->getDefaultMode();
 			echo '";';
 			echo $sCrLf;
 			echo 'xajax.config.defaultMethod = "';
-			echo $this->getConfig()->getDefaultMethod();
-			echo '";';
-			echo $sCrLf;
-			echo 'xajax.config.JavaScriptURI = "';
-			echo $this->getConfig()->getJavascriptURI();
+			echo $configScripts->getDefaultMethod();
 			echo '";';
 			echo $sCrLf;
 			echo 'xajax.config.responseType = "';
@@ -479,7 +475,7 @@ namespace Xajax\Core\Plugin {
 			}
 			if (0 < $this->nScriptLoadTimeout)
 			{
-				foreach ($aJsFiles as $aJsFile)
+				foreach ($xScripts as $xScript)
 				{
 					//				echo '<';
 					//				echo 'script type="text/javascript" ';
@@ -496,7 +492,7 @@ namespace Xajax\Core\Plugin {
 					echo '  var scriptExists = false;';
 					echo $sCrLf;
 					echo '  try { if (';
-					echo $aJsFile[1];
+					echo $xScript;
 					echo '.isLoaded) scriptExists = true; }';
 					echo $sCrLf;
 					echo '  catch (e) {}';
@@ -504,10 +500,10 @@ namespace Xajax\Core\Plugin {
 					echo '  if (!scriptExists) {';
 					echo $sCrLf;
 					echo '   alert("Error: the ';
-					echo $aJsFile[1];
+					echo $xScript;
 					echo ' Javascript component could not be included. Perhaps the URL is incorrect?\nURL: ';
-					echo $sJsURI;
-					echo $aJsFile[0];
+
+					echo $xScript;
 					echo '");';
 					echo $sCrLf;
 					echo '  }';
@@ -531,7 +527,7 @@ namespace Xajax\Core\Plugin {
 			echo '/script>';
 			echo $sCrLf;
 
-			if ($this->getConfig()->isDeferScriptGeneration())
+			if ($configScripts->isDeferScriptGeneration())
 			{
 
 
@@ -585,11 +581,23 @@ namespace Xajax\Core\Plugin {
 			else
 			{
 
+				foreach ($xScripts as $xScript)
+				{
+					echo '<';
+					echo 'script type="text/javascript" src="';
+
+					echo $xScript;
+					echo '" ';
+					echo $configScripts->isDeferScriptGeneration() ? 'defer ' : '';
+					echo 'charset="UTF-8"><';
+					echo '/script>';
+					echo $sCrLf;
+				}
 
 				echo $sCrLf;
 				echo '<';
 				echo 'script type="text/javascript" ';
-				echo $this->getConfig()->isDeferScriptGeneration() ? 'defer ' : '';
+				echo $configScripts->isDeferScriptGeneration() ? 'defer ' : '';
 				echo 'charset="UTF-8">';
 				echo $sCrLf;
 				echo '/* <';
@@ -604,19 +612,6 @@ namespace Xajax\Core\Plugin {
 				echo '<';
 				echo '/script>';
 				echo $sCrLf;
-
-				foreach ($aJsFiles as $aJsFile)
-				{
-					echo '<';
-					echo 'script type="text/javascript" src="';
-					echo $sJsURI;
-					echo $aJsFile[0];
-					echo '" ';
-					echo $this->getConfig()->isDeferScriptGeneration() ? 'defer ' : '';
-					echo 'charset="UTF-8"><';
-					echo '/script>';
-					echo $sCrLf;
-				}
 			}
 		}
 
