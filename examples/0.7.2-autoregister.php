@@ -20,14 +20,15 @@ use Xajax\Core\Factory;use Xajax\Plugins\Userfunction\Request;
 $xConfig = Factory::getInstance()->getConfig();
 
 
-$xConfig->setDeferScriptGeneration(false);
+
 $anXajaxUserFunction = Request::autoRegister('listDirectory');
-$xConfig->setErrorHandler(true);
-$xConfig->setDebug(true);
-$xConfig->setVerbose(false);
+$xConfig->setErrorHandler(true)->setDebug(true)->setVerbose(false);
+
 
 $xScripts = Factory::getScripts();
+$xScripts->getConfiguration()->setDeferScriptGeneration(false);
 $xScripts->addScriptDir('/xajax-php-7/scripts');
+
 // override the core Script-Location
 #$xScripts->addScript(new Core(['scriptName' => 'xajax', 'fileName' => 'xajax_core2.js']));
 #$xScripts->addScript(new Core(['scriptName' => 'xajax', 'fileName' => 'xajax_core3.js', 'dir' => '/media/scripts']));

@@ -344,22 +344,7 @@ namespace Xajax\Core\Plugin {
 			string - The filename as it should be specified in the script tags
 			on the browser.
 		*/
-		/**
-		 * Getting the minified or regular js-filename
-		 *
-		 * @param $sFilename
-		 *
-		 * @return string
-		 */
-		private function _getScriptFilename(?string $sFilename = null): string
-		{
-			if (is_string($sFilename) && false === Scripts::getInstance()->getConfiguration()->isUseUncompressedScripts())
-			{
-				return str_replace('.js', '.min.js', $sFilename);
-			}
 
-			return $sFilename;
-		}
 
 		/*
 			Function: generateClientScript

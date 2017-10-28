@@ -17,6 +17,7 @@ declare(strict_types=1);
 namespace Xajax\Configuration;
 
 use BadMethodCallException;
+use function Xajax\Core\addError;
 use Xajax\Core\Datas\Data;
 
 /**

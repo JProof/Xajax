@@ -108,6 +108,8 @@ class Scripts
 
 	/**
 	 * Render the Url for an single Script
+	 * todo compile filename
+	 * todo compile configured minified filename
 	 *
 	 * @param string|null $name
 	 * @param bool|null   $relative
@@ -120,20 +122,20 @@ class Scripts
 		{
 			return null;
 		}
+
 		if (($scriptQueue = $this->getScript($name)) instanceof Queue && 0 < $scriptQueue->count())
 		{
 			/** @var \Xajax\Core\Scripts\Base $item */
 			$item = $scriptQueue->top();
 
-			// todo compile filename
 			if ('' !== ($dir = $item->getDir()))
 			{
-				return $dir . '/' . $item->getFileName();
+				return $dir . '/' . $this->getScriptFilename($item->getFileName());
 			}
 
 			$topDir = $this->getScriptDirs()->top();
 
-			return $topDir . '/' . $item->getFileName();
+			return $topDir . '/' . $this->getScriptFilename($item->getFileName());
 		}
 
 		return null;
@@ -149,6 +151,23 @@ class Scripts
 		$scripts = $this->getScripts();
 
 		return $scripts[$name] ?? null;
+	}
+
+	/**
+	 * Getting the minified or regular js-filename
+	 *
+	 * @param $sFilename
+	 *
+	 * @return string
+	 */
+	private function getScriptFilename(?string $sFilename = null): string
+	{
+		if (is_string($sFilename) && false === self::getInstance()->getConfiguration()->isUseUncompressedScripts())
+		{
+			return str_replace('.js', '.min.js', $sFilename);
+		}
+
+		return $sFilename;
 	}
 
 	/**

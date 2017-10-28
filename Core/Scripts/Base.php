@@ -24,6 +24,7 @@ namespace Xajax\Core\Scripts;
  * @property-read string $fileName   the real fullname of the file
  * @property-read string $dir        override dir for an single script
  * @property-read int    $priority   Priority
+ * @property-read bool   useUncompressedScript regular or min.js
  */
 trait Base
 {
