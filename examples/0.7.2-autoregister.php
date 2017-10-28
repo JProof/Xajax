@@ -22,11 +22,11 @@ $xConfig = Factory::getInstance()->getConfig();
 
 
 $anXajaxUserFunction = Request::autoRegister('listDirectory');
-$xConfig->setErrorHandler(true)->setDebug(true)->setVerbose(false);
+$xConfig->setErrorHandler(true);
 
 
 $xScripts = Factory::getScripts();
-$xScripts->getConfiguration()->setDeferScriptGeneration(false);
+$xScripts->getConfiguration()->setDeferScriptGeneration(false)->setUseUncompressedScripts(true)->setDebug(true)->setVerbose(false);
 $xScripts->addScriptDir('/xajax-php-7/scripts');
 
 // override the core Script-Location
@@ -49,7 +49,7 @@ function listDirectory()
 	}
 	catch (Exception $exception)
 	{
-		\Xajax\Core\addError($exception);
+	    \Xajax\Core\Errors\Handler::addError($exception);
 	}
 
 	return $objResponse;

@@ -367,13 +367,13 @@ namespace Xajax\Core\Plugin {
 			$xCoreConfig->setScriptName('xajax')->setFileName('xajax_core.js')->setPriority(0);
 			$scripts->addScript($xCoreConfig, 50);
 
-			if ($this->getConfig()->isDebug())
+			if ($configScripts->isDebug())
 			{
 				$xCoreDebugConfig = new Core();
 				$xCoreDebugConfig->setScriptName('xajax.debug')->setFileName('xajax_debug.js')->setPriority(0);
 				$scripts->addScript($xCoreDebugConfig, 49);
 
-				if ($this->getConfig()->isVerbose())
+				if ($configScripts->isVerbose())
 				{
 					$xCoreVerboseConfig = new Core();
 					$xCoreVerboseConfig->setScriptName('xajax.debug.verbose')->setFileName('xajax_verbose.js')->setPriority(0);
@@ -446,7 +446,7 @@ namespace Xajax\Core\Plugin {
 				echo ';';
 			}
 
-			if (true === $this->getConfig()->isDebug())
+			if (true === $configScripts->isDebug())
 			{
 				if (false === (null === $this->sDebugOutputID))
 				{

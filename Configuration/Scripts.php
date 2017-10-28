@@ -52,6 +52,18 @@ class Scripts extends Base
 	 */
 	protected $deferScriptGeneration = true;
 	/**
+	 * Debug Flag for Xajax. Set to true only during development.
+	 *
+	 * @var bool
+	 */
+	protected $debug = false;
+	/**
+	 * If debug is true xajax will explain more debug-messages
+	 *
+	 * @var bool
+	 */
+	protected $verbose = false;
+	/**
 	 * @var array
 	 */
 	protected static $modes = ['asynchronous', 'synchronous',];
@@ -244,5 +256,71 @@ class Scripts extends Base
 		$defaultMethod = strtoupper((string) $defaultMethod);
 
 		return $this->defaultMethod = 'GET' === $defaultMethod ? 'GET' : 'POST';
+	}
+
+	/**
+	 * @todo explain
+	 * @return bool
+	 */
+	public function isDebug(): bool
+	{
+		return (bool) $this->debug;
+	}
+
+	/**
+	 * enable debug
+	 *
+	 * @return \Xajax\Configuration\Scripts
+	 */
+	public function enableDebug(): Scripts
+	{
+		$this->setDebug(true);
+
+		return $this;
+	}
+
+	/**
+	 * disable debug
+	 *
+	 * @return \Xajax\Configuration\Scripts
+	 */
+	public function disableDebug(): Scripts
+	{
+		$this->setDebug(false);
+
+		return $this;
+	}
+
+	/**
+	 * @param bool $debug
+	 *
+	 * @return \Xajax\Configuration\Scripts
+	 */
+	public function setDebug(?bool $debug = null): Scripts
+	{
+		$this->debug = (bool) $debug;
+
+		return $this;
+	}
+
+	/**
+	 * @todo explain
+	 * @return bool
+	 */
+	public function isVerbose(): bool
+	{
+		return $this->verbose;
+	}
+
+	/**
+	 * @param bool $verbose
+	 *
+	 * @return \Xajax\Configuration\Scripts
+	 */
+	public function setVerbose(?bool $verbose = null): Scripts
+	{
+		$this->verbose = (bool) $verbose;
+
+		return $this;
 	}
 }

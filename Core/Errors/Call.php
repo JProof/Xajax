@@ -22,7 +22,7 @@ trait Call
 	{
 		if (!method_exists($this, $name))
 		{
-			throw new \BadMethodCallException($name . ' has shuffled the mortal coil', E_ERROR);
+			throw new \BadMethodCallException($name . ' BadMethodCall', E_ERROR);
 		}
 	}
 }

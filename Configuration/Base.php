@@ -17,8 +17,9 @@ declare(strict_types=1);
 namespace Xajax\Configuration;
 
 use BadMethodCallException;
-use function Xajax\Core\addError;
+
 use Xajax\Core\Datas\Data;
+use Xajax\Core\Errors\Handler;
 
 /**
  * Class Base
@@ -96,7 +97,7 @@ abstract class Base extends Data
 			return $this->$method($value);
 		}
 		// never overload the setter! Make sure you have an
-		addError(new BadMethodCallException(__CLASS__ . '::' . __METHOD__ . ' Method ' . $method . ' for variable ' . $name . ' does not exists'));
+		Handler::addError(new BadMethodCallException(__CLASS__ . '::' . __METHOD__ . ' Method ' . $method . ' for variable ' . $name . ' does not exists'));
 
 		return null;
 	}

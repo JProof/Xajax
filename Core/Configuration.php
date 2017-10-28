@@ -91,18 +91,6 @@ class Configuration extends Base
 	 */
 	protected $wrapperPrefix = 'xajax_';
 	/**
-	 * Debug Flag for Xajax. Set to true only during development.
-	 *
-	 * @var bool
-	 */
-	protected $debug = false;
-	/**
-	 * If debug is true xajax will explain more debug-messages
-	 *
-	 * @var bool
-	 */
-	protected $verbose = false;
-	/**
 	 * A configuration option that is tracked by the main <xajax>object.  Setting this
 	 * to true allows <xajax> to exit immediatly after processing a xajax request.  If
 	 * this is set to false, xajax will allow the remaining code and HTML to be sent
@@ -328,71 +316,7 @@ class Configuration extends Base
 		return $this;
 	}
 
-	/**
-	 * @todo explain
-	 * @return bool
-	 */
-	public function isDebug(): bool
-	{
-		return (bool) $this->debug;
-	}
 
-	/**
-	 * enable debug
-	 *
-	 * @return \Xajax\Core\Configuration
-	 */
-	public function enableDebug(): Configuration
-	{
-		$this->setDebug(true);
-
-		return $this;
-	}
-
-	/**
-	 * disable debug
-	 *
-	 * @return \Xajax\Core\Configuration
-	 */
-	public function disableDebug(): Configuration
-	{
-		$this->setDebug(false);
-
-		return $this;
-	}
-
-	/**
-	 * @param bool $debug
-	 *
-	 * @return \Xajax\Core\Configuration
-	 */
-	public function setDebug(?bool $debug = null): Configuration
-	{
-		$this->debug = (bool) $debug;
-
-		return $this;
-	}
-
-	/**
-	 * @todo explain
-	 * @return bool
-	 */
-	public function isVerbose(): bool
-	{
-		return $this->verbose;
-	}
-
-	/**
-	 * @param bool $verbose
-	 *
-	 * @return \Xajax\Core\Configuration
-	 */
-	public function setVerbose(?bool $verbose = null): Configuration
-	{
-		$this->verbose = (bool) $verbose;
-
-		return $this;
-	}
 
 	/**
 	 * @return bool

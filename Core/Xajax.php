@@ -36,6 +36,7 @@ namespace Xajax\Core;
 
 use RuntimeException;
 use Xajax\Configuration\Config;
+use Xajax\Core\Errors\Handler;
 use Xajax\Core\Plugin\Manager;
 use Xajax\Core\Plugin\Plugin;
 use Xajax\Core\Response\Response;
@@ -903,7 +904,7 @@ class Xajax
 			if ($this->getConfig()->isErrorHandler())
 			{
 				$GLOBALS['xajaxErrorHandlerText'] = '';
-				set_error_handler('xajaxErrorHandler');
+				set_error_handler('\Xajax\Core\Errors\Handler::addError');
 			}
 
 			$mResult = true;
@@ -981,8 +982,8 @@ class Xajax
 
 			if ($this->getConfig()->isErrorHandler())
 			{
-				$sErrorMessage = $GLOBALS['xajaxErrorHandlerText'];
-				if (!empty($sErrorMessage))
+				$sErrorMessage = Handler::getErrors();
+				if (is_string($sErrorMessage))
 				{
 					if (0 < strlen($this->sLogFile))
 					{
@@ -1274,80 +1275,3 @@ class Xajax
 
 	See <xajax->bUserErrorHandler>
 */
-/**
- * @param \Exception|null $exception
- */
-function addError(?\Exception $exception = null)
-{
-	if ($exception instanceof \Exception)
-	{
-		xajaxErrorHandler($exception->getCode(), $exception->getMessage(), $exception->getFile(), $exception->getLine());
-	}
-}
-
-/**
- * @param $errno
- * @param $errstr
- * @param $errfile
- * @param $errline
- */
-function xajaxErrorHandler($errno, $errstr, $errfile, $errline)
-{
-	$errorReporting = error_reporting();
-	if (($errno & $errorReporting) == 0)
-	{
-		return;
-	}
-
-	if ($errno == E_NOTICE)
-	{
-		$errTypeStr = 'NOTICE';
-	}
-	else if ($errno == E_WARNING)
-	{
-		$errTypeStr = 'WARNING';
-	}
-	else if ($errno == E_USER_NOTICE)
-	{
-		$errTypeStr = 'USER NOTICE';
-	}
-	else if ($errno == E_USER_WARNING)
-	{
-		$errTypeStr = 'USER WARNING';
-	}
-	else if ($errno == E_USER_ERROR)
-	{
-		$errTypeStr = 'USER FATAL ERROR';
-	}
-	elseif (E_ERROR === $errno)
-	{
-		$errTypeStr = 'E_ERROR';
-	}
-	else if (defined('E_STRICT') && $errno == E_STRICT)
-	{
-		return;
-	}
-	else
-	{
-		$errTypeStr = 'UNKNOWN: ' . $errno;
-	}
-
-	$sCrLf = "\n";
-
-	ob_start();
-	echo $GLOBALS['xajaxErrorHandlerText'];
-	echo $sCrLf;
-	echo '----';
-	echo $sCrLf;
-	echo '[';
-	echo $errTypeStr;
-	echo '] ';
-	echo $errstr;
-	echo $sCrLf;
-	echo 'Error on line ';
-	echo $errline;
-	echo ' of file ';
-	echo $errfile;
-	$GLOBALS['xajaxErrorHandlerText'] = ob_get_clean();
-}
-
