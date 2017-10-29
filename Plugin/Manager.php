@@ -461,7 +461,7 @@ namespace Xajax\Plugin {
 			}
 			if (0 < $this->nScriptLoadTimeout)
 			{
-				foreach ($xScripts as $xScript)
+				foreach ($xScripts as $name => $xScript)
 				{
 					//				echo '<';
 					//				echo 'script type="text/javascript" ';
@@ -478,7 +478,7 @@ namespace Xajax\Plugin {
 					echo '  var scriptExists = false;';
 					echo $sCrLf;
 					echo '  try { if (';
-					echo $xScript;
+					echo $name;
 					echo '.isLoaded) scriptExists = true; }';
 					echo $sCrLf;
 					echo '  catch (e) {}';
