@@ -16,6 +16,9 @@ declare(strict_types=1);
 
 namespace Xajax\Core\Errors;
 
+use Exception;
+use Throwable;
+
 /**
  * Class Handler
  *
@@ -26,28 +29,50 @@ class Handler
 	/**
 	 * @var array
 	 */
-	static protected $errors = [];
-
+	static protected $exceptions = [];
 	/**
-	 * @param \Exception|null $exception
+	 * @var array
 	 */
-	public static function addError(?\Exception $exception = null)
-	{
-		if ($exception instanceof \Exception)
-		{
-			self::$errors[] = $exception;
-		}
-	}
+	static private $userErrors = [];
 
-	/**
-	 * @return null|string
-	 */
 	public static function getErrors()
 	{
 		$string = '';
-		foreach (self::$errors as $error)
+		$string .= self::getExceptions();
+		$string .= self::getUserErrors();
+		if ('' !== $string)
 		{
-			$string .= self::xajaxErrorHandler($error);
+			return $string;
+		}
+
+		return null;
+	}
+
+	public static function addError()
+	{
+		$args = func_get_args();
+		if ($args[0] instanceof Throwable)
+		{
+			self::addException($args[0]);
+		}
+		else
+		{
+
+			self::addUserError($args);
+		}
+	}
+
+	private static function addUserError(?array $args = null)
+	{
+		self::$userErrors[] = (array) $args;
+	}
+
+	public static function getUserErrors()
+	{
+		$string = '';
+		foreach (self::$userErrors as list($code, $message, $file, $line, $trace))
+		{
+			$string .= self::compileMessage($code, $message, $file, $line, self::errorTrace($trace));
 		}
 		if ('' === $string)
 		{
@@ -57,72 +82,131 @@ class Handler
 		return $string;
 	}
 
+	protected static function errorTrace(?array $array = null)
+	{
+		$string = '';
+		if (!is_array($array))
+		{
+			return $string;
+		}
+		$params = [];
+		foreach ($array as $key => $value)
+		{
+			$params[] = '# ' . $key . ':' . $value;
+		}
+
+		return implode("\n", $params);
+	}
+
+	/**
+	 * @param \Exception|null $exception
+	 */
+	public static function addException(?Exception $exception = null)
+	{
+		if ($exception instanceof Exception)
+		{
+			self::$exceptions[] = $exception;
+		}
+	}
+
+	/**
+	 * @return null|string
+	 */
+	public static function getExceptions()
+	{
+		$string = '';
+		if (0 < count(self::$exceptions))
+		{
+			foreach (self::$exceptions as $error)
+			{
+				$string .= self::compileExceptionMessage($error);
+			}
+		}
+		if ('' === $string)
+		{
+			return null;
+		}
+
+		return $string;
+	}
+
+	protected static function compileExceptionMessage(Exception $exception)
+	{
+		return self::compileMessage($exception->getCode(), $exception->getMessage(), $exception->getFile(), $exception->getLine(), $exception->getTraceAsString());
+	}
+
 	/**
 	 * Rendering the Error-Messages
 	 *
-	 * @param \Exception $exception
-	 *
 	 * @return string|null
 	 */
-	protected static function xajaxErrorHandler(\Exception $exception): ?string
+	protected static function compileMessage(): ?string
 	{
-		$errno          = $exception->getCode();
+		list($code, $message, $file, $line, $trace) = func_get_args();
+
 		$errorReporting = error_reporting();
-		if (0 === ($errno && $errorReporting))
+		if (0 === ($code && $errorReporting))
 		{
 			return null;
 		}
 
-		if (E_NOTICE === $errno)
+		$errorString = [];
+
+		$errorString[] = '----';
+
+		$errorString[] = '[' . self::getErrorTypeString($code) . '] ' . $message;
+
+		$errorString[] = 'Error on line ' . $line . ' of file ' . $file;
+		if ($trace)
+		{
+			$errorString[] = $trace;
+		}
+
+		return implode("\n", $errorString);
+	}
+
+	/**
+	 * Readable Error-Type-String
+	 *
+	 * @param int $code
+	 *
+	 * @return string
+	 */
+	public static function getErrorTypeString(int $code): string
+	{
+		if (E_NOTICE === $code)
 		{
 			$errTypeStr = 'NOTICE';
 		}
-		else if (E_WARNING === $errno)
+		else if (E_WARNING === $code)
 		{
 			$errTypeStr = 'WARNING';
 		}
-		else if (E_USER_NOTICE === $errno)
+		else if (E_USER_NOTICE === $code)
 		{
 			$errTypeStr = 'USER NOTICE';
 		}
-		else if (E_USER_WARNING === $errno)
+		else if (E_USER_WARNING === $code)
 		{
 			$errTypeStr = 'USER WARNING';
 		}
-		else if (E_USER_ERROR === $errno)
+		else if (E_USER_ERROR === $code)
 		{
 			$errTypeStr = 'USER FATAL ERROR';
 		}
-		elseif (E_ERROR === $errno)
+		elseif (E_ERROR === $code)
 		{
 			$errTypeStr = 'E_ERROR';
 		}
-		else if (defined('E_STRICT') && E_STRICT === $errno)
+		else if (defined('E_STRICT') && E_STRICT === $code)
 		{
-			return null;
+			$errTypeStr = 'E_STRICT';
 		}
 		else
 		{
-			$errTypeStr = 'UNKNOWN: ' . $errno;
+			$errTypeStr = 'UNKNOWN: ' . $code;
 		}
 
-		$sCrLf = "\n";
-
-		ob_start();
-		echo $sCrLf;
-		echo '----';
-		echo $sCrLf;
-		echo '[';
-		echo $errTypeStr;
-		echo '] ';
-		echo $exception->getMessage();
-		echo $sCrLf;
-		echo 'Error on line ';
-		echo $exception->getLine();
-		echo ' of file ';
-		echo $exception->getFile();
-		echo $exception->getTraceAsString();
-
-		return ob_get_clean();
+		return $errTypeStr;
 	}
 }

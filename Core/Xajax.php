@@ -266,27 +266,27 @@ class Xajax
 		// The default configuration settings.
 		$this->configureMany(
 		    [
-			'characterEncoding'      => XAJAX_DEFAULT_CHAR_ENCODING,
-			'decodeUTF8Input'        => false,
-			'outputEntities'         => false,
-			'responseType'           => 'JSON',
-			'defaultMode'            => 'asynchronous',
-			'defaultMethod'          => 'POST',        // W3C: Method is case sensitive
-			'wrapperPrefix'          => 'xajax_',
-			'debug'                  => false,
-			'verbose'                => false,
-			'useUncompressedScripts' => false,
-			'statusMessages'         => false,
-			'waitCursor'             => true,
-			'deferScriptGeneration'  => true,
-			'exitAllowed'            => true,
-			'errorHandler'           => false,
-			'cleanBuffer'            => false,
-			'allowBlankResponse'     => false,
-			'allowAllResponseTypes'  => false,
-			'generateStubs'          => true,
-			'logFile'                => '',
-			'timeout'                => 6000,
+		        'characterEncoding'      => XAJAX_DEFAULT_CHAR_ENCODING,
+		        'decodeUTF8Input'        => false,
+		        'outputEntities'         => false,
+		        'responseType'           => 'JSON',
+		        'defaultMode'            => 'asynchronous',
+		        'defaultMethod'          => 'POST',        // W3C: Method is case sensitive
+		        'wrapperPrefix'          => 'xajax_',
+		        'debug'                  => false,
+		        'verbose'                => false,
+		        'useUncompressedScripts' => false,
+		        'statusMessages'         => false,
+		        'waitCursor'             => true,
+		        'deferScriptGeneration'  => true,
+		        'exitAllowed'            => true,
+		        'errorHandler'           => null,
+		        'cleanBuffer'            => false,
+		        'allowBlankResponse'     => false,
+		        'allowAllResponseTypes'  => false,
+		        'generateStubs'          => true,
+		        'logFile'                => '',
+		        'timeout'                => 6000,
 
 		    ]
 		);
@@ -520,11 +520,7 @@ class Xajax
 	{
 
 		$isBoolValue = is_bool($mValue);
-		if ('errorHandler' === $sName && $isBoolValue)
-		{
-			$this->bErrorHandler = $mValue;
-		}
-		else if ('exitAllowed' === $sName && $isBoolValue)
+		if ('exitAllowed' === $sName && $isBoolValue)
 		{
 
 			$this->bExitAllowed = $mValue;
@@ -899,12 +895,10 @@ class Xajax
 
 		if ($this->canProcessRequest())
 		{
-			// @todo check error handler
-			// Use xajax error handler if necessary
+			// Use custom error handler if necessary
 			if ($this->getConfig()->isErrorHandler())
 			{
-				$GLOBALS['xajaxErrorHandlerText'] = '';
-				set_error_handler('\Xajax\Core\Errors\Handler::addError');
+				set_error_handler($this->getConfig()->getErrorHandler());
 			}
 
 			$mResult = true;

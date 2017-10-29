@@ -16,13 +16,26 @@ declare(strict_types=1);
 
 namespace Xajax\Core\Errors;
 
+use BadMethodCallException;
+
+/**
+ * Trait Call
+ *
+ * @package Xajax\Core\Errors
+ */
 trait Call
 {
+	/**
+	 * @param $name
+	 * @param $arguments
+	 *
+	 * @throws BadMethodCallException
+	 */
 	public function __call($name, $arguments)
 	{
 		if (!method_exists($this, $name))
 		{
-			throw new \BadMethodCallException($name . ' BadMethodCall', E_ERROR);
+			throw new BadMethodCallException('The method: "' . $name . '" was not found', E_ERROR);
 		}
 	}
 }

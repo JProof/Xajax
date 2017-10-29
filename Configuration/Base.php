@@ -97,7 +97,7 @@ abstract class Base extends Data
 			return $this->$method($value);
 		}
 		// never overload the setter! Make sure you have an
-		Handler::addError(new BadMethodCallException(__CLASS__ . '::' . __METHOD__ . ' Method ' . $method . ' for variable ' . $name . ' does not exists'));
+		trigger_error(__CLASS__ . '::' . __METHOD__ . ' Method ' . $method . ' for variable ' . $name . ' does not exists', E_ERROR);
 
 		return null;
 	}

@@ -106,10 +106,11 @@ class Configuration extends Base
 	 * to the client as part of the response.  The client can then display the errors
 	 * to the user if so desired.
 	 *
-	 * @see ../examples/tests/errorHandlingTest.php
-	 * @var bool
+	 * @since 0.7.2 error_handling can be set with an callable_class
+	 * @see   ../examples/tests/errorHandlingTest.php
+	 * @var string
 	 */
-	protected $errorHandler = false;
+	protected $errorHandler;
 	/**
 	 * A configuration setting tracked by the main <xajax> object.  Set the name of the
 	 * file on the server that you wish to have php error messages written to during
@@ -316,8 +317,6 @@ class Configuration extends Base
 		return $this;
 	}
 
-
-
 	/**
 	 * @return bool
 	 */
@@ -339,21 +338,53 @@ class Configuration extends Base
 	}
 
 	/**
-	 * @return bool
+	 * Getting the Error-Handler Class
+	 *
+	 * @return string
+	 * @throws \InvalidArgumentException
 	 */
-	public function isErrorHandler(): bool
+	public function getErrorHandler(): string
 	{
+		if (null === $this->errorHandler)
+		{
+			throw new \InvalidArgumentException('ErrorHandler is Null. Please check before with ->isErrorHandler(); or set ->setErroHandler(\'callable_object\')');
+		}
+
 		return $this->errorHandler;
 	}
 
 	/**
-	 * @param bool $errorHandler
+	 * @return bool
+	 */
+	public function isErrorHandler(): bool
+	{
+		return null !== $this->errorHandler;
+	}
+
+	/**
+	 * @param string $errorHandler
 	 *
 	 * @return \Xajax\Core\Configuration
+	 * @throws \InvalidArgumentException
 	 */
-	public function setErrorHandler(?bool $errorHandler = null): Configuration
+	public function setErrorHandler(?string $errorHandler = null): Configuration
 	{
-		$this->errorHandler = (bool) $errorHandler;
+		if (null !== $errorHandler)
+		{
+
+			if (is_string($errorHandler) && is_callable($errorHandler))
+			{
+				$this->errorHandler = $errorHandler;
+			}
+			else
+			{
+				throw new \InvalidArgumentException('ErrorHandler must be an callable Object such as MyErrorHandlerClass::myErrorMethod');
+			}
+		}
+		else
+		{
+			$this->errorHandler = null;
+		}
 
 		return $this;
 	}

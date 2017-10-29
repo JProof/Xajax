@@ -15,18 +15,18 @@ declare(strict_types=1);
 require_once __DIR__ . '/bootstrap.php';
 
 use Xajax\Core\Factory;use Xajax\Plugins\Userfunction\Request;
-
+set_error_handler('\Xajax\Core\Errors\Handler::addError');
 
 $xConfig = Factory::getInstance()->getConfig();
 
 
 
 $anXajaxUserFunction = Request::autoRegister('listDirectory');
-$xConfig->setErrorHandler(true);
+$xConfig->setErrorHandler('\Xajax\Core\Errors\Handler::addException');
 
 
 $xScripts = Factory::getScripts();
-$xScripts->getConfiguration()->setDeferScriptGeneration(false)->setUseUncompressedScripts(true)->setDebug(true)->setVerbose(true);
+$xScripts->getConfiguration()->setDeferScriptGeneration(false)->setUseUncompressedScripts(true)->setDebug(true)->setVerbose(false);
 $xScripts->addScriptDir('/xajax-php-7/scripts');
 
 // override the core Script-Location
@@ -41,7 +41,7 @@ echo $xScripts->getScriptUrl('xajax');
 function listDirectory()
 {
 	$objResponse = Factory::getResponseInstance();
-	$objResponse->alert('geth');
+	$objResponse->assign('geth', 'innerHTML', 'test');
 
 	try
 	{
@@ -49,6 +49,7 @@ function listDirectory()
 	}
 	catch (Exception $exception)
 	{
+
 	    \Xajax\Core\Errors\Handler::addError($exception);
 	}
 
