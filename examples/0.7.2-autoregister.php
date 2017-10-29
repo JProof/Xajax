@@ -22,7 +22,7 @@ $xConfig = Factory::getInstance()->getConfig();
 
 
 $anXajaxUserFunction = Request::autoRegister('listDirectory');
-$xConfig->setErrorHandler('\Xajax\Core\Errors\Handler::addException');
+$xConfig->setErrorHandler('\Xajax\Core\Errors\Handler::addException')->setToHtml(true);
 
 
 $xScripts = Factory::getScripts();

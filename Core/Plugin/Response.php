@@ -16,6 +16,8 @@ declare(strict_types=1);
 
 namespace Xajax\Core\Plugin;
 
+use Xajax\Core\Language;
+
 /**
  * Class Response
  *
@@ -82,7 +84,7 @@ abstract class Response extends Plugin
 	function getName()
 	{
 //SkipDebug
-		$objLanguageManager = xajaxLanguageManager::getInstance();
+		$objLanguageManager = Language::getInstance();
 		trigger_error(
 		    $objLanguageManager->getText('XJXPLG:GNERR:01')
 		    , E_USER_ERROR
@@ -104,7 +106,7 @@ abstract class Response extends Plugin
 	function process()
 	{
 //SkipDebug
-		$objLanguageManager = xajaxLanguageManager::getInstance();
+		$objLanguageManager = Language::getInstance();
 		trigger_error(
 		    $objLanguageManager->getText('XJXPLG:PERR:01')
 		    , E_USER_ERROR

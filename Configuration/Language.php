@@ -30,7 +30,7 @@ trait Language
 	 */
 	protected $useDebugLanguage = false;
 	/**
-	 * @see \xajaxLanguageManager
+	 * @see \Language
 	 * @var string
 	 */
 	protected $language;

@@ -17,8 +17,10 @@ declare(strict_types=1);
 namespace Xajax\Core\Plugin {
 
 	use InvalidArgumentException;
+	use RuntimeException;
 	use Xajax\Configuration\Config;
 	use Xajax\Core\Helper\Javascripts;
+	use Xajax\Core\Language;
 	use Xajax\Core\Plugin\Request\Data;
 	use Xajax\Core\Plugin\Request\RequestPluginIface;
 	use Xajax\Core\Scripts\Core;
@@ -194,7 +196,7 @@ namespace Xajax\Core\Plugin {
 				return $this->registerResponsePlugin($objPlugin, $nPriority);
 			}
 
-			$objLanguageManager = xajaxLanguageManager::getInstance();
+			$objLanguageManager = Language::getInstance();
 			trigger_error(
 			    $objLanguageManager->getText('XJXPM:IPLGERR:01')
 			    . get_class($objPlugin)

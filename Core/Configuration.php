@@ -19,6 +19,7 @@ namespace Xajax\Core;
 use Xajax\Configuration\Base;
 use Xajax\Configuration\Deprecated;
 use Xajax\Configuration\Language;
+use Xajax\Configuration\Logging;
 use Xajax\Configuration\Uri;
 use Xajax\Core\Errors\Call;
 use Xajax\Core\Helper\Encoding;
@@ -38,6 +39,9 @@ class Configuration extends Base
 
 	/** Language for errors an explanations **/
 	use Language;
+
+	/**Configure the Error-Logging */
+	use Logging;
 
 	/** error handling **/
 	use Call;

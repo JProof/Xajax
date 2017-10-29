@@ -227,10 +227,10 @@ class Xajax
 	/*
 		Object: objLanguageManager
 		
-		Stores a reference to the global <xajaxLanguageManager>
+		Stores a reference to the global <Language>
 	*/
 	/**
-	 * @var \xajaxLanguageManager
+	 * @var \Xajax\Core\Language
 	 **/
 	private $objLanguageManager;
 	/**
@@ -367,7 +367,7 @@ class Xajax
 //SkipAIO
 		/**@deprecated  load via composer
 		 * require_once $sLocalFolder . '/xajaxPluginManager.inc.php';
-		 * require_once $sLocalFolder . '/xajaxLanguageManager.inc.php';
+		 * require_once $sLocalFolder . '/Language.inc.php';
 		 * require_once $sLocalFolder . '/xajaxArgumentManager.inc.php';
 		 * require_once $sLocalFolder . '/xajaxResponseManager.inc.php';
 		 * require_once $sLocalFolder . '/xajaxRequest.inc.php';
@@ -979,6 +979,12 @@ class Xajax
 				$sErrorMessage = Handler::getErrors();
 				if (is_string($sErrorMessage))
 				{
+
+					if ($this->getConfig()->isToHtml())
+					{
+
+					}
+
 					if (0 < strlen($this->sLogFile))
 					{
 						$fH = @fopen($this->sLogFile, 'ab');

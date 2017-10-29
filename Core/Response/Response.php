@@ -42,7 +42,7 @@ namespace Xajax\Core\Response;
 */
 
 use Xajax\Core\Argument;
-use xajaxLanguageManager;
+use Xajax\Core\Language;
 use function Xajax\Core\addError;
 
 /**
@@ -111,7 +111,7 @@ class Response
 		//SkipDebug
 		if (0 < func_num_args())
 		{
-			$objLanguageManager = xajaxLanguageManager::getInstance();
+			$objLanguageManager = Language::getInstance();
 			trigger_error(
 			    $objLanguageManager->getText('XJXRSP:EDERR:01')
 			    , E_USER_ERROR
@@ -284,7 +284,7 @@ class Response
 		//SkipDebug
 		if (false == (0 < $nArgs))
 		{
-			$objLanguageManager = xajaxLanguageManager::getInstance();
+			$objLanguageManager = Language::getInstance();
 			trigger_error(
 			    $objLanguageManager->getText('XJXRSP:MPERR:01')
 			    , E_USER_ERROR
@@ -1788,7 +1788,7 @@ class Response
 			//SkipDebug
 			if (!empty($mCommands))
 			{
-				$objLanguageManager = xajaxLanguageManager::getInstance();
+				$objLanguageManager = Language::getInstance();
 				trigger_error(
 				    $objLanguageManager->getText('XJXRSP:LCERR:01')
 				    , E_USER_ERROR
@@ -2033,7 +2033,7 @@ class Response
 					//SkipDebug
 					if (htmlspecialchars($sInnerKey, ENT_COMPAT, 'UTF-8') != $sInnerKey)
 					{
-						$objLanguageManager = xajaxLanguageManager::getInstance();
+						$objLanguageManager = Language::getInstance();
 						trigger_error(
 						    $objLanguageManager->getText('XJXRSP:AKERR:01')
 						    , E_USER_ERROR
@@ -2055,7 +2055,7 @@ class Response
 					else
 					{
 						//SkipDebug
-						$objLanguageManager = xajaxLanguageManager::getInstance();
+						$objLanguageManager = Language::getInstance();
 						trigger_error(
 						    $objLanguageManager->getText('XJXRSP:IEAERR:01')
 						    , E_USER_ERROR
@@ -2070,7 +2070,7 @@ class Response
 			else
 			{
 				//SkipDebug
-				$objLanguageManager = xajaxLanguageManager::getInstance();
+				$objLanguageManager = Language::getInstance();
 				trigger_error(
 				    $objLanguageManager->getText('XJXRSP:NEAERR:01')
 				    , E_USER_ERROR
@@ -2114,7 +2114,7 @@ class Response
 			//SkipDebug
 			if (false === function_exists('mb_convert_encoding'))
 			{
-				$objLanguageManager = xajaxLanguageManager::getInstance();
+				$objLanguageManager = Language::getInstance();
 				trigger_error(
 				    $objLanguageManager->getText('XJXRSP:MBEERR:01')
 				    , E_USER_NOTICE
@@ -2328,7 +2328,7 @@ class xajaxCustomResponse
 		//SkipDebug
 		if (false == ($objResponse instanceof xajaxCustomResponse))
 		{
-			$objLanguageManager = xajaxLanguageManager::getInstance();
+			$objLanguageManager = Language::getInstance();
 			trigger_error(
 			    $objLanguageManager->getText('XJXRSP:MXRTERR')
 			    , E_USER_ERROR
@@ -2337,7 +2337,7 @@ class xajaxCustomResponse
 
 		if ($objResponse->getContentType() != $this->getContentType())
 		{
-			$objLanguageManager = xajaxLanguageManager::getInstance();
+			$objLanguageManager = Language::getInstance();
 			trigger_error(
 			    $objLanguageManager->getText('XJXRSP:MXCTERR')
 			    , E_USER_ERROR
@@ -2346,7 +2346,7 @@ class xajaxCustomResponse
 
 		if ($objResponse->getCharacterEncoding() != $this->getCharacterEncoding())
 		{
-			$objLanguageManager = xajaxLanguageManager::getInstance();
+			$objLanguageManager = Language::getInstance();
 			trigger_error(
 			    $objLanguageManager->getText('XJXRSP:MXCEERR')
 			    , E_USER_ERROR
@@ -2355,7 +2355,7 @@ class xajaxCustomResponse
 
 		if ($objResponse->getOutputEntities() != $this->getOutputEntities())
 		{
-			$objLanguageManager = xajaxLanguageManager::getInstance();
+			$objLanguageManager = Language::getInstance();
 			trigger_error(
 			    $objLanguageManager->getText('XJXRSP:MXOEERR')
 			    , E_USER_ERROR

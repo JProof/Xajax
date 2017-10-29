@@ -382,7 +382,7 @@ final class Argument
 			}
 			else
 			{
-				$objLanguageManager = xajaxLanguageManager::getInstance();
+				$objLanguageManager = Language::getInstance();
 				trigger_error(
 				    $objLanguageManager->getText('ARGMGR:ERR:03')
 				    , E_USER_NOTICE
