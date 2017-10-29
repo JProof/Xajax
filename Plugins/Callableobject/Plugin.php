@@ -17,9 +17,9 @@ declare(strict_types=1);
 namespace Xajax\Plugins\Callableobject;
 
 use InvalidArgumentException;
-use Xajax\Core\Plugin\Request;
-use Xajax\Core\Plugin\Request\RequestPluginIface;
-use Xajax\Core\RequestIface;
+use Xajax\Plugin\Request;
+use Xajax\Plugin\Request\RequestPluginIface;
+use Xajax\RequestIface;
 
 /**
  * Class Plugin

@@ -45,6 +45,8 @@ trait Language
 
 	/**
 	 * @param string $language
+	 *
+	 * @return self
 	 */
 	public function setLanguage(?string $language = null)
 	{
@@ -63,6 +65,8 @@ trait Language
 
 	/**
 	 * @param bool $useDebugLanguage
+	 *
+	 * @return self
 	 */
 	public function setUseDebugLanguage(?bool $useDebugLanguage = null)
 	{

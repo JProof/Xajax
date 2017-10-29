@@ -39,9 +39,7 @@
     "psr-0": {
     },
     "psr-4": {
-      "Xajax\\Core\\": "Core",
-      "Xajax\\Configuration\\": "Configuration",
-      "Xajax\\Plugins\\": "Plugins",
+      "Xajax\\": "",
       "Xajax\\Examples\\": "examples"
     },
     "files": [

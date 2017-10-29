@@ -14,20 +14,20 @@
 declare(strict_types=1);
 require_once __DIR__ . '/bootstrap.php';
 
-use Xajax\Core\Factory;use Xajax\Plugins\Userfunction\Request;
-set_error_handler('\Xajax\Core\Errors\Handler::addError');
+use Xajax\Factory;use Xajax\Plugins\Userfunction\Request;
+set_error_handler('\Xajax\Errors\Handler::addError');
 
 $xConfig = Factory::getInstance()->getConfig();
 
 
 
 $anXajaxUserFunction = Request::autoRegister('listDirectory');
-$xConfig->setErrorHandler('\Xajax\Core\Errors\Handler::addException')->setToHtml(true);
+$xConfig->setErrorHandler('\Xajax\Errors\Handler::addException')->setToHtml(true);
 
 
 $xScripts = Factory::getScripts();
 $xScripts->getConfiguration()->setDeferScriptGeneration(false)->setUseUncompressedScripts(true)->setDebug(true)->setVerbose(false);
-$xScripts->addScriptDir('/xajax-php-7/scripts');
+$xScripts->addScriptDir('/xajax-php-7/javascript');
 
 // override the core Script-Location
 #$xScripts->addScript(new Core(['scriptName' => 'xajax', 'fileName' => 'xajax_core2.js']));
@@ -50,7 +50,7 @@ function listDirectory()
 	catch (Exception $exception)
 	{
 
-	    \Xajax\Core\Errors\Handler::addError($exception);
+	    \Xajax\Errors\Handler::addError($exception);
 	}
 
 	return $objResponse;

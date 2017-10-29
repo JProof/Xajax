@@ -16,15 +16,15 @@ declare(strict_types=1);
 
 namespace Xajax\Plugins\Userfunction;
 
-use Xajax\Core\Factory;
-use Xajax\Core\RequestIface;
+use Xajax\Factory;
+use Xajax\RequestIface;
 
 /**
  * Class UserFunction
  *
  * @package Xajax\Plugin\Request
  */
-class Request extends \Xajax\Core\Request\Request implements RequestIface
+class Request extends \Xajax\Request\Request implements RequestIface
 {
 	/**
 	 * Automatic Register-Plugin-Method on demand

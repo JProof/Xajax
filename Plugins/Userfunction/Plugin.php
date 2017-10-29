@@ -17,10 +17,10 @@ declare(strict_types=1);
 namespace Xajax\Plugins\Userfunction;
 
 use InvalidArgumentException;
-use Xajax\Core\Argument;
-use Xajax\Core\Plugin\Request;
-use Xajax\Core\Plugin\Request\RequestPluginIface;
-use Xajax\Core\RequestIface;
+use Xajax\Argument;
+use Xajax\Plugin\Request;
+use Xajax\Plugin\Request\RequestPluginIface;
+use Xajax\RequestIface;
 
 /**
  * Class Plugin

@@ -14,7 +14,7 @@
 declare(strict_types=1);
 require_once __DIR__ . '/bootstrap.php';
 
-use Xajax\Core\Factory;use Xajax\Plugins\Callableobject\Request;
+use Xajax\Factory;use Xajax\Plugins\Callableobject\Request;
 
 class myTest
 {
@@ -28,7 +28,7 @@ class myTest
 		}
 		catch (Exception $exception)
 		{
-			\Xajax\Core\addError($exception);
+		\Xajax\addError($exception);
 		}
 
 		return $objResponse;

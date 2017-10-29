@@ -16,8 +16,8 @@ declare(strict_types=1);
 
 namespace Xajax\Plugins\Callableobject;
 
-use Xajax\Core\RequestIface;
-use Xajax\Core\Response\Manager;
+use Xajax\RequestIface;
+use Xajax\Response\Manager;
 
 /**
  * Class Handler

@@ -18,8 +18,8 @@ namespace Xajax\Configuration;
 
 use BadMethodCallException;
 
-use Xajax\Core\Datas\Data;
-use Xajax\Core\Errors\Handler;
+use Xajax\Datas\Data;
+use Xajax\Errors\Handler;
 
 /**
  * Class Base
