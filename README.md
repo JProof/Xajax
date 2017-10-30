@@ -1,6 +1,6 @@
 XAJAX
 
-next release(unofficial): 0.7.2
+next release(unofficial): 0.7.3
 
 [Relaunch-Notices](Relaunch.md)
 

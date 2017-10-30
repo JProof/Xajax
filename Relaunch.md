@@ -1,6 +1,6 @@
 [back to Readme](README.md)
 
-Current development xajax 0.7.1
+Current development xajax 0.7.3
 * Codstyles and Namespaces
 * php-7
 * LF
