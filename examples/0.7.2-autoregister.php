@@ -27,7 +27,7 @@ $xConfig->setErrorHandler('\Xajax\Errors\Handler::addException')->setToHtml(true
 
 $xScripts = Factory::getScripts();
 $xScripts->getConfiguration()->setDeferScriptGeneration(false)->setUseUncompressedScripts(true)->setDebug(true)->setVerbose(false);
-$xScripts->addScriptDir('/xajax-php-7/javascript');
+$xScripts->addScriptDir('/xajax-php-7/assets/js');
 
 // override the core Script-Location
 #$xScripts->addScript(new Core(['scriptName' => 'xajax', 'fileName' => 'xajax_core2.js']));
