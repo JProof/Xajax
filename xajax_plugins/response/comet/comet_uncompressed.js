@@ -123,7 +123,7 @@ xjxEc.detectSupport = function()
 	//		}
 
 	return false;
-}
+};
 
 
 // -------------------------------------------------------------------------------------------------------------------------------------
@@ -150,23 +150,23 @@ xjxEc.prepareRequestXHR = function (oRequest)
 				for (var optionName in headers)
 					this.request.setRequestHeader(optionName, headers[optionName]);
 			}
-		}
+		};
 		oRequest.setCommonRequestHeaders = function()
 		{
 			this.setRequestHeaders(this.commonHeaders);
-		}
+		};
 		oRequest.setPostRequestHeaders = function()
 		{
 			this.setRequestHeaders(this.postHeaders);
-		}
+		};
 		oRequest.setGetRequestHeaders = function()
 		{
 			this.setRequestHeaders(this.getHeaders);
-		}
+		};
 
 		oRequest.applyRequestHeaders = function()
 		{
-		}
+		};
 
 		oRequest.setCommonRequestHeaders = function()
 		{
@@ -178,7 +178,7 @@ xjxEc.prepareRequestXHR = function (oRequest)
 				for (a in oRequest.header)
 					this.request.setRequestHeader(a, oRequest.header[a]);
 			}
-		}
+		};
 		oRequest.comet = {
 		};
 
@@ -189,7 +189,7 @@ xjxEc.prepareRequestXHR = function (oRequest)
 			
 			console.log('pollLatestResponse'); 
 			xjxEc.responseProcessor.XHR(oRequest);
-		}
+		};
 		oRequest.pollTimer = setInterval(pollLatestResponse, 300);
 		oRequest.request.onreadystatechange = function()
 		{
@@ -205,13 +205,13 @@ xjxEc.prepareRequestXHR = function (oRequest)
 				xjxEc.responseProcessor.XHR(oRequest);
 				//xajax.responseReceived(oRequest);
 				xajax.completeResponse(oRequest);
-				return;
+				
 			}
-		}
+		};
 		oRequest.finishRequest = function()
 		{
 			return this.returnValue;
-		}
+		};
 
 		if ('undefined' != typeof oRequest.userName && 'undefined' != typeof oRequest.password)
 		{
@@ -262,7 +262,7 @@ xjxEc.prepareRequestXHR = function (oRequest)
 		return;
 	}
 	return xjxEc.prepareRequest(oRequest);
-}
+};
 
 // -------------------------------------------------------------------------------------------------------------------------------------
 /*
@@ -292,7 +292,7 @@ xjxEc.connect_htmlfile = function (url, callback, oRequest)
 	catch (ex)
 	{
 	}
-}
+};
 
 // -------------------------------------------------------------------------------------------------------------------------------------
 
@@ -326,7 +326,7 @@ xjxEc.prepareRequestActiveX = function(oRequest)
 		return;
 	}
 	return xjxEc.prepareRequest(oRequest);
-}
+};
 
 // -------------------------------------------------------------------------------------------------------------------------------------
 
@@ -365,7 +365,7 @@ xjxEc.prepareRequestHTMLDRAFT = function(oRequest)
 				es.removeEventListener("xjxstream", callback, false);
 				es.removeEventListener("xjxendstream", remove, false);
 			//document.body.removeChild(es);
-			}
+			};
 
 			es.addEventListener("xjxstream", callback, false);
 			es.addEventListener("xjxendstream", remove, false);
@@ -380,7 +380,7 @@ xjxEc.prepareRequestHTMLDRAFT = function(oRequest)
 		return;
 	}
 	return xjxEc.prepareRequest(oRequest);
-}
+};
 // -------------------------------------------------------------------------------------------------------------------------------------
 /*
 	Function: responseProcessor.XHR
@@ -412,7 +412,7 @@ xajax.debug.prepareDebugText = function(text)
 				haystack += segments[i];
 			}
 			return haystack;
-		}
+		};
 		xajax.debug.prepareDebugText = function(text)
 		{
 			text = xajax.debug.stringReplace(text, '&', '&amp;');
@@ -420,12 +420,11 @@ xajax.debug.prepareDebugText = function(text)
 			text = xajax.debug.stringReplace(text, '>', '&gt;');
 			text = xajax.debug.stringReplace(text, '\n', '<br />');
 			return text;
-		}
+		};
 		xajax.debug.prepareDebugText(text);
 	}
-}
-xjxEc.responseProcessor = {
-}
+};
+xjxEc.responseProcessor = {};
 
 xjxEc.responseProcessor.XHR = function(oRequest)
 {
@@ -469,7 +468,7 @@ xjxEc.responseProcessor.XHR = function(oRequest)
 	
 	oRequest.comet.inProgress = false;
 	return oRet;
-}
+};
 // -------------------------------------------------------------------------------------------------------------------------------------
 /*
 	Function: responseProcessor.ActiveX
@@ -499,7 +498,7 @@ xjxEc.responseProcessor.ActiveX = function(response, oRequest)
 			xt.queue.process(xx.response);
 	}
 	return oRet;
-}
+};
 
 // -------------------------------------------------------------------------------------------------------------------------------------
 /*
@@ -532,7 +531,7 @@ xjxEc.responseProcessor.HTMLDRAFT = function(response, oRequest)
 		oRequest.lastResponse = response
 	}
 	return oRet;
-}
+};
 
 // -------------------------------------------------------------------------------------------------------------------------------------
 /*
@@ -549,7 +548,7 @@ xjxEc.submitRequestActiveX = function(oRequest)
 		return;
 
 	xjxEc.submitRequest(oRequest);
-}
+};
 
 // -------------------------------------------------------------------------------------------------------------------------------------
 /*
@@ -597,7 +596,7 @@ if (typeof DOMParser == "undefined")
 {
 	DOMParser = function ()
 	{
-	}
+	};
 
 	DOMParser.prototype.parseFromString = function (str, contentType)
 	{

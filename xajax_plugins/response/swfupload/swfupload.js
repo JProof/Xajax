@@ -71,8 +71,21 @@ if(this.movieElement===null){throw "Could not find Flash element";}
 return this.movieElement;};SWFUpload.prototype.buildParamString=function(){var postParams=this.settings.post_params;var paramStringPairs=[];if(typeof(postParams)==="object"){for(var name in postParams){if(postParams.hasOwnProperty(name)){paramStringPairs.push(encodeURIComponent(name.toString())+"="+encodeURIComponent(postParams[name].toString()));}
 }
 }
-return paramStringPairs.join("&amp;");};SWFUpload.prototype.destroy=function(){try{this.cancelUpload(null,false);;var movieElement=null;movieElement=this.getMovieElement();if(movieElement){for(var i in movieElement){try{if(typeof(movieElement[i])==="function"){movieElement[i]=null;}
-}catch(ex1){}
+	return paramStringPairs.join("&amp;");
+};
+SWFUpload.prototype.destroy = function(){
+	try{
+		this.cancelUpload(null, false);
+		var movieElement = null;
+		movieElement = this.getMovieElement();
+		if(movieElement){
+			for(var i in movieElement){
+				try{
+					if(typeof(movieElement[i]) === "function"){
+						movieElement[i] = null;
+					}
+				}catch(ex1){
+				}
 }
 try{movieElement.parentNode.removeChild(movieElement);}catch(ex){}
 }

@@ -24,7 +24,7 @@ installTableUpdater = function() {
 	xajax.ext.tables.internal = {};
 	xajax.ext.tables.internal.createTable = function(table) {
 		if ('string' != typeof (table))
-			throw { name: 'TableError', message: 'Invalid table name specified.' }
+			throw {name: 'TableError', message: 'Invalid table name specified.'};
 		var newTable = document.createElement('table');
 		newTable.id = table;
 		// save the column configuration
@@ -32,29 +32,29 @@ installTableUpdater = function() {
 		xajax.ext.tables.appendBody(table + '_body', newTable);
 		xajax.ext.tables.appendFooter(table + '_footer', newTable);
 		return newTable;
-	}
+	};
 	xajax.ext.tables.internal.createRow = function(objects, id) {
 		var row = document.createElement('tr');
 		if (null != id)
 			row.id = id;
 		return row;
-	}
+	};
 	xajax.ext.tables.internal.createCell = function(objects, id) {
 		var cell = document.createElement('td');
 		if (null != id)
 			cell.id = id;
 		cell.innerHTML = '...';
 		return cell;
-	}
+	};
 	xajax.ext.tables.internal.getColumnNumber = function(objects, cell) {
 		var position;
 		var columns = objects.header.getElementsByTagName('td');
 		for (var column = 0; column < columns.length; ++column)
 			if (columns[column].id == cell)
 				return column;
-		throw { name: 'TableError', message: 'Column not found. (getColumnNumber)' }
+		throw {name: 'TableError', message: 'Column not found. (getColumnNumber)'};
 		return undefined;
-	}
+	};
 	xajax.ext.tables.internal.objectify = function(params, required) {
 		if ('undefined' == typeof params.source)
 			return false;
@@ -112,25 +112,25 @@ installTableUpdater = function() {
 		}
 		
 		return true;
-	}
+	};
 	// table
 	xajax.ext.tables.append = function(table, parent) {
 		if ('string' == typeof (parent))
 			parent = xajax.$(parent);
 		parent.appendChild(xajax.ext.tables.internal.createTable(table));
-	}
+	};
 	xajax.ext.tables.insert = function(table, parent, before) {
 		if ('string' == typeof (parent))
 			parent = xajax.$(parent);
 		if ('string' == typeof (before))
 			before = xajax.$(before);
 		parent.insertBefore(xajax.ext.tables.internal.createTable(table), before);
-	}
+	};
 	xajax.ext.tables.remove = function(table) {
 		var objects = { source: table };
 		xajax.ext.tables.internal.objectify(objects, ['table']);
 		objects.table.parentNode.removeChild(objects.table);
-	}
+	};
 	xajax.ext.tables.appendHeader = function(id, table) {
 		var objects = { source: table };
 		xajax.ext.tables.internal.objectify(objects, ['table']);
@@ -145,7 +145,7 @@ installTableUpdater = function() {
 			else
 				table.insertBefore(thead, table.firstChild);
 		}
-	}
+	};
 	xajax.ext.tables.appendBody = function(id, table) {
 		var objects = { source: table };
 		xajax.ext.tables.internal.objectify(objects, ['table']);
@@ -166,9 +166,9 @@ installTableUpdater = function() {
 			objects.table.insertBefore(objects.body, objects.footer);
 		else
 			objects.table.appendChild(objects.body);
-	}
+	};
 	xajax.ext.tables.appendFooter = function(id, table) {
-		var objects = { source: table }
+		var objects = {source: table};
 		xajax.ext.tables.internal.objectify(objects, ['table']);
 		if ('undefined' == typeof objects.footer) {
 			var tfoot = document.createElement('tfoot');
@@ -178,13 +178,13 @@ installTableUpdater = function() {
 			tfoot.appendChild(xajax.ext.tables.internal.createRow(objects, null));
 			objects.table.appendChild(tfoot);
 		}
-	}
+	};
 	// rows
-	xajax.ext.tables.rows = {}
-	xajax.ext.tables.rows.internal = {}
+	xajax.ext.tables.rows = {};
+	xajax.ext.tables.rows.internal = {};
 	xajax.ext.tables.rows.internal.calculateRow = function(objects, position) {
 		if ('undefined' == typeof position)
-			throw { name: 'TableError', message: 'Missing row number / id.' }
+			throw {name: 'TableError', message: 'Missing row number / id.'};
 		if ('undefined' == typeof objects.row)
 			if ('undefined' != typeof objects.rows)
 				if ('undefined' != typeof objects.rows[position])
@@ -193,9 +193,9 @@ installTableUpdater = function() {
 			objects.row = xajax.$(position);
 		if ('undefined' == typeof objects.row)
 			throw { name: 'TableError', message: 'Invalid row number / row id specified.' }
-	}
+	};
 	xajax.ext.tables.rows.append = function(id, table) {
-		var objects = { source: table }
+		var objects = {source: table};
 		xajax.ext.tables.internal.objectify(objects, ['table', 'body']);
 		var row = xajax.ext.tables.internal.createRow(objects, id);
 		if ('undefined' != typeof objects.columns) {
@@ -206,9 +206,9 @@ installTableUpdater = function() {
 			}
 		}
 		objects.body.appendChild(row);
-	}
+	};
 	xajax.ext.tables.rows.insert = function(id, source, position) {
-		var objects = { source: source }
+		var objects = {source: source};
 		xajax.ext.tables.internal.objectify(objects, ['table', 'body']);
 		if ('undefined' == typeof objects.row)
 			xajax.ext.tables.rows.internal.calculateRow(objects, position);
@@ -221,9 +221,9 @@ installTableUpdater = function() {
 			}
 		}
 		objects.body.insertBefore(row, objects.row);
-	}
+	};
 	xajax.ext.tables.rows.replace = function(id, source, position) {
-		var objects = { source: source }
+		var objects = {source: source};
 		xajax.ext.tables.internal.objectify(objects, ['table', 'body']);
 		if ('undefined' == typeof objects.row)
 			xajax.ext.tables.rows.internal.calculateRow(objects, position);
@@ -237,24 +237,24 @@ installTableUpdater = function() {
 		}
 		objects.body.insertBefore(row, objects.row);
 		objects.body.removeChild(objects.row);
-	}
+	};
 	xajax.ext.tables.rows.remove = function(source, position) {
-		var objects = { source: source }
+		var objects = {source: source};
 		xajax.ext.tables.internal.objectify(objects, ['table', 'body']);
 		if ('undefined' == typeof objects.row)
 			xajax.ext.tables.rows.internal.calculateRow(objects, position);
 		objects.body.removeChild(objects.row);
-	}
+	};
 	xajax.ext.tables.rows.assignProperty = function(value, source, position, property) {
-		var objects = { source: source }
+		var objects = {source: source};
 		xajax.ext.tables.internal.objectify(objects, ['table', 'body', 'header']);
 		if ('undefined' == typeof objects.row)
 			xajax.ext.tables.rows.internal.calculateRow(objects, position);
 		if ('undefined' != typeof property)
 			eval('objects.row.' + property + ' = value;');
-	}
+	};
 	xajax.ext.tables.rows.assign = function(values, source, position, start_column) {
-		var objects = { source: source }
+		var objects = {source: source};
 		xajax.ext.tables.internal.objectify(objects, ['table', 'body', 'header']);
 		if ('undefined' == typeof objects.row)
 			xajax.ext.tables.rows.internal.calculateRow(objects, position);
@@ -262,13 +262,13 @@ installTableUpdater = function() {
 			start_column = 0;
 		for (var column = 0; column < values.length; ++column)
 			xajax.ext.tables.cells.assign(values[column], objects.row, start_column + column);
-	}
+	};
 	// columns
-	xajax.ext.tables.columns = {}
-	xajax.ext.tables.columns.internal = {}
+	xajax.ext.tables.columns = {};
+	xajax.ext.tables.columns.internal = {};
 	xajax.ext.tables.columns.internal.calculateColumn = function(objects, position) {
 		if ('undefined' == typeof position)
-			throw { name: 'TableError', message: 'Missing column number / id.' }
+			throw {name: 'TableError', message: 'Missing column number / id.'};
 		if ('undefined' == typeof objects.column)
 			if ('undefined' != typeof objects.columns)
 				if ('undefined' != typeof objects.columns[position])
@@ -279,9 +279,9 @@ installTableUpdater = function() {
 					objects.column = column;
 		if ('undefined' == typeof objects.column)
 			throw { name: 'TableError', message: 'Invalid column number / row id specified.' }
-	}
+	};
 	xajax.ext.tables.columns.append = function(column_definition, table) {
-		var objects = { source: table }
+		var objects = {source: table};
 		xajax.ext.tables.internal.objectify(objects, ['table', 'header', 'body']);
 		var cell = xajax.ext.tables.internal.createCell(objects, column_definition.id);
 		if ('undefined' != typeof column_definition.name)
@@ -290,9 +290,9 @@ installTableUpdater = function() {
 		if ('undefined' != typeof objects.rows)
 			for (var i = 0; i < objects.rows.length; ++i)
 				xajax.ext.tables.cells.append({id: null}, objects.rows[i]);
-	}
+	};
 	xajax.ext.tables.columns.insert = function(column_definition, source, position) {
-		var objects = { source: source }
+		var objects = {source: source};
 		xajax.ext.tables.internal.objectify(objects, ['table', 'header']);
 		if ('undefined' == typeof objects.column)
 			xajax.ext.tables.columns.internal.calculateColumn(objects, position);
@@ -303,9 +303,9 @@ installTableUpdater = function() {
 		if ('undefined' != typeof objects.rows)
 			for (var i = 0; i < objects.rows.length; ++i)
 				xajax.ext.tables.cells.insert({id: null}, objects.rows[i], objects.column);
-	}
+	};
 	xajax.ext.tables.columns.replace = function(column_definition, source, position) {
-		var objects = { source: source }
+		var objects = {source: source};
 		xajax.ext.tables.internal.objectify(objects, ['table', 'header', 'columns']);
 		if ('undefined' == typeof objects.column)
 			xajax.ext.tables.columns.internal.calculateColumn(objects, position);
@@ -318,9 +318,9 @@ installTableUpdater = function() {
 		if ('undefined' != typeof objects.rows)
 			for (var i = 0; i < objects.rows.length; ++i)
 				xajax.ext.tables.cells.replace({id: null}, objects.rows[i], objects.column);
-	}
+	};
 	xajax.ext.tables.columns.remove = function(source, position) {
-		var objects = { source: source }
+		var objects = {source: source};
 		xajax.ext.tables.internal.objectify(objects, ['table', 'header']);
 		if ('undefined' == typeof objects.column)
 			xajax.ext.tables.columns.internal.calculateColumn(objects, position);
@@ -328,29 +328,29 @@ installTableUpdater = function() {
 		if ('undefined' != typeof objects.rows)
 			for (var i = 0; i < objects.rows.length; ++i)
 				xajax.ext.tables.cells.remove(objects.rows[i], objects.column);
-	}
+	};
 	xajax.ext.tables.columns.assign = function(values, source, position, start_row) {
-		var objects = { source: source }
+		var objects = {source: source};
 		xajax.ext.tables.internal.objectify(objects, ['table', 'cell']);
 		if ('undefined' == typeof objects.column)
 			xajax.ext.tables.columns.internal.calculateColumn(objects, position);
 		for (var row = 0; row < values.length; ++row)
 			xajax.ext.tables.cells.assign(values[row], objects.rows[start_row + row], objects.column);
-	}
+	};
 	xajax.ext.tables.columns.assignProperty = function(value, source, position, property) {
-		var objects = { source: source }
+		var objects = {source: source};
 		xajax.ext.tables.internal.objectify(objects, ['table', 'cell']);
 		if ('undefined' == typeof objects.column)
 			xajax.ext.tables.columns.internal.calculateColumn(objects, position);
 		for (var row = 0; row < objects.rows.length; ++row)
 			xajax.ext.tables.cells.assignProperty(value, objects.rows[row], objects.column, property);
-	}
+	};
 	// cells
-	xajax.ext.tables.cells = {}
-	xajax.ext.tables.cells.internal = {}
+	xajax.ext.tables.cells = {};
+	xajax.ext.tables.cells.internal = {};
 	xajax.ext.tables.cells.internal.calculateCell = function(objects, position) {
 		if ('undefined' == typeof position)
-			throw { name: 'TableError', message: 'Missing cell number / id.' }
+			throw {name: 'TableError', message: 'Missing cell number / id.'};
 		if ('undefined' == typeof objects.cell)
 			if ('undefined' != typeof objects.cells)
 				if ('undefined' != typeof objects.cells[position])
@@ -362,17 +362,17 @@ installTableUpdater = function() {
 						objects.cell = objects.cells[column];
 		if ('undefined' == typeof objects.cell)
 			throw { name: 'TableError', message: 'Invalid cell number / id specified.' }
-	}
+	};
 	xajax.ext.tables.cells.append = function(cell_definition, source) {
-		var objects = { source: source }
+		var objects = {source: source};
 		xajax.ext.tables.internal.objectify(objects, ['table', 'row']);
 		var cell = xajax.ext.tables.internal.createCell(objects, cell_definition.id);
 		if ('undefined' != typeof cell_definition.name)
 			cell.innerHTML = cell_definition.name;
 		objects.row.appendChild(cell);
-	}
+	};
 	xajax.ext.tables.cells.insert = function(cell_definition, source, position) {
-		var objects = { source: source }
+		var objects = {source: source};
 		xajax.ext.tables.internal.objectify(objects, ['table', 'row']);
 		if ('undefined' == typeof objects.cell)
 			xajax.ext.tables.cells.internal.calculateCell(objects, position);
@@ -380,9 +380,9 @@ installTableUpdater = function() {
 		if ('undefined' != typeof cell_definition.name)
 			cell.innerHTML = cell_definition.name;
 		objects.row.insertBefore(cell, objects.cell);
-	}
+	};
 	xajax.ext.tables.cells.replace = function(cell_definition, source, position) {
-		var objects = { source: source }
+		var objects = {source: source};
 		xajax.ext.tables.internal.objectify(objects, ['table', 'row']);
 		if ('undefined' == typeof objects.cell)
 			xajax.ext.tables.cells.internal.calculateCell(objects, position);
@@ -391,28 +391,28 @@ installTableUpdater = function() {
 			cell.innerHTML = cell_definition.name;
 		objects.row.insertBefore(cell, objects.cell);
 		objects.row.removeChild(objects.cell);
-	}
+	};
 	xajax.ext.tables.cells.remove = function(source, position) {
-		var objects = { source: source }
+		var objects = {source: source};
 		xajax.ext.tables.internal.objectify(objects, ['table', 'row']);
 		if ('undefined' == typeof objects.cell)
 			xajax.ext.tables.cells.internal.calculateCell(objects, position);
 		objects.row.removeChild(objects.cell);
-	}
+	};
 	xajax.ext.tables.cells.assign = function(value, source, position) {
-		var objects = { source: source }
+		var objects = {source: source};
 		xajax.ext.tables.internal.objectify(objects, ['table', 'row']);
 		if ('undefined' == typeof objects.cell)
 			xajax.ext.tables.cells.internal.calculateCell(objects, position);
 		objects.cell.innerHTML = value;
-	}
+	};
 	xajax.ext.tables.cells.assignProperty = function(value, source, position, property) {
-		var objects = { source: source }
+		var objects = {source: source};
 		xajax.ext.tables.internal.objectify(objects, ['table', 'row']);
 		if ('undefined' == typeof objects.cell)
 			xajax.ext.tables.cells.internal.calculateCell(objects, position);
 		eval('objects.cell.' + property + ' = value;');
-	}
+	};
 
 	// command handlers
 
@@ -523,6 +523,6 @@ installTableUpdater = function() {
 		xajax.ext.tables.cells.assignProperty(args.data, args.id, args.pos, args.prop);
 		return true;
 	});
-}
+};
 
 installTableUpdater();

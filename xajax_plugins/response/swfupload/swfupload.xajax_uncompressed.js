@@ -28,7 +28,7 @@ xajax.ext.SWFupload.settings = {
 	button_text_top_padding:3,
 	button_text_left_padding:100,
 	post_params:{}
-}
+};
 
 if ('undefined' == typeof xajax.ext.SWFupload.lang) {
 	xajax.ext.SWFupload.lang = {};
@@ -49,7 +49,7 @@ xajax.ext.SWFupload.configure = function (config) {
 	if ("object" == typeof config) return xajax.ext.SWFupload.tools.mergeObj(this.settings, config);
 
 	return this.settings;
-}
+};
 
 /* ------------------------------------------------------------------------------------------------------------------------ */
 /*
@@ -63,7 +63,7 @@ xajax.ext.SWFupload.addQueue = function (child, parent, config, multiple) {
 	this.queues[id] = new xajax.ext.SWFupload.tools.fileQueue(id, child, parent, config, multiple);
 
 	return id;
-}
+};
 
 /* ------------------------------------------------------------------------------------------------------------------------ */
 /*
@@ -91,9 +91,8 @@ xajax.ext.SWFupload.applyConfig = function (oQueue) {
 	swf.settings.file_queued_handler = function (oFile) {
 		oQueue.addFile(oFile)
 	};
-	;
 	swf.settings.file_queue_error_handler = oQueue.fileQueueError;
-}
+};
 /* ------------------------------------------------------------------------------------------------------------------------ */
 /*
  function: xajax.ext.SWFupload.selectFile
@@ -108,7 +107,7 @@ xajax.ext.SWFupload.selectFile = function (oQueue) {
 	if (oQueue.getConfig().file_queue_limit > 0 && oQueue.getConfig().file_queue_limit <= oQueue.queued) return;
 
 	xajax.ext.SWFupload.getInstance().selectFile();
-}
+};
 
 /* ------------------------------------------------------------------------------------------------------------------------ */
 /*
@@ -122,7 +121,7 @@ xajax.ext.SWFupload.selectFiles = function (oQueue) {
 	this.applyConfig(oQueue);
 	if (oQueue.getConfig().file_queue_limit > 0 && oQueue.getConfig().file_queue_limit <= oQueue.queued) return;
 	xajax.ext.SWFupload.getInstance().selectFiles();
-}
+};
 
 /* ------------------------------------------------------------------------------------------------------------------------ */
 /*
@@ -136,7 +135,7 @@ xajax.ext.SWFupload.getInstance = function () {
 	if (null == this.swf) this.swf = new SWFUpload(this.settings);
 
 	return this.swf;
-}
+};
 
 /* ------------------------------------------------------------------------------------------------------------------------ */
 /*
@@ -148,7 +147,7 @@ xajax.ext.SWFupload.getInstance = function () {
 
 xajax.ext.SWFupload.removeFile = function (QueueId, FileId, finished) {
 	this.queues[QueueId].removeFile(FileId, finished);
-}
+};
 
 
 /* ------------------------------------------------------------------------------------------------------------------------ */
@@ -182,7 +181,6 @@ xajax.ext.SWFupload.request.getFileFromQueue = function (oRequest) {
 				oRequest.swf = xajax.ext.SWFupload.queues[field].getSWF();
 				return true;
 			}
-			;
 		}
 	} else if ("string" == typeof oRequest.SWFfield) {
 		if ('string' != typeof xajax.ext.SWFupload.fields[oRequest.SWFfield]) {
@@ -195,7 +193,6 @@ xajax.ext.SWFupload.request.getFileFromQueue = function (oRequest) {
 			oRequest.swf = xajax.ext.SWFupload.queues[qId].getSWF();
 			return true;
 		}
-		;
 	} else {
 
 		for (var a in xajax.ext.SWFupload.queues) {
@@ -204,12 +201,11 @@ xajax.ext.SWFupload.request.getFileFromQueue = function (oRequest) {
 				oRequest.swf = xajax.ext.SWFupload.queues[a].getSWF();
 				return true;
 			}
-			;
 		}
 	}
 
 	return false;
-}
+};
 
 /* ------------------------------------------------------------------------------------------------------------------------ */
 /*
@@ -227,7 +223,7 @@ xajax.ext.SWFupload.request.processParameters = function (oRequest) {
 		if (oRequest.currentFile)	oRequest.method = 'GET';
 	}
 	return xajax.ext.SWFupload.bak.processParameters(oRequest);
-}
+};
 
 /* ------------------------------------------------------------------------------------------------------------------------ */
 /*
@@ -241,7 +237,7 @@ xajax.ext.SWFupload.request.processParameters = function (oRequest) {
 xajax.ext.SWFupload.request.prepareRequest = function (oRequest) {
 	if ("SWFupload" == oRequest.mode && false != oRequest.currentFile) return;
 	return xajax.ext.SWFupload.bak.prepareRequest(oRequest);
-}
+};
 
 /* ------------------------------------------------------------------------------------------------------------------------ */
 /*
@@ -329,7 +325,7 @@ xajax.ext.SWFupload.request.submitRequest = function (oRequest) {
 			// do not re-start the queue if a timeout is set
 			if (null == xx.response.timeout)
 				xt.queue.process(xx.response);
-		}
+		};
 
 		swf.settings.upload_complete_handler = function (oFile) {
 
@@ -342,14 +338,14 @@ xajax.ext.SWFupload.request.submitRequest = function (oRequest) {
 			}
 
 			xajax.ext.SWFupload.request.submitRequest(oRequest);
-		}
+		};
 
 
 		swf.settings.upload_start_handler = function (oFile) {
 			if ('function' == typeof this.old_upload_start_handler) this.old_upload_start_handler(oFile);
 			oRequest.startTime = new Date();
-
-		}
+			
+		};
 		swf.settings.upload_progress_handler = function (oFile, bytesLoaded, bytesTotal) {
 
 			upload = {};
@@ -372,8 +368,8 @@ xajax.ext.SWFupload.request.submitRequest = function (oRequest) {
 			var rate = xajax.ext.SWFupload.tools.formatBytes(upload.received / elapsed).toString() + '/s';
 			progress.innerHTML = "<i>" + rate + "</i> " + xajax.ext.SWFupload.tools.formatBytes(upload.received) + "/" + xajax.ext.SWFupload.tools.formatBytes(upload.total);
 			oRequest.lastbytes = upload.received;
-
-		}
+			
+		};
 
 		swf.settings.upload_error_handler = function (file, errorCode, message) {
 			// Skipe error when a file is removed from queue (abort)
@@ -390,7 +386,7 @@ xajax.ext.SWFupload.request.submitRequest = function (oRequest) {
 		return;
 	}
 	return xajax.ext.SWFupload.bak.submitRequest(oRequest);
-}
+};
 
 
 /* ------------------------------------------------------------------------------------------------------------------------ */
@@ -419,7 +415,7 @@ xajax.ext.SWFupload.tools.queueFile = function (oFile, name, QueueId, QueueConta
 	var QueueId = this.QueueId;
 	remove.onclick = function () {
 		xajax.ext.SWFupload.removeFile(QueueId, id);
-	}
+	};
 	container.appendChild(remove);
 
 	var label = document.createElement('div');
@@ -455,10 +451,9 @@ xajax.ext.SWFupload.tools.queueFile = function (oFile, name, QueueId, QueueConta
 
 	this.destroy = function () {
 		QueueContainer.removeChild(container);
-	}
-
-	return;
-}
+	};
+	
+};
 
 /* ------------------------------------------------------------------------------------------------------------------------ */
 /*
@@ -479,7 +474,7 @@ xajax.ext.SWFupload.tools.fileQueue = function (id, child, parent, config, multi
 
 	this.getConfig = function () {
 		return config;
-	}
+	};
 
 	var tmpName = child.name;
 	var container = document.createElement('div');
@@ -516,13 +511,13 @@ xajax.ext.SWFupload.tools.fileQueue = function (id, child, parent, config, multi
 		foo.files[oFile.id] = new xajax.ext.SWFupload.tools.queueFile(oFile, fieldname, foo.id, QueueContainer);
 		foo.queued++;
 		if (foo.queued == config.file_queue_limit) foo.swf.setButtonDisabled(true);
-	}
+	};
 
 	this.getFile = function (FileId) {
 		if ("undefined" != typeof FileId) return foo.files[FileId];
 		for (a in foo.files) return foo.files[a];
 		return false;
-	}
+	};
 
 	this.purge = function (d) {
 		var a = d.attributes, i, l, n;
@@ -542,7 +537,7 @@ xajax.ext.SWFupload.tools.fileQueue = function (id, child, parent, config, multi
 				this.purge(d.childNodes[i]);
 			}
 		}
-	}
+	};
 
 	this.removeFile = function (FileId, finished) {
 
@@ -558,7 +553,7 @@ xajax.ext.SWFupload.tools.fileQueue = function (id, child, parent, config, multi
 
 		foo.files[FileId] = null;
 		delete foo.files[FileId];
-	}
+	};
 	this.destroy = function () {
 
 		this.swf.destroy();
@@ -569,25 +564,25 @@ xajax.ext.SWFupload.tools.fileQueue = function (id, child, parent, config, multi
 		}
 		foo.queued = 0;
 		delete(foo);
-	}
+	};
 	this.fileQueueError = function (swf, code, msg) {
 		if (-110 == code) {
 			msg = "Die gew&auml;hlte Datei ist zu gro&szlig;!";
 			alert(msg);
 		}
-	}
+	};
 
 	this.getSWF = function () {
 		return this.swf;
-
-	}
+		
+	};
 
 	config.file_queued_handler = this.addFile;
 	config.file_queue_error_handler = this.fileQueueError;
 
 	this.swf = new SWFUpload(config);
-
-}
+	
+};
 /* ------------------------------------------------------------------------------------------------------------------------ */
 /*
  function: xajax.ext.SWFupload.tools._parseFields
@@ -612,7 +607,7 @@ xajax.ext.SWFupload.tools._parseFields = function (children, parent, config, mul
 		}
 	}
 	return result;
-}
+};
 
 /* ------------------------------------------------------------------------------------------------------------------------ */
 /*
@@ -629,8 +624,8 @@ xajax.ext.SWFupload.tools.transForm = function (form_id, config, multiple) {
 			var fields = xajax.ext.SWFupload.tools._parseFields(oForm.childNodes, oForm, config, multiple);
 			xajax.ext.SWFupload.forms[form_id] = fields;
 		}
-	return;
-}
+	
+};
 
 /* ------------------------------------------------------------------------------------------------------------------------ */
 
@@ -648,8 +643,8 @@ xajax.ext.SWFupload.tools.transField = function (field_id, config, multiple) {
 
 	} catch (ex) {
 	}
-	return;
-}
+	
+};
 
 
 /* ------------------------------------------------------------------------------------------------------------------------ */
@@ -668,8 +663,8 @@ xajax.ext.SWFupload.tools.destroyForm = function (form_id) {
 		delete xajax.ext.SWFupload.queues[key];
 	}
 	delete xajax.ext.SWFupload.forms[form_id];
-	return;
-}
+	
+};
 
 /* ------------------------------------------------------------------------------------------------------------------------ */
 /*
@@ -687,7 +682,7 @@ xajax.ext.SWFupload.tools.destroyField = function (field_id) {
 	delete xajax.ext.SWFupload.fields[field_id];
 
 	return true;
-}
+};
 
 /* ------------------------------------------------------------------------------------------------------------------------ */
 
@@ -728,7 +723,7 @@ xajax.ext.SWFupload.tools.FadeOut = function (elm, opacity) {
 		var parent = elm.parentNode;
 		parent.removeChild(elm);
 	}
-}
+};
 
 
 /* ------------------------------------------------------------------------------------------------------------------------ */
@@ -749,7 +744,7 @@ xajax.ext.SWFupload.tools.formatBytes = function (bytes) {
 		return (Math.round(bytes / 1024 / 1024 * 100) / 100).toString() + " MB";
 	}
 	return ret;
-}
+};
 
 /* ------------------------------------------------------------------------------------------------------------------------ */
 
@@ -774,7 +769,7 @@ xajax.ext.SWFupload.tools.mergeObj = function () {
 		}
 	}
 	return res;
-}
+};
 
 /* ------------------------------------------------------------------------------------------------------------------------ */
 /*
@@ -796,7 +791,7 @@ xajax.ext.SWFupload.tools.getId = function () {
 		pid_str = pid_str + pid.toString();
 	}
 	return pid_str;
-}
+};
 
 /* ------------------------------------------------------------------------------------------------------------------------ */
 /*
@@ -920,7 +915,7 @@ xajax.processParameters = xajax.ext.SWFupload.request.processParameters;
  */
 if (typeof DOMParser == "undefined") {
 	DOMParser = function () {
-	}
+	};
 
 	DOMParser.prototype.parseFromString = function (str, contentType) {
 		if (typeof ActiveXObject != "undefined") {
