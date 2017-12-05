@@ -96,7 +96,7 @@ class Configuration extends Base
 	protected $wrapperPrefix = 'xajax_';
 	/**
 	 * A configuration option that is tracked by the main <xajax>object.  Setting this
-	 * to true allows <xajax> to exit immediatly after processing a xajax request.  If
+	 * to true allows <xajax> to exit immediately after processing a xajax request.  If
 	 * this is set to false, xajax will allow the remaining code and HTML to be sent
 	 * as part of the response.  Typically this would result in an error, however,
 	 * a response processor on the client side could be designed to handle this condition.
@@ -376,7 +376,7 @@ class Configuration extends Base
 		if (null !== $errorHandler)
 		{
 
-			if (is_string($errorHandler) && is_callable($errorHandler))
+			if (\is_string($errorHandler) && \is_callable($errorHandler))
 			{
 				$this->errorHandler = $errorHandler;
 			}

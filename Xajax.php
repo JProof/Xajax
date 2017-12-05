@@ -266,32 +266,24 @@ class Xajax
 		// The default configuration settings.
 		$this->configureMany(
 		    [
-		        'characterEncoding'      => XAJAX_DEFAULT_CHAR_ENCODING,
-		        'decodeUTF8Input'        => false,
-		        'outputEntities'         => false,
-		        'responseType'           => 'JSON',
-		        'defaultMode'            => 'asynchronous',
-		        'defaultMethod'          => 'POST',        // W3C: Method is case sensitive
-		        'wrapperPrefix'          => 'xajax_',
-		        'debug'                  => false,
-		        'verbose'                => false,
-		        'useUncompressedScripts' => false,
-		        'statusMessages'         => false,
-		        'waitCursor'             => true,
-		        'deferScriptGeneration'  => true,
-		        'exitAllowed'            => true,
-		        'errorHandler'           => null,
-		        'cleanBuffer'            => false,
-		        'allowBlankResponse'     => false,
-		        'allowAllResponseTypes'  => false,
-		        'generateStubs'          => true,
-		        'logFile'                => '',
-		        'timeout'                => 6000,
+		        'characterEncoding'     => XAJAX_DEFAULT_CHAR_ENCODING,
+		        'decodeUTF8Input'       => false,
+		        'outputEntities'        => false,
+		        'responseType'          => 'JSON',
+		        'wrapperPrefix'         => 'xajax_',
+		        'exitAllowed'           => true,
+		        'errorHandler'          => null,
+		        'cleanBuffer'           => false,
+		        'allowBlankResponse'    => false,
+		        'allowAllResponseTypes' => false,
+		        'generateStubs'         => true,
+		        'logFile'               => '',
+		        'timeout'               => 6000,
 
 		    ]
 		);
 
-		if (is_array($configuration))
+		if (\is_array($configuration))
 		{
 
 			if (array_key_exists('sRequestURI', $configuration) && null !== ($sRequestURI = $configuration['sRequestURI']))
