@@ -101,7 +101,7 @@ class Scripts
 	 * @param null|string $dir
 	 * @param int|null    $priority
 	 */
-	public function addScriptDir(string $dir = null, ?int $priority = null)
+	public function addScriptDir(string $dir = null, ?int $priority = null): void
 	{
 		$this->getScriptDirs()->insert($dir, (int) $priority);
 	}
@@ -116,7 +116,7 @@ class Scripts
 	 *
 	 * @return null|string
 	 */
-	public function getScriptUrl(string $name = null, ?bool $relative = null)
+	public function getScriptUrl(string $name = null, ?bool $relative = null): ?string
 	{
 		if ($this->isLockScript($name))
 		{
@@ -162,7 +162,7 @@ class Scripts
 	 */
 	private function getScriptFilename(?string $sFilename = null): string
 	{
-		if (is_string($sFilename) && false === self::getInstance()->getConfiguration()->isUseUncompressedScripts())
+		if (\is_string($sFilename) && false === self::getInstance()->getConfiguration()->isUseUncompressedScripts())
 		{
 			return str_replace('.js', '.min.js', $sFilename);
 		}
@@ -173,10 +173,13 @@ class Scripts
 	/**
 	 * Adding an Script
 	 *
-	 * @param null|Iface $script
-	 * @param int|null   $priority
+	 * @example new Xajax\Scripts\Core(['scriptName' => 'xajax', 'fileName' => 'xajax_core2.js']);
+	 *          replaces the script 'xajax' with the xajax_core2.js override file
+	 *
+	 * @param null|Iface $script   script object
+	 * @param int|null   $priority Higher value will be tried to render first
 	 */
-	public function addScript(Iface $script = null, ?int $priority = null)
+	public function addScript(Iface $script = null, ?int $priority = null): void
 	{
 		if ($script instanceof Iface)
 		{
@@ -224,7 +227,7 @@ class Scripts
 	/**
 	 * @param array $scripts
 	 */
-	protected function setScripts(array $scripts)
+	protected function setScripts(array $scripts): void
 	{
 		$this->scripts = $scripts;
 	}
@@ -238,9 +241,13 @@ class Scripts
 	}
 
 	/**
+	 * On Large PHP/WebApps there are many ways and points where somebody adds an script which you do not want to display/use.
+	 *
+	 * @example 'xajax' 'xajax.debug';
+	 *
 	 * @param string|null $name
 	 */
-	public function setLockScript(string $name = null)
+	public function setLockScript(string $name = null): void
 	{
 		if (!$this->isLockScript($name))
 		{
@@ -249,9 +256,11 @@ class Scripts
 	}
 
 	/**
+	 * Remove the Lock of an Script
+	 *
 	 * @param string|null $name
 	 */
-	public function removeLockScript(string $name = null)
+	public function removeLockScript(string $name = null): void
 	{
 		if ($this->isLockScript($name))
 		{

@@ -1,16 +1,4 @@
 <?php
-/**
- * PHP version php7
- *
- * @category
- * @package            xajax-php-7
- * @author             ${JProof}
- * @copyright          ${copyright}
- * @license            ${license}
- * @link
- * @see                ${docu}
- * @since              15.10.2017
- */
 
 declare(strict_types=1);
 
@@ -23,26 +11,54 @@ use stdClass;
 /**
  * Class Data
  *
- * @package Xajax\Datas
+ * @package JProof\RedmineApi\Data
  */
 class Data implements IteratorAggregate, \Countable
 {
 	/**
 	 * @var array
 	 */
-	private $properties = [];
+	private $datas = [];
+
+	/**
+	 * @return null|array
+	 */
+	public function getDatas(): ?array
+	{
+		return $this->datas;
+	}
 
 	/**
 	 * Data constructor.
 	 *
-	 * @param null $properties
+	 * @param iterable null $datas
 	 */
-	public function __construct($properties = null)
+	public function __construct(?iterable $datas = null)
 	{
-		if (is_array($properties))
+		if (\is_iterable($datas))
 		{
-			$this->bind($properties);
+			$this->bind($datas);
 		}
+	}
+
+	/**
+	 * @param $name
+	 *
+	 * @return bool
+	 */
+	public function __isset($name)
+	{
+		return isset($this->datas[$name]);
+	}
+
+	/**
+	 * @param $name
+	 *
+	 * @return mixed|null
+	 */
+	public function __get($name)
+	{
+		return $this->get($name);
 	}
 
 	/**
@@ -53,60 +69,39 @@ class Data implements IteratorAggregate, \Countable
 	 */
 	public function __set($name, $value)
 	{
-		return $this->setProperty($name, $value);
+		return $this->set($name, $value);
 	}
 
 	/**
-	 * @param $name
+	 * @param null $name
 	 *
-	 * @return bool
+	 * @return mixed|null Null on every not successfully try
 	 */
-	public function __isset($name)
+	protected function get($name = null)
 	{
-		return isset($this->properties[$name]);
-	}
-
-	/**
-	 * @param $name
-	 *
-	 * @return mixed|null
-	 */
-	public function __get($name)
-	{
-		return $this->getProperty($name);
-	}
-
-	/**
-	 * @param $name
-	 *
-	 * @return mixed|null
-	 */
-	protected function getProperty($name)
-	{
-		return $this->properties[$name] ?? null;
+		if (null === $name)
+		{
+			return null;
+		}
+		return $this->datas[$name] ?? null;
 	}
 
 	/**
 	 * @param $name
 	 * @param $value
 	 *
+	 * @see http://us3.php.net/manual/en/language.types.array.php#language.types.array.casting
 	 * @return mixed
 	 */
-	protected function setProperty($name, $value)
+	protected function set($name, $value)
 	{
-		/*
-		 * Check if the property starts with a null byte. If so, discard it because a later attempt to try to access it
-		 * can cause a fatal error. See http://us3.php.net/manual/en/language.types.array.php#language.types.array.casting
-		 */
-		if (0 === strpos($name, "\0"))
+		if (false === strpos($name, "\0"))
 		{
-			return false;
+			$this->datas[$name] = $value;
+
+			return $value;
 		}
-
-		// Set the value.
-		$this->properties[$name] = $value;
-
-		return $value;
+		return false;
 	}
 
 	/**
@@ -121,7 +116,7 @@ class Data implements IteratorAggregate, \Countable
 	 */
 	public function count(): int
 	{
-		return count($this->properties);
+		return \count($this->datas);
 	}
 
 	/**
@@ -129,28 +124,34 @@ class Data implements IteratorAggregate, \Countable
 	 */
 	public function dump(): \stdClass
 	{
+		$datasObject = new stdClass;
 
-		$propertiesObject = new stdClass;
-
-		foreach (array_keys($this->properties) as $property)
+		foreach (array_keys($this->datas) as $property)
 		{
-			// Get the property.
-			$propertiesObject->$property = $property;
+			$datasObject->$property = $this->{$property};
 		}
 
-		return $propertiesObject;
+		return $datasObject;
 	}
 
 	/**
-	 * @param array|null $properties
+	 * @return array
 	 */
-	public function bind(?array $properties = null)
+	public function toArray(): array
 	{
-		if (is_array($properties))
+		return (array) $this->dump();
+	}
+
+	/**
+	 * @param iterable|null $datas
+	 */
+	public function bind(?iterable $datas = null)
+	{
+		if (\is_iterable($datas))
 		{
-			foreach ($properties as $key => $value)
+			foreach ($datas as $key => $value)
 			{
-				$this->setProperty($key, $value);
+				$this->set($key, $value);
 			}
 		}
 	}

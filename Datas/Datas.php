@@ -1,16 +1,4 @@
 <?php
-/**
- * PHP version php7
- *
- * @category
- * @package            xajax-php-7
- * @author             ${JProof}
- * @copyright          ${copyright}
- * @license            ${license}
- * @link
- * @see                ${docu}
- * @since              15.10.2017
- */
 
 declare(strict_types=1);
 
@@ -22,7 +10,7 @@ use InvalidArgumentException;
 /**
  * Class Datas
  *
- * @package Xajax\Plugin\Request
+ * @package JProof\RedmineApi\Data
  */
 class Datas implements ArrayAccess, \Iterator
 {
@@ -82,24 +70,25 @@ class Datas implements ArrayAccess, \Iterator
 	 *
 	 * @link  http://php.net/manual/en/arrayaccess.offsetset.php
 	 *
-	 * @param int                        $offset        <p>
+	 * @param int  $offset                              <p>
 	 *                                                  The offset to assign the value to.
 	 *                                                  </p>
-	 * @param \Xajax\Plugin\Request\Data $value         <p>
+	 * @param Data $value                               <p>
 	 *                                                  The value to set.
 	 *                                                  </p>
 	 *
 	 * @return void
 	 * @since 5.0.0
+	 * @throws \InvalidArgumentException
 	 */
-	public function offsetSet($offset, $value)
+	public function offsetSet($offset = null, $value = null): void
 	{
 		if (!$value instanceof Data)
 		{
 			throw new InvalidArgumentException('offsetSet needs as value an valid Object');
 		}
 
-		if (is_null($offset))
+		if (null === $offset)
 		{
 			$this->container[] = $value;
 		}
@@ -121,7 +110,7 @@ class Datas implements ArrayAccess, \Iterator
 	 * @return void
 	 * @since 5.0.0
 	 */
-	public function offsetUnset($offset)
+	public function offsetUnset($offset = null): void
 	{
 		if ($this->offsetExists($offset))
 		{
@@ -156,7 +145,7 @@ class Datas implements ArrayAccess, \Iterator
 	 * @return void Any returned value is ignored.
 	 * @since 5.0.0
 	 */
-	public function next()
+	public function next(): void
 	{
 		// Get the object offsets.
 		$keys = $this->keys();
@@ -222,7 +211,7 @@ class Datas implements ArrayAccess, \Iterator
 	 * @return void Any returned value is ignored.
 	 * @since 5.0.0
 	 */
-	public function rewind()
+	public function rewind(): void
 	{
 		// Set the current position to the first object.
 		if (empty($this->container))
