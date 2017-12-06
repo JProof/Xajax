@@ -8,10 +8,14 @@ New Demo
 
 [Filebrowser](examples/demo/Filebrowser/filebrowser.md)
 
+Handling JavaScripts 
+[JavasScript](docs/scripts.md)
 
 New Response-Types:
 
 [Attribute](docs/methods.attr.md)
+
+
 
 current version: 0.6 beta1
 

@@ -18,5 +18,5 @@ declare(strict_types=1);
 // bootstrap Autoloader is enough, add more options if need
 
 /** @var \Composer\Autoload\ClassLoader $loader */
-$loader = require dirname(__DIR__, 2) . '/vendor/autoload.php';
+$loader = require dirname(__DIR__, 3) . '/vendor/autoload.php';
 

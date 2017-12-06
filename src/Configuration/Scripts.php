@@ -304,7 +304,7 @@ class Scripts extends Base
 	}
 
 	/**
-	 * @todo explain
+	 * @deprecated verbose will be removed
 	 * @return bool
 	 */
 	public function isVerbose(): bool
@@ -315,6 +315,7 @@ class Scripts extends Base
 	/**
 	 * @param bool $verbose
 	 *
+	 * @deprecated verbose will be removed
 	 * @return \Xajax\Configuration\Scripts
 	 */
 	public function setVerbose(?bool $verbose = null): Scripts
