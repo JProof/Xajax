@@ -20,23 +20,21 @@ namespace Xajax\Scripts;
  * Trait Base
  *
  * @package Xajax\Scripts
- * @property-read string $scriptName internal Name of an script -> unique identifier
- * @property-read string $fileName   the real fullname of the file
- * @property-read string $dir        override dir for an single script
- * @property-read int    $priority   Priority
- * @property-read bool   useUncompressedScript regular or min.js
+ * @property-read string $scriptName           internal Name of an script -> unique identifier
+ * @property-read string $fileName             the real fullName of the file without "min"
+ * @property-read string $dir                  concrete directory for this file
+ * @property-read int    $priority             Priority
  */
 trait Base
 {
 	/**
 	 * @param string $scriptName
 	 *
-	 * @todo test against empty
-	 * @return Base
+	 * @return self
 	 */
-	public function setScriptName(?string $scriptName = null)
+	public function setScriptName(?string $scriptName = null): self
 	{
-		$this->scriptName = (string) $scriptName;
+		$this->scriptName = $scriptName;
 
 		return $this;
 	}
@@ -44,38 +42,37 @@ trait Base
 	/**
 	 * @param string $fileName
 	 *
-	 * @todo test against empty
-	 * @return Base
+	 * @return self
 	 */
-	public function setFileName(?string $fileName = null)
+	public function setFileName(?string $fileName = null): self
 	{
-		$this->fileName = (string) $fileName;
+		$this->fileName = $fileName;
 
 		return $this;
 	}
 
 	/**
-	 * @return string
+	 * @return null|string
 	 */
-	public function getScriptName(): string
+	public function getScriptName(): ?string
 	{
-		return (string) $this->scriptName;
+		return $this->scriptName;
 	}
 
 	/**
-	 * @return string
+	 * @return null|string
 	 */
-	public function getDir(): string
+	public function getDir(): ?string
 	{
-		return (string) $this->dir;
+		return $this->dir;
 	}
 
 	/**
 	 * @param string $dir
 	 *
-	 * @return Base
+	 * @return self
 	 */
-	public function setDir(string $dir = null)
+	public function setDir(?string $dir = null): self
 	{
 		$this->dir = $dir;
 
@@ -85,23 +82,23 @@ trait Base
 	/**
 	 * @return string
 	 */
-	public function getFileName(): string
+	public function getFileName(): ?string
 	{
-		return (string) $this->fileName;
+		return $this->fileName;
 	}
 
 	/**
 	 * @return int
 	 */
-	public function getPriority(): int
+	public function getPriority(): ?int
 	{
-		return (int) $this->priority;
+		return $this->priority;
 	}
 
 	/**
 	 * @param int $priority
 	 */
-	public function setPriority(int $priority = null)
+	public function setPriority(?int $priority = null): void
 	{
 		$this->priority = $priority;
 	}

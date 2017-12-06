@@ -19,11 +19,7 @@ namespace Xajax\Scripts;
 /**
  * Class Scripts
  *
- * @package Xajax\Scripts
- */
-/**
- * Class Scripts
- *
+ * @see     https://github.com/JProof/Xajax/blob/master/docs/scripts.md
  * @package Xajax\Scripts
  */
 class Scripts
@@ -97,17 +93,29 @@ class Scripts
 		return $scriptUrls;
 	}
 
+	public function appendScriptDir(?string $dir = null)
+	{
+
+	}
+
+	public function prependScriptDir(string $dir)
+	{
+	}
+
 	/**
+	 * Adding an Override dir
+	 *
 	 * @param null|string $dir
 	 * @param int|null    $priority
 	 */
-	public function addScriptDir(string $dir = null, ?int $priority = null): void
+	public function addScriptDir(string $dir, ?int $priority = null): void
 	{
+		// todo check existence of the directory
 		$this->getScriptDirs()->insert($dir, (int) $priority);
 	}
 
 	/**
-	 * Render the Url for an single Script
+	 * Try to get the first valid ScriptUrl
 	 * todo compile filename
 	 * todo compile configured minified filename
 	 *
@@ -116,7 +124,7 @@ class Scripts
 	 *
 	 * @return null|string
 	 */
-	public function getScriptUrl(string $name = null, ?bool $relative = null): ?string
+	public function getScriptUrl(?string $name = null, ?bool $relative = null): ?string
 	{
 		if ($this->isLockScript($name))
 		{
@@ -273,9 +281,9 @@ class Scripts
 	 *
 	 * @return bool
 	 */
-	public function isLockScript(string $name = null): bool
+	public function isLockScript(?string $name = null): bool
 	{
-		return array_key_exists($name, $this->lockedScripts);
+		return null !== $name && array_key_exists($name, $this->lockedScripts);
 	}
 
 	/**
