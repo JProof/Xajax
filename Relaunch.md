@@ -1,11 +1,13 @@
 [back to Readme](README.md)
 
-Current development xajax 0.7.1
+Current development xajax 0.7.3
 * Codstyles and Namespaces
 * php-7
 * LF
 * UTF-8
 * remove procedurally "php-echo" inside Scripts
+
+* removed the JSON-Extralibrary
 
 Changes
 

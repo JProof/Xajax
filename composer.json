@@ -33,18 +33,23 @@
     "source": "https://github.com/JProof/Xajax"
   },
   "require": {
-    "php": ">=7.0.0"
+    "php": ">=7.1.0"
   },
   "autoload": {
     "psr-0": {
-      "": "xajax_core/"
     },
     "psr-4": {
-      "Xajax\\": "xajax_core",
-      "Xajax\\Examples\\": "examples"
+      "Xajax\\": "src",
+      "Xajax\\Examples\\": "/examples"
     },
     "files": [
-      "xajax_core/xajax.inc.php"
+    ],
+    "classmap": [
     ]
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Xajax\\": "tests"
+    }
   }
 }

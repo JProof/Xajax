@@ -1,6 +1,6 @@
 XAJAX
 
-next release(unofficial): 0.7.1 
+next release(unofficial): 0.7.3
 
 [Relaunch-Notices](Relaunch.md)
 
@@ -8,10 +8,14 @@ New Demo
 
 [Filebrowser](examples/demo/Filebrowser/filebrowser.md)
 
+Handling JavaScripts 
+[JavasScript](docs/scripts.md)
 
 New Response-Types:
 
 [Attribute](docs/methods.attr.md)
+
+
 
 current version: 0.6 beta1
 

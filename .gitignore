@@ -4,7 +4,6 @@ codecept.phar
 composer.lock
 composer.phar
 phpunit.phar
-test-php-7/
 tests/_data/
 tests/_output/
 tests/_support/
@@ -13,8 +12,8 @@ tests/acceptance/
 tests/functional.suite.yml
 tests/functional/
 vendor/
-/xajax_js/deferred/
-xajax_core/Plugins/Response/
+_xajax_core
+_xajax_js
+xajax_js
+xajax_plugins
 
-
-/examples/demo/assets/font-awesome-4.7.0/
