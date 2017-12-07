@@ -14,7 +14,7 @@
 declare(strict_types=1);
 require_once __DIR__ . '/bootstrap.php';
 
-use Xajax\Factory;
+use Xajax\Factory;use Xajax\Scripts\Core;
 set_error_handler('\Xajax\Errors\Handler::addError');
 
 $xConfig = Factory::getInstance()->getConfig();
@@ -49,14 +49,13 @@ else
 
 
 // override the core Script-Location
-$xScripts->addScript(new Xajax\Scripts\Core(['scriptName' => 'xajax', 'fileName' => 'xajax_core2.js']));
-#$xScripts->addScript(new Core(['scriptName' => 'xajax', 'fileName' => 'xajax_core3.js', 'dir' => '/media/scripts']));
+//$xScripts->addScript(new Xajax\Scripts\Core(['scriptName' => 'xajax', 'fileName' => 'xajax_core2.js']));
+#$xScripts->addScript(new Core(['scriptName' => 'xajax', 'fileName' => 'xajax_core3.js']));
 
 // lock the core-script completely
 #$xScripts->setLockScript('xajax');
 
-var_dump($xScripts->getScriptUrl('xajax'));
-return;
+
 function listDirectory()
 {
 	$objResponse = Factory::getResponseInstance();
