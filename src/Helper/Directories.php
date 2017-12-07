@@ -26,12 +26,139 @@ namespace Xajax\Helper;
  *
  * @package Xajax\Helper
  */
+/**
+ * Class Directories
+ *
+ * @package Xajax\Helper
+ */
 class Directories
 {
 	/**
 	 * @var
 	 */
 	static protected $webDirectory;
+
+	/**
+	 * Try to make an relative dir from Root-Directory stripped
+	 *
+	 * @param null|string $absDir
+	 *
+	 * @return null|string null Directory does not exists |String with leading Slash
+	 */
+	public static function getValidRelativeDirectory(?string $absDir = null): ?string
+	{
+		if (null !== $absDir)
+		{
+			$absDir = self::cleanPath($absDir);
+			// strips the absolute dir from the first of the relative Dir
+			if ($checkedAbsDir = self::isValidAbsoluteDir($absDir))
+			{
+				$rootParts = substr_count(self::getWebDirectory(), '/') + 1;
+
+				$absParts = explode('/', $absDir);
+				$sliced   = \array_slice($absParts, $rootParts);
+				return '/' . implode('/', $sliced);
+			}
+			// is already an relative dir
+			if ($relDir = self::isValidRelativeDir($absDir))
+			{
+				return $relDir;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Try to make an relative dir from Root-Directory stripped
+	 *
+	 * @param null|string $relDir
+	 *
+	 * @return null|string
+	 */
+	public static function getValidAbsoluteDirectory(?string $relDir = null): ?string
+	{
+		if (null !== $relDir)
+		{
+			// perhaps is already valid
+			if ($checkedAbsDir = self::isValidAbsoluteDir($relDir))
+			{
+
+				return $checkedAbsDir;
+			}
+			// is an Relative dir, add the WebDirectory
+			if ($relDir = self::isValidRelativeDir($relDir))
+			{
+				return self::concatPaths(self::getWebDirectory(), $relDir);
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Method to check the directory is an existing absolute directory
+	 * The string-result can be Safely used as directory
+	 *
+	 * @param null|string $directory
+	 *
+	 * @return null| string
+	 */
+	public static function isValidAbsoluteDir(?string $directory = null): ?string
+	{
+		$directory = $directory ?? '/';
+
+		$cp = self::cleanPath($directory);
+		return false !== realpath($cp) ? $cp : null;
+	}
+
+	/**
+	 * Method to check the directory is an existing relative directory
+	 *
+	 * @param null|string $directory
+	 *
+	 * @return null|string
+	 */
+	public static function isValidRelativeDir(?string $directory = null): ?string
+	{
+		$directory = $directory ?? '/';
+
+		$cp     = self::cleanPath($directory);
+		$absDir = self::concatPaths(self::getWebDirectory(), $cp);
+
+		return false !== realpath($absDir) ? $cp : null;
+	}
+
+	/**
+	 * Merge to Paths
+	 *
+	 * @param string $path1
+	 * @param string $path2
+	 *
+	 * @return string
+	 */
+	public static function concatPaths(string $path1, string $path2): string
+	{
+		return self::cleanPath($path1 . '/' . $path2);
+	}
+
+	/**
+	 * Cleaning path from wrong dots, traversals
+	 *
+	 * @param null|string $path
+	 *
+	 * @return string
+	 */
+	public static function cleanPath(?string $path = null): string
+	{
+		$ds      = '/';
+		$path    = (string) $path;
+		$search  = ['\\', '../', './', '.\\', '..\\', '//'];
+		$replace = $ds;
+
+		$path = str_replace($search, $replace, $path);
+
+		// last chance to cleanup
+		return preg_replace(['#\//#', '#[/\\\\]+#', '#[/\\\\]+#'], [$ds, $ds, $ds], $path);
+	}
 
 	/**
 	 * Visible for Browsing
@@ -43,7 +170,7 @@ class Directories
 	{
 		if (null === self::$webDirectory)
 		{
-			self::$webDirectory = self::setWebDirectory(self::detectWebdirectory());
+			self::$webDirectory = self::setWebDirectory(self::detectWebDirectory());
 		}
 		return self::$webDirectory;
 	}
@@ -58,7 +185,7 @@ class Directories
 	 */
 	public static function setWebDirectory(?string $dir = null): ?string
 	{
-		if ($nDir = self::cleanDir($dir))
+		if ($nDir = self::cleanPath($dir))
 		{
 			return self::$webDirectory = $nDir;
 		}
@@ -66,104 +193,16 @@ class Directories
 	}
 
 	/**
-	 * Try to get the AbsPath of an setting directory
-	 * Method to cleanup an directory name an check the directory exists in system
-	 *
-	 * @param null|string $dir
-	 *
-	 * @return null|string
-	 * @throws \UnexpectedValueException
-	 */
-	public static function cleanDir(?string $dir = null): ?string
-	{
-		if (null === $dir)
-		{
-			return null;
-		}
-		/**
-		 * clean first to prevent from
-		 * /tests/unit/datas/directories/jsTwoDirectory/../../
-		 * to
-		 * /tests/unit/datas/
-		 * */
-		$dir = self::cleanPath($dir);
-
-		// try relative directory
-		if (false !== ($np = realpath($dir)))
-		{
-			// directory exists as absolute
-			return $dir;
-		}
-
-		$absPath = self::concatPaths(self::getWebDirectory(), $dir);
-		// next Try with full directory
-		if (false !== ($np = realpath($absPath)))
-		{
-			// directory exists
-			return $np;
-		}
-
-		return null;
-	}
-
-	/**
-	 * Try to make an relative dir from Root-Directory stripped
-	 *
-	 * @param null|string $absDir
-	 *
-	 * @return bool|null|string
-	 */
-	public static function getRelative(?string $absDir = null)
-	{
-		if (null !== $absDir && null !== ($absDir = self::cleanDir($absDir)))
-		{
-
-			$webDirL = \strlen(self::getWebDirectory());
-			$absDirL = \strlen($absDir);
-			return substr($absDir, ($absDirL - $webDirL) - 1, $webDirL);
-		}
-		return null;
-	}
-
-	/**
-	 * @param string $path1
-	 * @param string $path2
-	 *
-	 * @return mixed
-	 */
-	public static function concatPaths(string $path1, string $path2)
-	{
-		return self::cleanPath($path1 . '/' . $path2);
-	}
-
-	/**
-	 * CleanMethod
-	 *
-	 * @todo adding Tests
-	 *
-	 * @param null|string $path
-	 *
-	 * @return string
-	 */
-	public static function cleanPath(?string $path = null): string
-	{
-		$path    = (string) $path;
-		$search  = ['\\', '../', './', '//'];
-		$replace = ['/', '/', '/', '/', '/'];
-
-		$path = str_replace($search, $replace, $path);
-
-		// last chance to cleanup
-		return preg_replace(['#\//#'], ['/'], $path);
-	}
-
-	/**
-	 * Autodection of visible DocumentRoot
+	 * AutoDetection of visible DocumentRoot
 	 *
 	 * @return null|string
 	 */
 	protected static function detectWebDirectory(): ? string
 	{
-		return $_SERVER['DOCUMENT_ROOT'] ?? null;
+		if (null !== $_SERVER && \is_array($_SERVER) && array_key_exists('DOCUMENT_ROOT', $_SERVER))
+		{
+			return $_SERVER['DOCUMENT_ROOT'];
+		}
+		return null;
 	}
 }

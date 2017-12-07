@@ -61,9 +61,22 @@ Examples of more useful locations for scripts
 Xajax\Factory::getScripts()->addScriptDir('/templates/myTemplate/assets/js/');
 // or
 Xajax\Factory::getScripts()->addScriptDir('/media/scripts');
+// or
+Xajax\Factory::getScripts()->addScriptDir('FULL-SERVER-DIRECTORY/media/scripts');
 // wherever the place is
 ```
-**@Important: All directories must be start from Server-Document-Root**
+
+All Javascript directories can be set relative or absolute. Xajax\Factory:: getScripts () works internally with the absolute paths 
+to the respective directories or files. The output of the relative urls organizes the script class independently.
+
+```
+/home/users/myUserAccount/public_html/myTemplate/js/xajax.js
+ will be out to Browser as
+/myTemplate/js/xajax.js
+
+this method maybe is handy for the following case
+Xajax\Factory::getScripts()->addScriptDir(dirname(__DIR__,2)'/myAssets');
+```
 
 In each newly added ScriptDirectory the scripts requested by Xajax are searched first (priority)
 
