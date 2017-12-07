@@ -101,8 +101,9 @@ Like the configuration above, the extra JavaScripts try to load the *scriptfile.
 
 Depending on the situation, it may be necessary that JavaScripts are requested by a part of the application, but it is not necessary or desired.
 to deliver these JavaScriptFiles to the browser as well. 
-In this case, a script can be prevented from being output.
+In this case, a script can be prevented from being output. 
 
 ```php 
 Xajax\Factory::getScripts()->->setLockScript('jquery');
 ```
+The setLockScript works only if the script was set with an method of Xajax\Factory::getScripts();
