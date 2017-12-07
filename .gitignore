@@ -17,3 +17,6 @@ _xajax_js
 xajax_js
 xajax_plugins
 
+/examples/demo/assets/
+/.gitignore
+Would skip repository examples/demo/assets/kube
