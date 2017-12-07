@@ -21,14 +21,15 @@ interface Iface
 	/**
 	 * Getting the Script name
 	 *
-	 * @return string
+	 * @return null|string null = file was locket | string = the relative url of the js file
+	 * @throws \UnexpectedValueException // script was not set or not found in directories
 	 */
-	public function getScriptName(): string;
+	public function getScriptName(): ? string;
 
 	/**
 	 * Each script has his own priority saved in the Object
 	 *
-	 * @return int
+	 * @return int|null null was never set
 	 */
-	public function getPriority(): int;
+	public function getPriority(): ?int;
 }

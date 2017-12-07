@@ -16,6 +16,8 @@ declare(strict_types=1);
 
 namespace Xajax\Scripts;
 
+use Xajax\Helper\Directories;
+
 /**
  * Class Scripts
  *
@@ -107,22 +109,29 @@ class Scripts
 	 *
 	 * @param null|string $dir
 	 * @param int|null    $priority
+	 *
+	 * @return bool has bin inserted or not
 	 */
-	public function addScriptDir(string $dir, ?int $priority = null): void
+	public function addScriptDir(string $dir, ?int $priority = null): bool
 	{
-		// todo check existence of the directory
-		$this->getScriptDirs()->insert($dir, (int) $priority);
+		if ($dir = Directories::getValidAbsoluteDirectory($dir))
+		{
+			$priority = $priority ?? $this->getScriptDirs()->count() + 1;
+
+			$this->getScriptDirs()->insert($dir, (int) $priority);
+			return true;
+		}
+		return false;
 	}
 
 	/**
 	 * Try to get the first valid ScriptUrl
-	 * todo compile filename
-	 * todo compile configured minified filename
 	 *
-	 * @param string|null $name
+	 * @param string|null $name scriptName
 	 * @param bool|null   $relative
 	 *
-	 * @return null|string
+	 * @return null|string relative url of the js File
+	 * @throws \UnexpectedValueException
 	 */
 	public function getScriptUrl(?string $name = null, ?bool $relative = null): ?string
 	{
@@ -136,20 +145,34 @@ class Scripts
 			/** @var \Xajax\Scripts\Base $item */
 			$item = $scriptQueue->top();
 
-			if ('' !== ($dir = $item->getDir()))
+			if ('' !== ($dir = (string) $item->getDir()))
 			{
-				return $dir . '/' . $this->getScriptFilename($item->getFileName());
+				// yes, we have an wanted custom specific directory for this jsscript
+				if ($valid = Directories::getValidRelativeDirectory($dir))
+				{
+					// todo check existence of the File
+					return Directories::concatPaths($valid, $this->getScriptFilename($item->getFileName()));
+				}
+				throw new \UnexpectedValueException('The directory where the ' . $name . ' js file must be located does not exists');
 			}
 
-			$topDir = $this->getScriptDirs()->top();
-
-			return $topDir . '/' . $this->getScriptFilename($item->getFileName());
+			// iterate getScriptDirs and try to find the js File
+			foreach ($this->getScriptDirs() as $scriptDir)
+			{
+				// todo check existence of the File
+				if ($scriptDir = Directories::getValidRelativeDirectory($scriptDir))
+				{
+					return Directories::concatPaths($scriptDir, $this->getScriptFilename($item->getFileName()));
+				}
+			}
+			throw new \UnexpectedValueException($name . ' js-file was not found in any scriptDir');
 		}
-
-		return null;
+		throw new \UnexpectedValueException($name . ' js-file was never set by an addScript Method');
 	}
 
 	/**
+	 * Different scripts have an identifier by "scriptName"
+	 *
 	 * @param string|null $name
 	 *
 	 * @return null|Queue

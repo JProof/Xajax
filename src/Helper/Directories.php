@@ -133,9 +133,9 @@ class Directories
 	 * @param string $path1
 	 * @param string $path2
 	 *
-	 * @return mixed
+	 * @return string
 	 */
-	public static function concatPaths(string $path1, string $path2)
+	public static function concatPaths(string $path1, string $path2): string
 	{
 		return self::cleanPath($path1 . '/' . $path2);
 	}
