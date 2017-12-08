@@ -47,6 +47,7 @@ use function Xajax\addError;
 
 /**
  * Class Response
+ * modified
  *
  * @todo    make abstract such as Request Class
  * @package Xajax\Response
