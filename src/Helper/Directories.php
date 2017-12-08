@@ -19,16 +19,6 @@ namespace Xajax\Helper;
 /**
  * Class Directories
  *
- * @package Helper
- */
-/**
- * Class Directories
- *
- * @package Xajax\Helper
- */
-/**
- * Class Directories
- *
  * @package Xajax\Helper
  */
 class Directories
@@ -189,7 +179,7 @@ class Directories
 		{
 			return self::$webDirectory = $nDir;
 		}
-		throw new \UnexpectedValueException('Directory can not be found on System');
+		throw new \UnexpectedValueException('WebDirectory can not be found on System. Please the  Xajax\Helper\Directories::setWebDirectory($_SERVER[\'DOCUMENT_ROOT\']) or similar.');
 	}
 
 	/**
