@@ -47,6 +47,7 @@ use function Xajax\addError;
 
 /**
  * Class Response
+ * modified
  *
  * @todo    make abstract such as Request Class
  * @package Xajax\Response
@@ -516,9 +517,9 @@ class Response
 	 * @param string $sAttribute
 	 * @param string $sData
 	 *
-	 * @return \xajaxResponse
+	 * @return Response
 	 */
-	public function attrAdd($sTarget = '', $sAttribute = '', $sData = ''): \xajaxResponse
+	public function attrAdd($sTarget = '', $sAttribute = '', $sData = ''): Response
 	{
 		return $this->addCommand(
 		    [
@@ -539,9 +540,9 @@ class Response
 	 * @param string $sTarget
 	 * @param string $sAttribute
 	 *
-	 * @return \xajaxResponse
+	 * @return Response
 	 */
-	public function attrRemove($sTarget = '', $sAttribute = ''): \xajaxResponse
+	public function attrRemove($sTarget = '', $sAttribute = ''): Response
 	{
 		return $this->addCommand(
 		    [
@@ -564,9 +565,9 @@ class Response
 	 * @param string $newAttribute
 	 * @param string $sData
 	 *
-	 * @return \xajaxResponse
+	 * @return Response
 	 */
-	public function attrReplace($sTarget = '', $sAttribute = '', $newAttribute = '', $sData = ''): \xajaxResponse
+	public function attrReplace($sTarget = '', $sAttribute = '', $newAttribute = '', $sData = ''): Response
 	{
 		return $this->addCommand(
 		    [
@@ -1754,8 +1755,8 @@ class Response
 	/**
 	 * todo check array is $mCommands
 	 *
-	 * @param \xajaxResponse|array $mCommands
-	 * @param bool                 $bBefore
+	 * @param Response|array $mCommands
+	 * @param bool           $bBefore
 	 */
 	public function appendResponse($mCommands = null, $bBefore = false)
 	{
@@ -1814,7 +1815,7 @@ class Response
 		
 		object : The <xajaxResponse> object.
 	*/
-	public function addPluginCommand($objPlugin, $aAttributes, $mData): \xajaxResponse
+	public function addPluginCommand($objPlugin, $aAttributes, $mData): Response
 	{
 		$aAttributes['plg'] = $objPlugin->getName();
 
