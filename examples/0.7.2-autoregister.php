@@ -13,7 +13,7 @@
  */
 declare(strict_types=1);
 require_once __DIR__ . '/bootstrap.php';
-
+return;
 use Xajax\Factory;
 set_error_handler('\Xajax\Errors\Handler::addError');
 
@@ -29,7 +29,11 @@ $xScripts = Factory::getScripts();
 $xScripts->getConfiguration()->setDeferScriptGeneration(false)->setUseUncompressedScripts(true)->setDebug(true)->setVerbose(false);
 // register an alternative JS Directory where all Xajax Scripts can be found. If is an Script missing,
 // xajax will try to find the wanted script in an lower-priority Location
-$xScripts->addScriptDir('/xajax-php-7/assets/js');
+if (!$xScripts->addScriptDir('/xajax-php-7/examples/demo/assets/override-js-dir/'))
+{
+	echo '/xajax-php-7/assets/js is not an Relative Directory on Server';
+	return false;
+}
 
 // override the core Script-Location
 $xScripts->addScript(new Xajax\Scripts\Core(['scriptName' => 'xajax', 'fileName' => 'xajax_core2.js']));
@@ -38,8 +42,8 @@ $xScripts->addScript(new Xajax\Scripts\Core(['scriptName' => 'xajax', 'fileName'
 // lock the core-script completely
 #$xScripts->setLockScript('xajax');
 
-echo $xScripts->getScriptUrl('xajax');
-
+var_dump($xScripts->getScriptUrl('xajax'));
+return;
 function listDirectory()
 {
 	$objResponse = Factory::getResponseInstance();

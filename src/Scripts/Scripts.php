@@ -60,7 +60,8 @@ class Scripts
 	{
 		$this->configuration = \Xajax\Configuration\Scripts::getInstance();
 
-		$this->scriptDirs      = new Queue();
+		$this->scriptDirs = new Queue();
+
 		$this->scripts         = [];
 		$this->scriptsOrdering = new Queue();
 
@@ -156,15 +157,21 @@ class Scripts
 					continue;
 				}
 
+				$sqIterator = $scriptQueue->getIterator();
 				/** @var \Xajax\Scripts\Base $scriptItem */
-				foreach ($scriptQueue as $scriptItem)
+				while ($sqIterator->valid())
 				{
+
+					/** @var \Xajax\Scripts\Core $scriptItem */
+					$scriptItem = $sqIterator->current();
+
 					// do NOT try to render concrete js files
 					if ('' === (string) $scriptItem->getDir() && null !== ($relOutPath = $this->getSaveRelativeOutFile($absDir, $scriptItem->getFileName())))
 					{
 
 						return $relOutPath;
 					}
+					$sqIterator->next();
 				}
 			}
 			throw new \UnexpectedValueException($name . ' js-file was not found in any scriptDir');
@@ -188,8 +195,11 @@ class Scripts
 
 		if (($scriptQueue = $this->getScript($name)) instanceof Queue && 0 < ($cnt = $scriptQueue->count()))
 		{
-			foreach ($scriptQueue as $scriptItem)
+			$sqIterator = $scriptQueue->getIterator();
+			while ($sqIterator->valid())
 			{
+				/** @var \Xajax\Scripts\Core $scriptItem */
+				$scriptItem = $sqIterator->current();
 				// First look up the Javascript has set an concrete Directory
 				if ('' !== ($dir = (string) $scriptItem->getDir()))
 				{
@@ -201,6 +211,7 @@ class Scripts
 
 					throw new \UnexpectedValueException('The directory where the ' . $name . ' js file must be located does not exists');
 				}
+				$sqIterator->next();
 			}
 		}
 		return null;

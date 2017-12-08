@@ -40,6 +40,7 @@ class Queue implements Countable, IteratorAggregate
 	{
 		// I'll explain the lack of global namespacing later...
 		$this->innerQueue = new SplPriorityQueue;
+		$this->innerQueue->setExtractFlags(SplPriorityQueue::EXTR_BOTH);
 	}
 
 	/**
@@ -64,6 +65,8 @@ class Queue implements Countable, IteratorAggregate
 	 */
 	public function getIterator()
 	{
+		$this->innerQueue->rewind();
+
 		return clone $this->innerQueue;
 	}
 }
