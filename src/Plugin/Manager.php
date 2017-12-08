@@ -23,7 +23,6 @@ namespace Xajax\Plugin {
 	use Xajax\Language;
 	use Xajax\Plugin\Request\Data;
 	use Xajax\Plugin\Request\RequestPluginIface;
-	use Xajax\Scripts\Core;
 	use Xajax\Scripts\Scripts;
 
 	class Manager
@@ -364,26 +363,26 @@ namespace Xajax\Plugin {
 			$scripts       = Scripts::getInstance();
 			$configScripts = $scripts->getConfiguration();
 
-			$xCoreConfig = new Core();
-			$xCoreConfig->setScriptName('xajax')->setFileName('xajax_core.js')->setPriority(0);
-			$scripts->addScript($xCoreConfig, 50);
+			/**
+			 * already init by
+			 *
+			 * @see \Xajax\Scripts\Scripts::__construct()
+			 */
+			#	$xCoreConfig = new Core();
+			#	$xCoreConfig->setScriptName('xajax')->setFileName('xajax_core.js')->setPriority(0);
+			#	$scripts->addScript($xCoreConfig, 0);
 
 			if ($configScripts->isDebug())
 			{
-				$xCoreDebugConfig = new Core();
-				$xCoreDebugConfig->setScriptName('xajax.debug')->setFileName('xajax_debug.js')->setPriority(0);
-				$scripts->addScript($xCoreDebugConfig, 49);
+				/**
+				 * already init by
+				 *
+				 * @see \Xajax\Scripts\Scripts::__construct()
+				 */
+				#	$xCoreDebugConfig = new Core();
+				#       $xCoreDebugConfig->setScriptName('xajax.debug')->setFileName('xajax_debug.js')->setPriority(0);
+				#	$scripts->addScript($xCoreDebugConfig, 0);
 
-				if ($configScripts->isVerbose())
-				{
-					$xCoreVerboseConfig = new Core();
-					$xCoreVerboseConfig->setScriptName('xajax.debug.verbose')->setFileName('xajax_verbose.js')->setPriority(0);
-					$scripts->addScript($xCoreVerboseConfig, 48);
-				}
-				else
-				{
-					$scripts->setLockScript('xajax.debug.verbose');
-				}
 			}
 			else
 			{

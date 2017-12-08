@@ -39,7 +39,7 @@ class Scripts
 	 */
 	protected $scripts;
 	/**
-	 * @var \Xajax\Scripts\Queue
+	 * @var Queue
 	 */
 	protected $scriptsOrdering;
 	/**
@@ -60,21 +60,30 @@ class Scripts
 	{
 		$this->configuration = \Xajax\Configuration\Scripts::getInstance();
 
-		$this->scriptDirs      = new Queue();
+		$this->scriptDirs = new Queue();
+
 		$this->scripts         = [];
 		$this->scriptsOrdering = new Queue();
 
+		// execution order
 		$this->getScriptsOrdering()->insert('xajax', 50);
 		$this->getScriptsOrdering()->insert('xajax.debug', 49);
-		$this->getScriptsOrdering()->insert('xajax.debug.verbose', 48);
+
+		// @todo add the core scripts // core scripts will be added by response renderer, perhaps is usefull to do it here right now?!
+		$this->addScript(new Core(['scriptName' => 'xajax', 'fileName' => 'xajax_core.js']));
+		$this->addScript(new Core(['scriptName' => 'xajax.debug', 'fileName' => 'xajax_debug.js']));
+
+		// adding xajax default Script Directory
+		$this->addScriptDir(\dirname(__DIR__) . '/assets/js');
 	}
 
 	/**
-	 * Get the Script-Urls
+	 * Get all Script-Urls they was set before (sorting,ordering,safe detecting)
 	 *
 	 * @param bool|null $relative
 	 *
 	 * @return array
+	 * @throws \UnexpectedValueException If scripts must be output but not found
 	 */
 	public function getScriptUrls(?bool $relative = null): array
 	{
@@ -85,7 +94,8 @@ class Scripts
 			{
 				continue;
 			}
-			$tmp = $this->getScriptUrl($item, $relative);
+			// todo output relative or absolute
+			$tmp = $this->getScriptUrl($item);
 			if ($tmp)
 			{
 				$scriptUrls[$item] = $tmp;
@@ -93,15 +103,6 @@ class Scripts
 		}
 
 		return $scriptUrls;
-	}
-
-	public function appendScriptDir(?string $dir = null)
-	{
-
-	}
-
-	public function prependScriptDir(string $dir)
-	{
 	}
 
 	/**
@@ -128,46 +129,109 @@ class Scripts
 	 * Try to get the first valid ScriptUrl
 	 *
 	 * @param string|null $name scriptName
-	 * @param bool|null   $relative
 	 *
 	 * @return null|string relative url of the js File
 	 * @throws \UnexpectedValueException
 	 */
-	public function getScriptUrl(?string $name = null, ?bool $relative = null): ?string
+	public function getScriptUrl(?string $name = null): ?string
+	{
+		if ($this->isLockScript($name))
+		{
+			return null;
+		}
+		// check the Script-Type is in Concrete Directory
+		if (null !== ($relOutPath = $this->getScriptByConcreteDirectory($name)))
+		{
+			return $relOutPath;
+		}
+
+		if (($scriptQueue = $this->getScript($name)) instanceof Queue && 0 < ($cnt = $scriptQueue->count()))
+		{
+			// iterate getScriptDirs and try to find the js File
+			/** @var Queue $scriptQueue */
+			foreach ($this->getScriptDirs() as $scriptDir)
+			{
+				if (null === ($absDir = Directories::getValidAbsoluteDirectory($scriptDir)))
+				{
+					// not valid Directory
+					continue;
+				}
+
+				$sqIterator = $scriptQueue->getIterator();
+				/** @var \Xajax\Scripts\Base $scriptItem */
+				while ($sqIterator->valid())
+				{
+
+					/** @var \Xajax\Scripts\Core $scriptItem */
+					$scriptItem = $sqIterator->current();
+
+					// do NOT try to render concrete js files
+					if ('' === (string) $scriptItem->getDir() && null !== ($relOutPath = $this->getSaveRelativeOutFile($absDir, $scriptItem->getFileName())))
+					{
+
+						return $relOutPath;
+					}
+					$sqIterator->next();
+				}
+			}
+			throw new \UnexpectedValueException($name . ' js-file was not found in any scriptDir');
+		}
+		throw new \UnexpectedValueException($name . ' js-file was never set by an addScript Method');
+	}
+
+	/**
+	 * Maybe Javascripts should output directly without searching in directory queue
+	 *
+	 * @param null|string $name
+	 *
+	 * @return null|string
+	 */
+	protected function getScriptByConcreteDirectory(?string $name = null): ?string
 	{
 		if ($this->isLockScript($name))
 		{
 			return null;
 		}
 
-		if (($scriptQueue = $this->getScript($name)) instanceof Queue && 0 < $scriptQueue->count())
+		if (($scriptQueue = $this->getScript($name)) instanceof Queue && 0 < ($cnt = $scriptQueue->count()))
 		{
-			/** @var \Xajax\Scripts\Base $item */
-			$item = $scriptQueue->top();
-
-			if ('' !== ($dir = (string) $item->getDir()))
+			$sqIterator = $scriptQueue->getIterator();
+			while ($sqIterator->valid())
 			{
-				// yes, we have an wanted custom specific directory for this jsscript
-				if ($valid = Directories::getValidRelativeDirectory($dir))
+				/** @var \Xajax\Scripts\Core $scriptItem */
+				$scriptItem = $sqIterator->current();
+				// First look up the Javascript has set an concrete Directory
+				if ('' !== ($dir = (string) $scriptItem->getDir()))
 				{
-					// todo check existence of the File
-					return Directories::concatPaths($valid, $this->getScriptFilename($item->getFileName()));
-				}
-				throw new \UnexpectedValueException('The directory where the ' . $name . ' js file must be located does not exists');
-			}
+					if (null !== ($relOutPath = $this->getSaveRelativeOutFile($dir, $this->getScriptFilename($scriptItem->getFileName()))))
+					{
+						// yes, we have an wanted custom specific directory for this javascript-file exists!
+						return $relOutPath;
+					}
 
-			// iterate getScriptDirs and try to find the js File
-			foreach ($this->getScriptDirs() as $scriptDir)
-			{
-				// todo check existence of the File
-				if ($scriptDir = Directories::getValidRelativeDirectory($scriptDir))
-				{
-					return Directories::concatPaths($scriptDir, $this->getScriptFilename($item->getFileName()));
+					throw new \UnexpectedValueException('The directory where the ' . $name . ' js file must be located does not exists');
 				}
+				$sqIterator->next();
 			}
-			throw new \UnexpectedValueException($name . ' js-file was not found in any scriptDir');
 		}
-		throw new \UnexpectedValueException($name . ' js-file was never set by an addScript Method');
+		return null;
+	}
+
+	/**
+	 * Check existing of an JS file give back the relative valid url
+	 *
+	 * @param string $absDir
+	 * @param string $scriptFileName
+	 *
+	 * @return null|string string relative Url for an existing JS File
+	 */
+	protected function getSaveRelativeOutFile(string $absDir, string $scriptFileName): ?string
+	{
+		if (file_exists($fPath = Directories::concatPaths($absDir, $scriptFileName)))
+		{
+			return Directories::concatPaths(Directories::getValidRelativeDirectory($absDir), $scriptFileName);
+		}
+		return null;
 	}
 
 	/**
@@ -185,7 +249,7 @@ class Scripts
 	}
 
 	/**
-	 * Getting the minified or regular js-filename
+	 * Getting the minimized or regular js-filename
 	 *
 	 * @param $sFilename
 	 *
@@ -248,22 +312,8 @@ class Scripts
 	}
 
 	/**
-	 * @return array
-	 */
-	public function getScripts(): array
-	{
-		return $this->scripts;
-	}
-
-	/**
-	 * @param array $scripts
-	 */
-	protected function setScripts(array $scripts): void
-	{
-		$this->scripts = $scripts;
-	}
-
-	/**
+	 * All searchDirectories where Javascript-Files can be located
+	 *
 	 * @return Queue
 	 */
 	public function getScriptDirs(): Queue
@@ -310,9 +360,11 @@ class Scripts
 	}
 
 	/**
-	 * @return \Xajax\Scripts\Queue
+	 * ScriptsOrdering means, that scripts pushed into an separate queue. The queue handles which "scriptName" url must be rendered before others
+	 *
+	 * @return Queue
 	 */
-	protected function getScriptsOrdering(): \Xajax\Scripts\Queue
+	protected function getScriptsOrdering(): Queue
 	{
 		return $this->scriptsOrdering;
 	}
@@ -323,5 +375,21 @@ class Scripts
 	public function getConfiguration(): \Xajax\Configuration\Scripts
 	{
 		return $this->configuration;
+	}
+
+	/**
+	 * @return array
+	 */
+	public function getScripts(): array
+	{
+		return $this->scripts;
+	}
+
+	/**
+	 * @param array $scripts
+	 */
+	private function setScripts(array $scripts): void
+	{
+		$this->scripts = $scripts;
 	}
 }

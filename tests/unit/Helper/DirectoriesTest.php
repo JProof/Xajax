@@ -25,7 +25,7 @@ class DirectoriesTest extends \Codeception\Test\Unit
 	 *
 	 * @return string
 	 */
-	protected static function getRootDir()
+	protected static function getRootDir(): string
 	{
 		return dirname(__DIR__, 3);
 	}

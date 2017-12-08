@@ -16,6 +16,57 @@ declare(strict_types=1);
 
 namespace Xajax\Scripts;
 
-class Queue extends \SplPriorityQueue
+use Countable;
+use IteratorAggregate;
+use SplPriorityQueue;
+
+/**
+ * Class Queue
+ *
+ * @package Xajax\Scripts
+ * @see     https://mwop.net/blog/253-Taming-SplPriorityQueue.html
+ */
+class Queue implements Countable, IteratorAggregate
 {
+	/**
+	 * @var \SplPriorityQueue
+	 */
+	protected $innerQueue;
+
+	/**
+	 * Queue constructor.
+	 */
+	public function __construct()
+	{
+		// I'll explain the lack of global namespacing later...
+		$this->innerQueue = new SplPriorityQueue;
+		$this->innerQueue->setExtractFlags(SplPriorityQueue::EXTR_BOTH);
+	}
+
+	/**
+	 * @return int
+	 */
+	public function count(): int
+	{
+		return \count($this->innerQueue);
+	}
+
+	/**
+	 * @param $key
+	 * @param $priority
+	 */
+	public function insert($key, $priority)
+	{
+		$this->innerQueue->insert($key, $priority);
+	}
+
+	/**
+	 * @return \SplPriorityQueue|\Traversable
+	 */
+	public function getIterator()
+	{
+		$this->innerQueue->rewind();
+
+		return clone $this->innerQueue;
+	}
 }
