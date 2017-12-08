@@ -460,8 +460,15 @@ namespace Xajax\Plugin {
 			}
 			if (0 < $this->nScriptLoadTimeout)
 			{
+
 				foreach ($xScripts as $name => $xScript)
 				{
+					// only Xajax scripts can timeOuted
+					if (false === strpos($name, 'xajax'))
+					{
+						continue;
+					}
+
 					//				echo '<';
 					//				echo 'script type="text/javascript" ';
 					//				echo $this->sDefer;
