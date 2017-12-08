@@ -13,7 +13,7 @@
  */
 declare(strict_types=1);
 
-use Xajax\Helper\Directories;
+namespace Xajax\Helper;
 
 /**
  * Class DirectoriesTest
