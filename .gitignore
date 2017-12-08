@@ -1,6 +1,7 @@
 # Created by .ignore support plugin (hsz.mobi)
 .idea/
 codecept.phar
+composer.lock
 composer.phar
 phpunit.phar
 tests/_data/
