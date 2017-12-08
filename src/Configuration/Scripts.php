@@ -206,7 +206,7 @@ class Scripts extends Base
 	public function setDefaultMode(string $defaultMode): string
 	{
 		$defaultMode = strtolower($defaultMode);
-		if (in_array($defaultMode, self::getModes(), true))
+		if (\in_array($defaultMode, self::getModes(), true))
 		{
 			$this->defaultMode = $defaultMode;
 		}
@@ -243,7 +243,7 @@ class Scripts extends Base
 	 */
 	public function getDefaultMethod(): string
 	{
-		return $this->defaultMethod ?? $this->setDefaultMethod('');
+		return $this->defaultMethod ?? $this->setDefaultMethod();
 	}
 
 	/**
@@ -255,7 +255,7 @@ class Scripts extends Base
 	{
 		$defaultMethod = strtoupper((string) $defaultMethod);
 
-		return $this->defaultMethod = 'GET' === $defaultMethod ? 'GET' : 'POST';
+		return $this->defaultMethod = ('GET' === $defaultMethod) ? 'GET' : 'POST';
 	}
 
 	/**
