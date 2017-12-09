@@ -14,12 +14,15 @@
 declare(strict_types=1);
 
 use Xajax\Examples\Demo\Filebrowser\Directories;
+use Xajax\Factory;
+use Xajax\Response\Response;
 
 require_once dirname(__DIR__) . '/bootstrap.php';
-$xajax       = Xajax\Factory::getInstance();
-$xajaxConfig = $xajax->getConfig();
-$xajaxConfig->setUseUncompressedScripts(true);
-$xajaxConfig->setDeferScriptGeneration(false);
+$xajax                    = Xajax\Factory::getInstance();
+$xajaxScriptConfiguration = Factory::getScripts()->getConfiguration();
+$xajaxConfig              = $xajax->getConfig();
+$xajaxScriptConfiguration->setUseUncompressedScripts(true);
+$xajaxScriptConfiguration->setDeferScriptGeneration(false);
 /**
  * Simple instance
  *
@@ -33,7 +36,7 @@ function getDirectories()
 		return $directories;
 	}
 	$directories = new Directories();
-	$directories->setDocRoot($_SERVER['DOCUMENT_ROOT'] . '/xajax-php-7/')->setScriptRoot(__DIR__);
+	$directories->setDocRoot(dirname(__DIR__, 2))->setScriptRoot(dirname(__DIR__, 2));
 
 	return $directories;
 }
@@ -43,11 +46,11 @@ function getDirectories()
  *
  * @param string $params
  *
- * @return \xajaxResponse
+ * @return Response
  */
-function listDir(string $params = '')
+function listDir(?string $params = null)
 {
-	$objResponse = xajaxResponse::getInstance();
+	$objResponse = Factory::getResponseInstance();
 
 	$directories = getDirectories();
 
@@ -58,7 +61,6 @@ function listDir(string $params = '')
 	$tmpl = htmlCreateNode($directories, $params);
 	if ('' === $tmpl)
 	{
-
 		$objResponse->attrReplace($openButton, 'aria-disabled', 'disabled', 'true');
 		$objResponse->assign($openButton, 'className', 'btn badge badge-warning disabled');
 		$objResponse->append($openButton, 'innerHTML', ' There are no directories deeper');
@@ -72,14 +74,14 @@ function listDir(string $params = '')
 	return $objResponse;
 }
 
-function htmlCreateNode(Directories $directories, $parent = '')
+function htmlCreateNode(Directories $directories, ? string $parent = null)
 {
 	ob_start();
-	$dirs          = $directories->getDirectoriesFromDir();
-	$simpleExclude = ['.', '..', '.git', '.idea'];
-	$fromDir       = $directories->getDocFromDir();
+	$dirs              = $directories->getDirectoriesFromDir();
+	$simpleExclude = ['.', '..', '.git'];
+	$fromDir           = $directories->getDocFromDir();
 
-	if ('' === $parent)
+	if (null === $parent)
 	{
 		$parent = Directories::getHash($fromDir);
 	}
@@ -123,8 +125,7 @@ function htmlCreateNode(Directories $directories, $parent = '')
 	return ('' === $content) ? '' : '<ul id="' . Directories::getParentNodeHashId($fromDir) . '">' . $content . '</ul>';
 }
 
-$xajax->getConfig()->setJavascriptURI('../../../');
-$xajaxFunctionListDir = $xajax->getPlugin('function')->registerRequest((array) 'listDir');
+$xajaxFunctionListDir = Xajax\Plugins\Userfunction\Request::autoRegister('listDir');
 
 $xajax->processRequest();
 
