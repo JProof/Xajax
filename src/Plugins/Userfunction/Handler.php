@@ -106,13 +106,13 @@ class Handler
 		$this->uf             = $uf;
 		$this->aConfiguration = [];
 
-		if (is_array($this->uf) && 2 < count($this->uf))
+		if (\is_array($this->uf) && 2 < \count($this->uf))
 		{
 			$this->sAlias = $this->uf[0];
-			$this->uf     = array_slice($this->uf, 1);
+			$this->uf     = \array_slice($this->uf, 1);
 		}
 
-		if (is_array($this->uf) && 2 != count($this->uf))
+		if (\is_array($this->uf) && 2 !== \count($this->uf))
 		{
 			trigger_error(
 			    'Invalid function declaration for xajaxUserFunction.',
@@ -133,7 +133,7 @@ class Handler
 	public function getName(): string
 	{
 		// Do not use sAlias here!
-		return (is_array($this->uf)) ? (string) $this->uf[1] : (string) $this->uf;
+		return \is_array($this->uf) ? (string) $this->uf[1] : (string) $this->uf;
 	}
 
 	/*
@@ -147,13 +147,13 @@ class Handler
 	 *
 	 * @deprecated use an global or plugin or handler config
 	 */
-	public function configure($sName, $sValue)
+	public function configure($sName, $sValue): void
 	{
-		if ('alias' == $sName)
+		if ('alias' === $sName)
 		{
 			$this->sAlias = $sValue;
 		}
-		if ('include' == $sName)
+		if ('include' === $sName)
 		{
 			$this->sInclude = $sValue;
 		}
@@ -180,7 +180,7 @@ class Handler
 	public function generateRequest(?string $sXajaxPrefix = null, ? RequestConfigurationIface $configuration = null): RequestIface
 	{
 		$sAlias = $this->getName();
-		if (0 < strlen($this->sAlias))
+		if (0 < \strlen($this->sAlias))
 		{
 			$sAlias = $this->sAlias;
 		}
@@ -213,7 +213,7 @@ class Handler
 
 		$sFunction = $this->getName();
 		$sAlias    = $sFunction;
-		if (0 < strlen($this->sAlias))
+		if (0 < \strlen($this->sAlias))
 		{
 			$sAlias = $this->sAlias;
 		}
@@ -242,8 +242,13 @@ class Handler
 		function, including an external file if needed and passing along
 		the specified arguments.
 	*/
-	public function call($aArgs = [])
+	public function call(?array $aArgs = null): bool
 	{
+		if (null === $aArgs)
+		{
+			return false;
+		}
+
 		$objResponseManager = Manager::getInstance();
 
 		if (null !== $this->sInclude)
@@ -253,7 +258,7 @@ class Handler
 			$sOutput = ob_get_clean();
 
 //SkipDebug
-			if (0 < strlen($sOutput))
+			if (0 < \strlen($sOutput))
 			{
 				$sOutput = 'From include file: ' . $this->sInclude . ' => ' . $sOutput;
 				$objResponseManager->debug($sOutput);
@@ -262,6 +267,25 @@ class Handler
 		}
 
 		$mFunction = $this->uf;
-		$objResponseManager->append(call_user_func_array($mFunction, $aArgs));
+
+		// regular function
+		if (\is_string($mFunction))
+		{
+			if (\function_exists($mFunction))
+			{
+				try
+				{
+					$result = \call_user_func_array($mFunction, $aArgs);
+				}
+				catch (\Exception$exception)
+				{
+					// todo Log
+					return false;
+				}
+				$objResponseManager->append($result);
+				return true;
+			}
+		}        // todo Log
+		return false;
 	}
 }
