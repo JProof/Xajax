@@ -255,9 +255,9 @@ namespace Xajax\Examples\Demo\Filebrowser {
 		 *
 		 * @return string
 		 */
-		public static function compilePathway($child = '', $parent = ''): string
+		public static function compilePathway(string $child = null, ?string $parent = null): string
 		{
-			$parent = trim($parent);
+			$parent = trim((string) $parent);
 			if ('' === $parent)
 			{
 				return $child;
@@ -265,7 +265,7 @@ namespace Xajax\Examples\Demo\Filebrowser {
 			$parentParts   = self::splitPathway($parent);
 			$parentParts[] = $child;
 
-			return implode('.', $parentParts);
+			return implode('#', $parentParts);
 		}
 
 		/**
@@ -273,9 +273,9 @@ namespace Xajax\Examples\Demo\Filebrowser {
 		 *
 		 * @return array
 		 */
-		public static function splitPathway($nodes = ''): array
+		public static function splitPathway(?string $nodes = null): array
 		{
-			return explode('.', (string) $nodes);
+			return explode('#', (string) $nodes);
 		}
 
 		/**
@@ -283,9 +283,9 @@ namespace Xajax\Examples\Demo\Filebrowser {
 		 *
 		 * @return string
 		 */
-		public static function stringifyPathway(array $parts = []): string
+		public static function stringifyPathway(?array $parts = null): string
 		{
-			return implode('.', $parts);
+			return implode('#', (array) $parts);
 		}
 
 		/**
@@ -295,10 +295,9 @@ namespace Xajax\Examples\Demo\Filebrowser {
 		 *
 		 * @return string
 		 */
-		public static function getHash($dir = ''): string
+		public static function getHash(?string $dir = null): string
 		{
 			return basename((string) $dir);
-			//return md5('xajaxSecret' . (string) $dir);
 		}
 
 		/**

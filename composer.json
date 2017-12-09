@@ -42,8 +42,7 @@
     "psr-0": {
     },
     "psr-4": {
-      "Xajax\\": "src",
-      "Xajax\\Examples\\": "/examples"
+      "Xajax\\": "src"
     },
     "files": [
     ],
@@ -52,7 +51,8 @@
   },
   "autoload-dev": {
     "psr-4": {
-      "Xajax\\": "tests"
+      "Xajax\\": "tests",
+      "Xajax\\Examples\\": "examples"
     }
   }
 }
