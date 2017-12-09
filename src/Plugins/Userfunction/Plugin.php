@@ -133,9 +133,10 @@ class Plugin extends Request implements RequestPluginIface
 	 *
 	 * @return RequestIface
 	 */
-	public function registerRequest(array $aArgs = []): RequestIface
+	public function registerRequest(array $aArgs = null): RequestIface
 	{
-		if (0 < count($aArgs))
+		$cntArgs = \count($aArgs);
+		if (0 < $cntArgs)
 		{
 
 			$xuf = $aArgs[0];
@@ -145,9 +146,9 @@ class Plugin extends Request implements RequestPluginIface
 				$xuf = new Handler($xuf);
 			}
 
-			if (2 < count($aArgs))
+			if (2 < $cntArgs)
 			{
-				if (is_array($aArgs[2]))
+				if (\is_array($aArgs[2]))
 				{
 					foreach ($aArgs[2] as $sName => $sValue)
 					{
@@ -164,7 +165,7 @@ class Plugin extends Request implements RequestPluginIface
 			return $xuf->generateRequest($this->sXajaxPrefix);
 		}
 
-		throw new InvalidArgumentException('Wrong ParameterCount to register an XajaxUserFunction');
+		throw new InvalidArgumentException('Wrong ParameterCount to register an Userfunction');
 	}
 
 	/*
@@ -196,11 +197,10 @@ class Plugin extends Request implements RequestPluginIface
 	public function generateClientScript(): string
 	{
 		$script = '';
-		if (0 < count($this->aFunctions))
+		if (0 < \count($this->aFunctions))
 		{
 			foreach (array_keys($this->aFunctions) as $sKey)
 			{
-
 				$script .= $this->getMethodByIndex($sKey)->generateClientScript($this->sXajaxPrefix);
 			}
 		}
@@ -230,7 +230,7 @@ class Plugin extends Request implements RequestPluginIface
 	*/
 	public function canProcessRequest(): bool
 	{
-		return 0 < count($this->sRequestedFunction);
+		return 0 < \count($this->sRequestedFunction);
 	}
 
 	/*
@@ -258,7 +258,7 @@ class Plugin extends Request implements RequestPluginIface
 		{
 			$xuf = $method;
 			//$xuf->call($aArgs);
-			if ($xuf->getName() == $this->sRequestedFunction)
+			if ($xuf->getName() === $this->sRequestedFunction)
 			{
 				$xuf->call($aArgs);
 
