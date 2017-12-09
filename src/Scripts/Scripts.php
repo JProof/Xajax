@@ -39,7 +39,7 @@ class Scripts
 	 */
 	protected $scripts;
 	/**
-	 * @var Queue
+	 * @var ScriptsOrdering
 	 */
 	protected $scriptsOrdering;
 	/**
@@ -63,17 +63,16 @@ class Scripts
 		$this->scriptDirs = new Queue();
 
 		$this->scripts         = [];
-		$this->scriptsOrdering = new Queue();
+		$this->scriptsOrdering = new ScriptsOrdering();
 
-		// execution order
+		// execution order call insert only on construction
 		$this->getScriptsOrdering()->insert('xajax', 50);
 		$this->getScriptsOrdering()->insert('xajax.debug', 49);
 
-		// @todo add the core scripts // core scripts will be added by response renderer, perhaps is usefull to do it here right now?!
 		$this->addScript(new Core(['scriptName' => 'xajax', 'fileName' => 'xajax_core.js']));
 		$this->addScript(new Core(['scriptName' => 'xajax.debug', 'fileName' => 'xajax_debug.js']));
 
-		// adding xajax default Script Directory
+		// Adding xajax default Script Directory
 		$this->addScriptDir(\dirname(__DIR__) . '/assets/js');
 	}
 
@@ -87,9 +86,21 @@ class Scripts
 	 */
 	public function getScriptUrls(?bool $relative = null): array
 	{
-		$scriptUrls = [];
-		foreach ($this->getScriptsOrdering() as $item)
+		$_solved         = [];
+		$scriptUrls      = [];
+		$scriptsIterator = $this->getScriptsOrdering()->getIterator();
+
+		while ($scriptsIterator->valid())
 		{
+
+			$item = $scriptsIterator->current();
+			$scriptsIterator->next();
+			if (\in_array($item, $_solved, true))
+			{
+				continue;
+			}
+			$_solved[] = $item;
+
 			if ($this->isLockScript($item))
 			{
 				continue;
@@ -117,7 +128,7 @@ class Scripts
 	{
 		if ($dir = Directories::getValidAbsoluteDirectory($dir))
 		{
-			$priority = $priority ?? $this->getScriptDirs()->count() + 1;
+			$priority = $priority ?? $this->getScriptDirs()->getHighestPriority() + 1;
 
 			$this->getScriptDirs()->insert($dir, (int) $priority);
 			return true;
@@ -290,6 +301,13 @@ class Scripts
 			{
 				$priority = $scripts[$scriptName]->count() + 1;
 			}
+
+			// auto add Script type like jquery without explizit use the addScriptsOrdering
+			if (!$this->getScriptsOrdering()->scriptExists($scriptName))
+			{
+				$this->getScriptsOrdering()->appendScript($scriptName);
+			}
+
 			$scripts[$scriptName]->insert($script, $priority);
 			$this->setScripts($scripts);
 		}
@@ -324,7 +342,7 @@ class Scripts
 	/**
 	 * On Large PHP/WebApps there are many ways and points where somebody adds an script which you do not want to display/use.
 	 *
-	 * @example 'xajax' 'xajax.debug';
+	 * @example 'xajax' 'xajax.debug' 'jQuery'
 	 *
 	 * @param string|null $name
 	 */
@@ -362,9 +380,9 @@ class Scripts
 	/**
 	 * ScriptsOrdering means, that scripts pushed into an separate queue. The queue handles which "scriptName" url must be rendered before others
 	 *
-	 * @return Queue
+	 * @return ScriptsOrdering
 	 */
-	protected function getScriptsOrdering(): Queue
+	protected function getScriptsOrdering(): ScriptsOrdering
 	{
 		return $this->scriptsOrdering;
 	}

@@ -55,6 +55,9 @@ $xScripts->addScript(new Xajax\Scripts\Core(['scriptName' => 'xajax', 'fileName'
 $xScripts->addScript(new Xajax\Scripts\Core(['scriptName' => 'xajax', 'fileName' => 'nothing2.js']));
 Factory::getInstance()->processRequest();
 $xScripts->addScript(new Xajax\Scripts\Core(['scriptName' => 'xajax', 'fileName' => 'nothing3.js']));
+
+// AutoRegister in queue
+$xScripts->addScript(new Xajax\Scripts\Core(['scriptName' => 'jquery', 'fileName' => 'jqueryDummy.js']));
 ?><!DOCTYPE html>
 <html lang="en">
 <head>

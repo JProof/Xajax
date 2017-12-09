@@ -43,6 +43,32 @@ class Queue implements Countable, IteratorAggregate
 		$this->innerQueue->setExtractFlags(SplPriorityQueue::EXTR_BOTH);
 	}
 
+	public function getHighestPriority()
+	{
+		$highest = 0;
+		$iter    = $this->getIterator();
+		$iter->setExtractFlags(SplPriorityQueue::EXTR_PRIORITY);
+		while ($iter->valid())
+		{
+			$highest = $iter->current() > $highest ? $iter->current() : $highest;
+			$iter->next();
+		}
+		return $highest;
+	}
+
+	public function getLowestPriority()
+	{
+		$lowest = 100000;
+		$iter   = $this->getIterator();
+		$iter->setExtractFlags(SplPriorityQueue::EXTR_PRIORITY);
+		while ($iter->valid())
+		{
+			$lowest = $iter->current() < $lowest ? $iter->current() : $lowest;
+			$iter->next();
+		}
+		return $lowest;
+	}
+
 	/**
 	 * @return int
 	 */

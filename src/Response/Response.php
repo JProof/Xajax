@@ -1692,7 +1692,7 @@ class Response
 		}
 		elseif ('application/json' === $this->getContentType())
 		{
-			$this->_printResponse_JSON();
+			echo $this->_printResponse_JSON();
 		}
 		else
 		{
@@ -1893,7 +1893,7 @@ class Response
 			$response['xjxobj'][] = $this->aCommands[$sKey];
 		}
 
-		print json_encode($response);
+		return json_encode($response);
 	}
 
 	/*
