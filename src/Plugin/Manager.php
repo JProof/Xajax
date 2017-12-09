@@ -372,23 +372,12 @@ namespace Xajax\Plugin {
 			#	$xCoreConfig->setScriptName('xajax')->setFileName('xajax_core.js')->setPriority(0);
 			#	$scripts->addScript($xCoreConfig, 0);
 
-			if ($configScripts->isDebug())
-			{
-				/**
-				 * already init by
-				 *
-				 * @see \Xajax\Scripts\Scripts::__construct()
-				 */
-				#	$xCoreDebugConfig = new Core();
-				#       $xCoreDebugConfig->setScriptName('xajax.debug')->setFileName('xajax_debug.js')->setPriority(0);
-				#	$scripts->addScript($xCoreDebugConfig, 0);
-
-			}
-			else
+			if (!$configScripts->isDebug())
 			{
 				$scripts->setLockScript('xajax.debug');
 			}
 
+			// getting all Script Urls
 			$xScripts = Scripts::getInstance()->getScriptUrls();
 
 			$sCrLf = "\n";
@@ -586,6 +575,7 @@ namespace Xajax\Plugin {
 					echo $sCrLf;
 				}
 
+				// script Content
 				echo $sCrLf;
 				echo '<';
 				echo 'script type="text/javascript" ';
