@@ -94,6 +94,7 @@ class Scripts
 		{
 
 			$item = $scriptsIterator->current();
+			$scriptsIterator->next();
 			if (\in_array($item, $_solved, true))
 			{
 				continue;
@@ -110,7 +111,6 @@ class Scripts
 			{
 				$scriptUrls[$item] = $tmp;
 			}
-			$scriptsIterator->next();
 		}
 
 		return $scriptUrls;
