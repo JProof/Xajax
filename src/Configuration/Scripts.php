@@ -28,7 +28,7 @@ class Scripts extends Base
 	 *
 	 * @var bool
 	 */
-	protected $useUncompressedScripts = false;
+	protected $useUncompressedScripts;
 	/**
 	 * JS
 	 * true - xajax should update the status bar during a request
@@ -36,33 +36,27 @@ class Scripts extends Base
 	 *
 	 * @var bool
 	 */
-	protected $statusMessages = false;
+	protected $statusMessages;
 	/**
 	 * true - xajax should display a wait cursor when making a request
 	 * false - xajax should not show a wait cursor during a request
 	 *
 	 * @var bool
 	 */
-	protected $waitCursor = true;
+	protected $waitCursor;
 	/**
 	 * A flag that indicates whether
 	 * script deferral is in effect or not
 	 *
 	 * @var bool
 	 */
-	protected $deferScriptGeneration = true;
+	protected $deferScriptGeneration;
 	/**
 	 * Debug Flag for Xajax. Set to true only during development.
 	 *
 	 * @var bool
 	 */
-	protected $debug = false;
-	/**
-	 * If debug is true xajax will explain more debug-messages
-	 *
-	 * @var bool
-	 */
-	protected $verbose = false;
+	protected $debug;
 	/**
 	 * @var array
 	 */
@@ -107,7 +101,7 @@ class Scripts extends Base
 	 */
 	public function isUseUncompressedScripts(): bool
 	{
-		return (bool) $this->useUncompressedScripts;
+		return $this->useUncompressedScripts ?? false;
 	}
 
 	/**
@@ -127,7 +121,7 @@ class Scripts extends Base
 	 */
 	public function isStatusMessages(): bool
 	{
-		return (bool) $this->statusMessages;
+		return $this->statusMessages ?? false;
 	}
 
 	/**
@@ -147,7 +141,7 @@ class Scripts extends Base
 	 */
 	public function isWaitCursor(): bool
 	{
-		return (bool) $this->waitCursor;
+		return $this->waitCursor ?? false;
 	}
 
 	/**
@@ -167,7 +161,7 @@ class Scripts extends Base
 	 */
 	public function isDeferScriptGeneration(): bool
 	{
-		return (bool) $this->deferScriptGeneration;
+		return $this->deferScriptGeneration ?? false;
 	}
 
 	/**
@@ -264,7 +258,7 @@ class Scripts extends Base
 	 */
 	public function isDebug(): bool
 	{
-		return (bool) $this->debug;
+		return $this->debug ?? false;
 	}
 
 	/**
@@ -299,28 +293,6 @@ class Scripts extends Base
 	public function setDebug(?bool $debug = null): Scripts
 	{
 		$this->debug = (bool) $debug;
-
-		return $this;
-	}
-
-	/**
-	 * @deprecated verbose will be removed
-	 * @return bool
-	 */
-	public function isVerbose(): bool
-	{
-		return $this->verbose;
-	}
-
-	/**
-	 * @param bool $verbose
-	 *
-	 * @deprecated verbose will be removed
-	 * @return \Xajax\Configuration\Scripts
-	 */
-	public function setVerbose(?bool $verbose = null): Scripts
-	{
-		$this->verbose = (bool) $verbose;
 
 		return $this;
 	}
