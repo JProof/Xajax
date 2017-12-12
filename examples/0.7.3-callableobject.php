@@ -40,6 +40,7 @@ $xjxScriptConfig = Factory::getScripts()->getConfiguration();
 
 $xjxScriptConfig->setDeferScriptGeneration(false);
 $anXajaxUserFunction = Request::autoRegister(new myTest());
+
 $xjxConfig->setErrorHandler('\Xajax\Errors\Handler::addException')->setToHtml(true);
 $xjxScriptConfig->setDebug(false);
 Factory::getInstance()->processRequest();
