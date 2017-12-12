@@ -17,6 +17,7 @@ declare(strict_types=1);
 namespace Xajax\Plugins\Callableobject;
 
 use InvalidArgumentException;
+use Xajax\Argument;
 use Xajax\Plugin\Request;
 use Xajax\Plugin\Request\RequestPluginIface;
 use Xajax\RequestIface;
@@ -227,7 +228,7 @@ class Plugin extends Request implements RequestPluginIface
 			return false;
 		}
 
-		$objArgumentManager = xajaxArgumentManager::getInstance();
+		$objArgumentManager = Argument::getInstance();
 		$aArgs              = $objArgumentManager->process();
 
 		foreach (array_keys($this->aCallableObjects) as $sKey)

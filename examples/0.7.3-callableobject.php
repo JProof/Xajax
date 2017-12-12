@@ -28,19 +28,20 @@ class myTest
 		}
 		catch (Exception $exception)
 		{
-		\Xajax\addError($exception);
+		\Xajax\Errors\Handler::addException($exception);
 		}
 
 		return $objResponse;
 	}
 }
-$xConfig = Factory::getInstance()->getConfig();
+$xjxConfig = Factory::getInstance()->getConfig();
+$xjxScriptConfig = Factory::getScripts()->getConfiguration();
 
-$xConfig->setJavascriptURI('/xajax-php-7/');
-$xConfig->setDeferScriptGeneration(false);
+
+$xjxScriptConfig->setDeferScriptGeneration(false);
 $anXajaxUserFunction = Request::autoRegister(new myTest());
-$xConfig->setErrorHandler(true);
-$xConfig->setDebug(false);
+$xjxConfig->setErrorHandler('\Xajax\Errors\Handler::addException')->setToHtml(true);
+$xjxScriptConfig->setDebug(false);
 Factory::getInstance()->processRequest();
 
 $anXajaxUserFunction->useSingleQuote()->setParameter('test', 'roman')->addParameterArray('text', ['roman'  => 'test',
