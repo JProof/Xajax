@@ -22,7 +22,7 @@ set_error_handler('\Xajax\Errors\Handler::addError');
 
 $xConfig = Factory::getInstance()->getConfig();
 $xConfig->setErrorHandler('\Xajax\Errors\Handler::addException')->setToHtml(true);
-$xufListDirectory1 = Xajax\Plugins\Userfunction\Request::autoRegister('listDirectory1');
+$xufListDirectory = Xajax\Plugins\Userfunction\Request::autoRegister('listDirectory');
 
 /**
  * Call directly an method during method-name
@@ -70,7 +70,7 @@ Factory::getInstance()->processRequest();
 </head>
 <body>
 <h3>no Function need, just an javascript-files demo</h3>
-<a href="javascript:void(null)" onclick="<?php $xufListDirectory1->printScript() ?>">List Directory via method-name</a>
+<a href="javascript:void(null)" onclick="<?php $xufListDirectory->printScript() ?>">List Directory via method-name</a>
 <div id="information">
 
 </div>
