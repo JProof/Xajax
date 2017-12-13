@@ -31,6 +31,13 @@ class myTest
 		\Xajax\Errors\Handler::addException($exception);
 		}
 
+	    return $objResponse;
+    }
+
+	public function notRegisteredMethod(): \Xajax\Response\Response
+	{
+		$objResponse = Factory::getResponseInstance();
+		$objResponse->alert('notListedCall');
 		return $objResponse;
 	}
 }

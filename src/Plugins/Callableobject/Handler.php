@@ -119,7 +119,7 @@ class Handler
 	{
 		$returnRequest = null;
 
-		$sClass = $this->getMethods();
+		$sClass = $this->getName();
 
 		foreach (get_class_methods($this->obj) as $sMethodName)
 		{
