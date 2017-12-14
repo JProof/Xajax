@@ -212,7 +212,7 @@ class Scripts
 				/** @var \Xajax\Scripts\Core $scriptItem */
 				$scriptItem = $sqIterator->current();
 				// First look up the Javascript has set an concrete Directory
-				if ('' !== ($dir = (string) $scriptItem->getDir()))
+				if ('' !== ($dir = (string) Directories::getValidAbsoluteDirectory($scriptItem->getDir())))
 				{
 					if (null !== ($relOutPath = $this->getSaveRelativeOutFile($dir, $this->getScriptFilename($scriptItem->getFileName()))))
 					{
