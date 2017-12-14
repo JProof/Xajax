@@ -33,6 +33,11 @@ class Factory
 	 * @var array
 	 */
 	private static $instances = [];
+	/**
+	 * @since 0.7.3 Detect the Request is not an old xajax type
+	 * @var bool
+	 */
+	private static $cmsRequest;
 
 	/**
 	 * Factory constructor.
@@ -95,9 +100,47 @@ class Factory
 	/**
 	 * @param array $instances
 	 */
-	private static function setInstances(array $instances)
+	private static function setInstances(array $instances): void
 	{
 		self::$instances = $instances;
+	}
+
+	/**
+	 * Short hand for closing the Response
+	 *
+	 * @param bool|null $exit
+	 */
+	public static function processRequest(?bool $exit = null): void
+	{
+		null !== $exit ? self::getInstance()->getConfig()->setExitAllowed($exit) : null;
+
+		self::getInstance()->processRequest();
+	}
+
+	/**
+	 * Method to check the calls was an new Cms Xajax Call
+	 *
+	 * @since 0.7.3
+	 * @return bool
+	 */
+	public static function isCmsRequest(): bool
+	{
+		return self::$cmsRequest ?? self::$cmsRequest = self::detectIsCmsRequest();
+	}
+
+	/**
+	 * @since 0.7.3
+	 * @todo  check more parameters or insert methods for check cms Request
+	 * @return bool
+	 */
+	private static function detectIsCmsRequest(): bool
+	{
+		if ($isDetected = (bool) ($_GET['xjxcms'] ?? $_POST['xjxcms'] ?? false))
+		{
+			// automatically enable the cms Plugin which is handling found objResponses
+			self::getInstance()->getRequestPlugin('cms');
+		}
+		return $isDetected;
 	}
 
 	/**

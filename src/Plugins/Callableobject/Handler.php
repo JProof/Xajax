@@ -61,12 +61,18 @@ class Handler
 		Returns the name of this callable object.  This is typically the
 		class name of the object.
 	*/
-	public function getName()
+	public function getName(): string
 	{
-		return get_class($this->obj);
+		return \get_class($this->obj);
 	}
 
-	public function getMethods()
+	/**
+	 * Listing Methods in Class
+	 *
+	 * @todo  check against public methods!
+	 * @return array
+	 */
+	public function getMethods(): array
 	{
 		$aReturn = [];
 		foreach (get_class_methods($this->obj) as $sMethodName)
@@ -113,13 +119,13 @@ class Handler
 	{
 		$returnRequest = null;
 
-		$sClass = get_class($this->obj);
+		$sClass = $this->getName();
 
 		foreach (get_class_methods($this->obj) as $sMethodName)
 		{
 			$bInclude = true;
 			// exclude magic __call, __construct, __destruct methods
-			if (2 < strlen($sMethodName))
+			if (2 < \strlen($sMethodName))
 			{
 				if ('__' === substr($sMethodName, 0, 2))
 				{
@@ -152,8 +158,9 @@ class Handler
 	*/
 	public function generateClientScript($sXajaxPrefix)
 	{
-		$sClass = get_class($this->obj);
+		$sClass = $this->getName();
 
+		// inits the js namespace
 		echo "{$sXajaxPrefix}{$sClass} = {};\n";
 
 		foreach (get_class_methods($this->obj) as $sMethodName)
@@ -168,7 +175,7 @@ class Handler
 				}
 			}
 			// exclude constructor
-			if ($sClass == $sMethodName)
+			if ($sClass === $sMethodName)
 			{
 				$bInclude = false;
 			}
@@ -214,14 +221,9 @@ class Handler
 		boolean - True of the specified class name matches the class of
 			the object being referenced; false otherwise.
 	*/
-	public function isClass($sClass)
+	public function isClass(?string $sClass = null): bool
 	{
-		if (get_class($this->obj) === $sClass)
-		{
-			return true;
-		}
-
-		return false;
+		return null !== $sClass && \get_class($this->obj) === $sClass;
 	}
 
 	/*
@@ -237,7 +239,7 @@ class Handler
 		boolean - True of the referenced object contains the specified method,
 			false otherwise.
 	*/
-	public function hasMethod($sMethod)
+	public function hasMethod($sMethod): bool
 	{
 		return method_exists($this->obj, $sMethod) || method_exists($this->obj, '__call');
 	}
@@ -251,11 +253,13 @@ class Handler
 		sMethod - (string): The name of the method to call.
 		aArgs - (array):  The arguments to pass to the method.
 	*/
-	public function call($sMethod, $aArgs)
+	public function call(string $sMethod, ?array $aArgs = null): void
 	{
+		$aArgs = (array) $aArgs;
+
 		$objResponseManager = Manager::getInstance();
 		$objResponseManager->append(
-		    call_user_func_array(
+		    \call_user_func_array(
 			[$this->obj, $sMethod],
 			$aArgs
 		    )
