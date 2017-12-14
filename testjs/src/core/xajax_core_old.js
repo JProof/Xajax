@@ -1346,24 +1346,24 @@ xajax.initializeRequest = function (oRequest) {
                     this[opt][itmName] = def[itmName];
         } else this[opt] = def;
     };
-    oRequest.append('commonHeaders', xc.commonHeaders);
-    oRequest.append('postHeaders', xc.postHeaders);
-    oRequest.append('getHeaders', xc.getHeaders);
+    oRequest.append('commonHeaders', xc.getOption('commonHeaders'));
+    oRequest.append('postHeaders', xc.getOption('postHeaders'));
+    oRequest.append('getHeaders', xc.getOption('getHeaders'));
     oRequest.set = function (option, defaultValue) {
         if ('undefined' == typeof this[option])
             this[option] = defaultValue;
     };
-    oRequest.set('statusMessages', xc.statusMessages);
-    oRequest.set('waitCursor', xc.waitCursor);
-    oRequest.set('mode', xc.defaultMode);
-    oRequest.set('method', xc.defaultMethod);
-    oRequest.set('URI', xc.requestURI);
-    oRequest.set('httpVersion', xc.defaultHttpVersion);
-    oRequest.set('contentType', xc.defaultContentType);
-    oRequest.set('retry', xc.defaultRetry);
-    oRequest.set('returnValue', xc.defaultReturnValue);
-    oRequest.set('maxObjectDepth', xc.maxObjectDepth);
-    oRequest.set('maxObjectSize', xc.maxObjectSize);
+    oRequest.set('statusMessages', xc.getOption('statusMessages'));
+    oRequest.set('waitCursor', xc.getOption('waitCursor'));
+    oRequest.set('mode', xc.getOption('defaultMode'));
+    oRequest.set('method', xc.getOption('defaultMethod'));
+    oRequest.set('URI', xc.getOption('requestURI'));
+    oRequest.set('httpVersion', xc.getOption('defaultHttpVersion'));
+    oRequest.set('contentType', xc.getOption('defaultContentType'));
+    oRequest.set('retry', xc.getOption('defaultRetry'));
+    oRequest.set('returnValue', xc.getOption('defaultReturnValue'));
+    oRequest.set('maxObjectDepth', xc.getOption('maxObjectDepth'));
+    oRequest.set('maxObjectSize', xc.getOption('maxObjectSize'));
     oRequest.set('context', window);
     
     var xcb = xx.callback;

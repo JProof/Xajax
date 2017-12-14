@@ -13,9 +13,21 @@
 	defaultValue - (unknown):
 		The value to use if a value was not already set.
 */
-    "use strict";
+    'use strict';
     xjx.config = {};
-    xjx.config.defaults = [
+    var options = [];
+    xjx.config.getOption = function (optName) {
+        return options.hasOwnProperty(optName) ? options[optName] : null;
+    };
+    xjx.config.setOption = function (key, value) {
+        options[key] = value;
+    };
+    xjx.config.setOptions = function (arr) {
+        for (var obj in arr) {
+            xjx.config.setOption(obj, arr[obj]);
+        }
+    };
+    xjx.config.defaults = {
         /*
 	    Object: commonHeaders
 	
@@ -25,10 +37,8 @@
 	
 	    These headers will be set for both POST and GET requests.
         */
-        {
-            'commonHeaders': {
-            "If-Modified-Since": "Sat, 1 Jan 2000 00:00:00 GMT"
-            }
+        'commonHeaders': {
+            'If-Modified-Since': 'Sat, 1 Jan 2000 00:00:00 GMT'
         },
         /*
 	Object: postHeaders
@@ -37,7 +47,7 @@
 	option name and the associated value is the value that will
 	set when the request object is initialized.
 */
-        {'postHeaders': {}},
+        'postHeaders': {},
         /*
 	Object: getHeaders
 	
@@ -45,21 +55,21 @@
 	option name and the associated value is the value that will
 	set when the request object is initialized.
 */
-        {'getHeaders': {}},
+        'getHeaders': {},
         /*
 	Boolean: waitCursor
 	
 	true - xajax should display a wait cursor when making a request
 	false - xajax should not show a wait cursor during a request
 */
-        {'waitCursor': false},
+        'waitCursor': false,
         /*
 	Boolean: statusMessages
 	
 	true - xajax should update the status bar during a request
 	false - xajax should not display the status of the request
 */
-        {'statusMessages': false},
+        'statusMessages': false,
         /*
 	Object: baseDocument
 	
@@ -67,14 +77,14 @@
 	locating elements by ID.
 	@todo more explanations
 */
-        {'baseDocument': document},
+        'baseDocument': document,
         /*
             String: requestURI
             
             The URI that requests will be sent to.
             @todo buggy internal loop
         */
-        {'requestURI': ' xajax.config.baseDocument.URL'},
+        'requestURI': '',
         /*
 	String: defaultMode
 	
@@ -87,28 +97,28 @@
 		response.  This option allows the server to return
 		a value directly to the caller.
 */
-        {'defaultMode': 'asynchronous'},
+        'defaultMode': 'asynchronous',
         /*
 	String: defaultHttpVersion
 	
 	The Hyper Text Transport Protocol version designated in the
 	header of the request.
 */
-        {'defaultHttpVersion': 'HTTP/1.1'},
+        'defaultHttpVersion': 'HTTP/1.1',
         /*
 	String: defaultContentType
 	
 	The content type designated in the header of the request.
 	@todo extra headers for upload
 */
-        {'defaultContentType': 'application/x-www-form-urlencoded'},
+        'defaultContentType': 'application/x-www-form-urlencoded',
         /*
             Integer: defaultResponseDelayTime
             
             The delay time, in milliseconds, associated with the
             <xajax.callback.global.onRequestDelay> event.
         */
-        {'defaultResponseDelayTime': 1000},
+        'defaultResponseDelayTime': 1000,
         /*
 
 	Integer: defaultExpirationTime
@@ -117,7 +127,7 @@
 	is considered expired.  This is used to trigger the
 	<xajax.callback.global.onExpiration event.
 */
-        {'defaultExpirationTime': 10000},
+        'defaultExpirationTime': 10000,
         /*
 	String: defaultMethod
 	
@@ -128,14 +138,14 @@
 		to the <xajax.config.requestURI> to form a URL.
 		 W3C: Method is case sensitive
 */
-        {'defaultMethod': 'POST'},
+        'defaultMethod': 'POST',
         /*
 	Integer: defaultRetry
 	
 	The number of times a request should be retried
 	if it expires.
 */
-        {'defaultRetry': 5},
+        'defaultRetry': 5,
         /*
 	Object: defaultReturnValue
 	
@@ -143,35 +153,26 @@
 	mode, or when a synchronous call does not specify the
 	return value.
 */
-        {'defaultReturnValue': false},
+        'defaultReturnValue': false,
         /*
 	Integer: maxObjectDepth
 	
 	The maximum depth of recursion allowed when serializing
 	objects to be sent to the server in a request.
 */
-        {'maxObjectDepth': 20},
+        'maxObjectDepth': 20,
         /*
 	Integer: maxObjectSize
 	
 	The maximum number of members allowed when serializing
 	objects to be sent to the server in a request.
 */
-        {'maxObjectSize': 2000},
+        'maxObjectSize': 2000,
         /**
          *
          * @desc How many items can be hold in queue. It is an prevention from overload the queue(on errors or buggy loops)
          * **/
-        {'responseQueueSize': 1000}
-    ];
-    var options = [];
-    xjx.config.setOption = function (key, value) {
-        options[key] = value;
-    };
-    xjx.config.setOptions = function (arr) {
-        arr.forEach(function (value) {
-            console.log(value);
-        });
+        'responseQueueSize': 1000
     };
     xjx.config.setOptions(xjx.config.defaults);
 }(xajax));

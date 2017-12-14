@@ -22,11 +22,11 @@
             oCB.timers.onResponseDelay = xcb.setupTimer(
               (arguments.length > 0)
                 ? arguments[0]
-                : xc.defaultResponseDelayTime);
+                : xc.getOption('defaultResponseDelayTime'));
             oCB.timers.onExpiration = xcb.setupTimer(
               (arguments.length > 1)
                 ? arguments[1]
-                : xc.defaultExpirationTime);
+                : xc.getOption('defaultExpirationTime'));
             oCB.onRequest = null;
             oCB.onResponseDelay = null;
             oCB.onExpiration = null;
