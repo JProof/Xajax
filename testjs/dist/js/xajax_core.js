@@ -3088,7 +3088,7 @@ xajax.initializeRequest = function (oRequest) {
     lcb.take(oRequest, 'onRedirect');
     lcb.take(oRequest, 'onSuccess');
     lcb.take(oRequest, 'onComplete');
-    if ('undefined' != typeof oRequest.callback) {
+    if ('undefined' !== typeof oRequest.callback) {
         if (lcb.hasEvents)
             oRequest.callback = [oRequest.callback, lcb];
     } else
@@ -3100,7 +3100,7 @@ xajax.initializeRequest = function (oRequest) {
       ? xc.cursor.update()
       : xc.cursor.dontUpdate();
     oRequest.method = oRequest.method.toUpperCase();
-    if ('GET' != oRequest.method)
+    if ('GET' !== oRequest.method)
         oRequest.method = 'POST';	// W3C: Method is case sensitive
     
     oRequest.requestRetry = oRequest.retry;
@@ -3311,7 +3311,7 @@ xajax.prepareRequest = function (oRequest) {
 */
 xajax.request = function () {
     var numArgs = arguments.length;
-    if (0 == numArgs)
+    if (0 === numArgs)
         return false;
     var oRequest = {};
     if (1 < numArgs)
@@ -3331,7 +3331,7 @@ xajax.request = function () {
               'onFailure',
               oRequest
             );
-            if (0 == oRequest.requestRetry)
+            if (0 === oRequest.requestRetry)
                 throw e;
         }
     }
@@ -3421,7 +3421,7 @@ xajax.responseReceived = function (oRequest) {
         return xx.submitRequest(oRequest);
     }
     var fProc = xx.getResponseProcessor(oRequest);
-    if ('undefined' == typeof fProc) {
+    if ('undefined' === typeof fProc) {
         xcb.execute([gcb, lcb], 'onFailure', oRequest);
         xx.completeResponse(oRequest);
         return;
@@ -3445,7 +3445,7 @@ xajax.responseReceived = function (oRequest) {
 */
 xajax.getResponseProcessor = function (oRequest) {
     var fProc;
-    if ('undefined' == typeof oRequest.responseProcessor) {
+    if ('undefined' === typeof oRequest.responseProcessor) {
         var cTyp = oRequest.request.getResponseHeader('content-type');
         if (cTyp) {
             if (0 <= cTyp.indexOf('text/xml')) {

@@ -361,11 +361,11 @@ xajax.tools._nodeToObject = function (node) {
 	object - Javascript XHR object.
 */
 xajax.tools.getRequestObject = function () {
-    if ('undefined' != typeof XMLHttpRequest) {
+    if ('undefined' !== typeof XMLHttpRequest) {
         xajax.tools.getRequestObject = function () {
             return new XMLHttpRequest();
         }
-    } else if ('undefined' != typeof ActiveXObject) {
+    } else if ('undefined' !== typeof ActiveXObject) {
         xajax.tools.getRequestObject = function () {
             try {
                 return new ActiveXObject('Msxml2.XMLHTTP.4.0');
