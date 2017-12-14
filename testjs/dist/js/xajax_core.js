@@ -33,6 +33,8 @@ if ("undefined" === typeof xajax) {
 }
 /** Core Configuration Module **/
 (function (xjx) {
+    'use strict';
+    xjx.config = {};
     /*
 	Function: xajax.config.setDefault
 	
@@ -46,21 +48,31 @@ if ("undefined" === typeof xajax) {
 	defaultValue - (unknown):
 		The value to use if a value was not already set.
 */
-    'use strict';
-    xjx.config = {};
     var options = [];
+    /**
+     * @public
+     *
+     * Getting an option if set, default return is null so you can check against null
+     * @return mixed
+     * **/
     xjx.config.getOption = function (optName) {
         return options.hasOwnProperty(optName) ? options[optName] : null;
     };
+    /**
+     *  @public
+     * **/
     xjx.config.setOption = function (key, value) {
         options[key] = value;
     };
-    xjx.config.setOptions = function (arr) {
-        for (var obj in arr) {
-            xjx.config.setOption(obj, arr[obj]);
+    /**
+     * @private
+     * */
+    var setOptions = function (objs) {
+        for (var key in objs) {
+            xjx.config.setOption(key, objs[key]);
         }
     };
-    xjx.config.defaults = {
+    var defaults = {
         /*
 	    Object: commonHeaders
 	
@@ -207,9 +219,9 @@ if ("undefined" === typeof xajax) {
          * **/
         'responseQueueSize': 1000
     };
-    xjx.config.setOptions(xjx.config.defaults);
+    setOptions(defaults);
 }(xajax));
-console.log(xajax);
+// config end
 /*
     Class: xajax.config.status
     
@@ -3029,7 +3041,7 @@ xajax.initializeRequest = function (oRequest) {
     oRequest.append('postHeaders', xc.getOption('postHeaders'));
     oRequest.append('getHeaders', xc.getOption('getHeaders'));
     oRequest.set = function (option, defaultValue) {
-        if ('undefined' == typeof this[option])
+        if ('undefined' === typeof this[option])
             this[option] = defaultValue;
     };
     oRequest.set('statusMessages', xc.getOption('statusMessages'));
@@ -3048,7 +3060,7 @@ xajax.initializeRequest = function (oRequest) {
     var gcb = xcb.global;
     var lcb = xcb.create();
     lcb.take = function (frm, opt) {
-        if ('undefined' != typeof frm[opt]) {
+        if ('undefined' !== typeof frm[opt]) {
             lcb[opt] = frm[opt];
             lcb.hasEvents = true;
         }
@@ -3067,12 +3079,12 @@ xajax.initializeRequest = function (oRequest) {
             oRequest.callback = [oRequest.callback, lcb];
     } else
         oRequest.callback = lcb;
-    oRequest.status = (oRequest.statusMessages)
-      ? xc.status.update()
-      : xc.status.dontUpdate();
-    oRequest.cursor = (oRequest.waitCursor)
-      ? xc.cursor.update()
-      : xc.cursor.dontUpdate();
+    oRequest.status = (oRequest.statusMessages) ?
+      xc.status.update() :
+      xc.status.dontUpdate();
+    oRequest.cursor = (oRequest.waitCursor) ?
+      xc.cursor.update() :
+      xc.cursor.dontUpdate();
     oRequest.method = oRequest.method.toUpperCase();
     if ('GET' !== oRequest.method)
         oRequest.method = 'POST';	// W3C: Method is case sensitive
@@ -3107,7 +3119,7 @@ xajax.processParameters = function (oRequest) {
     var rd = [];
     var separator = '';
     for (var sCommand in oRequest.functionName) {
-        if ('constructor' != sCommand) {
+        if ('constructor' !== sCommand) {
             rd.push(separator);
             rd.push(sCommand);
             rd.push('=');
@@ -3124,7 +3136,7 @@ xajax.processParameters = function (oRequest) {
         var iLen = oRequest.parameters.length;
         while (i < iLen) {
             var oVal = oRequest.parameters[i];
-            if ('object' == typeof oVal && null != oVal) {
+            if ('object' === typeof oVal && null !== oVal) {
                 try {
 //					var oGuard = {};
 //					oGuard.depth = 0;
@@ -3144,15 +3156,15 @@ xajax.processParameters = function (oRequest) {
                 ++i;
             } else {
                 rd.push('&xjxargs[]=');
-                if ('undefined' == typeof oVal || null == oVal) {
+                if ('undefined' === typeof oVal || null == oVal) {
                     rd.push('*');
                 } else {
                     var sType = typeof oVal;
-                    if ('string' == sType)
+                    if ('string' === sType)
                         rd.push('S');
-                    else if ('boolean' == sType)
+                    else if ('boolean' === sType)
                         rd.push('B');
-                    else if ('number' == sType)
+                    else if ('number' === sType)
                         rd.push('N');
                     oVal = encodeURIComponent(oVal);
                     rd.push(oVal);
@@ -3162,7 +3174,7 @@ xajax.processParameters = function (oRequest) {
         }
     }
     oRequest.requestURI = oRequest.URI;
-    if ('GET' == oRequest.method) {
+    if ('GET' === oRequest.method) {
         oRequest.requestURI += oRequest.requestURI.indexOf('?') == -1 ?
           '?' :
           '&';
@@ -3226,10 +3238,7 @@ xajax.prepareRequest = function (oRequest) {
     }
     if ('undefined' !== typeof oRequest.userName && 'undefined' !== typeof oRequest.password) {
         oRequest.open = function () {
-            this.request.open(
-              this.method,
-              this.requestURI,
-              'asynchronous' === this.mode,
+            this.request.open(this.method, this.requestURI, 'asynchronous' === this.mode,
               oRequest.userName,
               oRequest.password);
         };
@@ -3330,6 +3339,7 @@ xajax.submitRequest = function (oRequest) {
     xcb.execute([gcb, lcb], 'onRequest', oRequest);
     oRequest.open();
     oRequest.applyRequestHeaders();
+    // todo work with emiters
     oRequest.cursor.onWaiting();
     oRequest.status.onWaiting();
     xajax._internalSend(oRequest);
@@ -3478,29 +3488,31 @@ xajax.executeCommand = function (command) {
 */
 xajax.completeResponse = function (oRequest) {
     xajax.callback.execute(
-      [xajax.callback.global, oRequest.callback],
-      'onComplete',
-      oRequest
-    );
+      [xajax.callback.global, oRequest.callback], 'onComplete', oRequest);
     oRequest.cursor.onComplete();
     oRequest.status.onComplete();
     // clean up -- these items are restored when the request is initiated
-    delete oRequest['functionName'];
-    delete oRequest['requestURI'];
-    delete oRequest['requestData'];
-    delete oRequest['requestRetry'];
-    delete oRequest['request'];
-    delete oRequest['set'];
-    delete oRequest['open'];
-    delete oRequest['setRequestHeaders'];
-    delete oRequest['setCommonRequestHeaders'];
-    delete oRequest['setPostRequestHeaders'];
-    delete oRequest['setGetRequestHeaders'];
-    delete oRequest['applyRequestHeaders'];
-    delete oRequest['finishRequest'];
-    delete oRequest['status'];
-    delete oRequest['cursor'];
-    delete oRequest['challengeResponse'];
+    var resets = [
+        'functionName',
+        'requestURI',
+        'requestData',
+        'requestRetry',
+        'request',
+        'set',
+        'open',
+        'setRequestHeaders',
+        'setCommonRequestHeaders',
+        'setPostRequestHeaders',
+        'setGetRequestHeaders',
+        'applyRequestHeaders',
+        'finishRequest',
+        'status',
+        'cursor',
+        'challengeResponse'
+    ];
+    resets.forEach(function (value) {
+        delete oRequest[value];
+    });
 };
 /*
 	Function: xajax.$

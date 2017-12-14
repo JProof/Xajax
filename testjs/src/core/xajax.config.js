@@ -1,5 +1,7 @@
 /** Core Configuration Module **/
 (function (xjx) {
+    'use strict';
+    xjx.config = {};
     /*
 	Function: xajax.config.setDefault
 	
@@ -13,21 +15,31 @@
 	defaultValue - (unknown):
 		The value to use if a value was not already set.
 */
-    'use strict';
-    xjx.config = {};
     var options = [];
+    /**
+     * @public
+     *
+     * Getting an option if set, default return is null so you can check against null
+     * @return mixed
+     * **/
     xjx.config.getOption = function (optName) {
         return options.hasOwnProperty(optName) ? options[optName] : null;
     };
+    /**
+     *  @public
+     * **/
     xjx.config.setOption = function (key, value) {
         options[key] = value;
     };
-    xjx.config.setOptions = function (arr) {
-        for (var obj in arr) {
-            xjx.config.setOption(obj, arr[obj]);
+    /**
+     * @private
+     * */
+    var setOptions = function (objs) {
+        for (var key in objs) {
+            xjx.config.setOption(key, objs[key]);
         }
     };
-    xjx.config.defaults = {
+    var defaults = {
         /*
 	    Object: commonHeaders
 	
@@ -174,6 +186,6 @@
          * **/
         'responseQueueSize': 1000
     };
-    xjx.config.setOptions(xjx.config.defaults);
+    setOptions(defaults);
 }(xajax));
-console.log(xajax);
+// config end
