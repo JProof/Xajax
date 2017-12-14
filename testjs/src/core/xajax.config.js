@@ -14,6 +14,7 @@
 		The value to use if a value was not already set.
 */
     "use strict";
+    xjx.config = {};
     var defaults = {
         /*
 	    Object: commonHeaders
@@ -137,7 +138,7 @@
 	Object: defaultReturnValue
 	
 	The value returned by <xajax.request> when in asynchronous
-	mode, or when a syncrhonous call does not specify the
+	mode, or when a synchronous call does not specify the
 	return value.
 */
         "defaultReturnValue": false,
@@ -171,3 +172,4 @@
         });
     };
 }(xajax));
+console.log(xajax);

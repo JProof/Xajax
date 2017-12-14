@@ -8,6 +8,16 @@ var scriptStackDir = "src/core/";
 var scripts = [
     scriptStackDir + "xajax.init.js",
     scriptStackDir + "xajax.config.js",
+    scriptStackDir + 'xajax.config.status.js',
+    scriptStackDir + 'xajax.config.cursor.js',
+    scriptStackDir + 'xajax.tools.js',
+    scriptStackDir + 'xajax.js.js',
+    scriptStackDir + 'xajax.dom.js',
+    scriptStackDir + 'xajax.domResponse.js',
+    scriptStackDir + 'xajax.css.js',
+    scriptStackDir + 'xajax.forms.js',
+    scriptStackDir + 'xajax.events.js',
+    scriptStackDir + 'xajax.callback.js',
     //"src/core/xajax.event.js"
     scriptStackDir + "xajax_core_old.js"
 ];
