@@ -18,6 +18,7 @@ var scripts = [
     scriptStackDir + 'xajax.forms.js',
     scriptStackDir + 'xajax.events.js',
     scriptStackDir + 'xajax.callback.js',
+    scriptStackDir + 'xajax.attr.js',
     //"src/core/xajax.event.js"
     scriptStackDir + "xajax_core_old.js"
 ];

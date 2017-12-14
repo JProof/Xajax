@@ -48,7 +48,7 @@ if ("undefined" === typeof xajax) {
 */
     "use strict";
     xjx.config = {};
-    var defaults = {
+    xjx.config.defaults = [
         /*
 	    Object: commonHeaders
 	
@@ -58,8 +58,10 @@ if ("undefined" === typeof xajax) {
 	
 	    These headers will be set for both POST and GET requests.
         */
-        "commonHeaders": {
+        {
+            'commonHeaders': {
             "If-Modified-Since": "Sat, 1 Jan 2000 00:00:00 GMT"
+            }
         },
         /*
 	Object: postHeaders
@@ -68,7 +70,7 @@ if ("undefined" === typeof xajax) {
 	option name and the associated value is the value that will
 	set when the request object is initialized.
 */
-        "postHeaders": {},
+        {'postHeaders': {}},
         /*
 	Object: getHeaders
 	
@@ -76,21 +78,21 @@ if ("undefined" === typeof xajax) {
 	option name and the associated value is the value that will
 	set when the request object is initialized.
 */
-        "getHeaders": {},
+        {'getHeaders': {}},
         /*
 	Boolean: waitCursor
 	
 	true - xajax should display a wait cursor when making a request
 	false - xajax should not show a wait cursor during a request
 */
-        "waitCursor": false,
+        {'waitCursor': false},
         /*
 	Boolean: statusMessages
 	
 	true - xajax should update the status bar during a request
 	false - xajax should not display the status of the request
 */
-        "statusMessages": false,
+        {'statusMessages': false},
         /*
 	Object: baseDocument
 	
@@ -98,14 +100,14 @@ if ("undefined" === typeof xajax) {
 	locating elements by ID.
 	@todo more explanations
 */
-        "baseDocument": document,
+        {'baseDocument': document},
         /*
             String: requestURI
             
             The URI that requests will be sent to.
             @todo buggy internal loop
         */
-        "requestURI": " xajax.config.baseDocument.URL",
+        {'requestURI': ' xajax.config.baseDocument.URL'},
         /*
 	String: defaultMode
 	
@@ -118,28 +120,28 @@ if ("undefined" === typeof xajax) {
 		response.  This option allows the server to return
 		a value directly to the caller.
 */
-        "defaultMode": "asynchronous",
+        {'defaultMode': 'asynchronous'},
         /*
 	String: defaultHttpVersion
 	
 	The Hyper Text Transport Protocol version designated in the
 	header of the request.
 */
-        "defaultHttpVersion": "HTTP/1.1",
+        {'defaultHttpVersion': 'HTTP/1.1'},
         /*
 	String: defaultContentType
 	
 	The content type designated in the header of the request.
 	@todo extra headers for upload
 */
-        "defaultContentType": "application/x-www-form-urlencoded",
+        {'defaultContentType': 'application/x-www-form-urlencoded'},
         /*
             Integer: defaultResponseDelayTime
             
             The delay time, in milliseconds, associated with the
             <xajax.callback.global.onRequestDelay> event.
         */
-        "defaultResponseDelayTime": 1000,
+        {'defaultResponseDelayTime': 1000},
         /*
 
 	Integer: defaultExpirationTime
@@ -148,7 +150,7 @@ if ("undefined" === typeof xajax) {
 	is considered expired.  This is used to trigger the
 	<xajax.callback.global.onExpiration event.
 */
-        "defaultExpirationTime": 10000,
+        {'defaultExpirationTime': 10000},
         /*
 	String: defaultMethod
 	
@@ -159,14 +161,14 @@ if ("undefined" === typeof xajax) {
 		to the <xajax.config.requestURI> to form a URL.
 		 W3C: Method is case sensitive
 */
-        "defaultMethod": "POST",
+        {'defaultMethod': 'POST'},
         /*
 	Integer: defaultRetry
 	
 	The number of times a request should be retried
 	if it expires.
 */
-        "defaultRetry": 5,
+        {'defaultRetry': 5},
         /*
 	Object: defaultReturnValue
 	
@@ -174,27 +176,27 @@ if ("undefined" === typeof xajax) {
 	mode, or when a synchronous call does not specify the
 	return value.
 */
-        "defaultReturnValue": false,
+        {'defaultReturnValue': false},
         /*
 	Integer: maxObjectDepth
 	
 	The maximum depth of recursion allowed when serializing
 	objects to be sent to the server in a request.
 */
-        "maxObjectDepth": 20,
+        {'maxObjectDepth': 20},
         /*
 	Integer: maxObjectSize
 	
 	The maximum number of members allowed when serializing
 	objects to be sent to the server in a request.
 */
-        "maxObjectSize": 2000,
+        {'maxObjectSize': 2000},
         /**
          *
          * @desc How many items can be hold in queue. It is an prevention from overload the queue(on errors or buggy loops)
          * **/
-        "responseQueueSize": 1000
-    };
+        {'responseQueueSize': 1000}
+    ];
     var options = [];
     xjx.config.setOption = function (key, value) {
         options[key] = value;
@@ -204,6 +206,7 @@ if ("undefined" === typeof xajax) {
             console.log(value);
         });
     };
+    xjx.config.setOptions(xjx.config.defaults);
 }(xajax));
 console.log(xajax);
 /*
@@ -1640,7 +1643,62 @@ console.log(xajax);
             
             The global callback object which is active for every request.
         */
-        global: create()
+    };
+    xajax.callback.global = xajax.callback.create();
+}(xajax));
+(function (xjx) {
+    xjx.attr = {
+        that: this,
+        has: function (ele) {
+            var hasAttrib = false;
+            try {
+                hasAttrib = xajax.tools.$(xajax.get(ele, 'id')).hasAttribute(xajax.get(ele, 'prop'));
+            } catch (error) {
+                throw error;
+            }
+            return hasAttrib;
+        },
+        /**
+         * ele={'id',prop,data[value]};
+         * ***/
+        add: function (ele) {
+            if (!xajax.attr.has(ele)) {
+                var elem = xajax.tools.$(xajax.get(ele, 'id'));
+                try {
+                    var data = xajax.get(ele, 'data');
+                    var value = xajax.get(data, 'value');
+                    value = (typeof value === 'string') ? value : '';
+                    elem.setAttribute(xajax.get(ele, 'prop'), value);
+                } catch (error) {
+                    throw error;
+                }
+                return true;
+            }
+        }, /**
+         * ele={'id',prop};
+         */
+        remove: function (ele) {
+            if (xajax.attr.has(ele)) {
+                var elem = xajax.tools.$(xajax.get(ele, 'id'));
+                try {
+                    elem.removeAttribute(xajax.get(ele, 'prop'));
+                } catch (error) {
+                    throw error;
+                }
+                return true;
+            }
+        },
+        /**
+         * ele={'id',prop,data[value,new]};
+         * ***/
+        replace: function (ele) {
+            if (xajax.attr.has(ele)) {
+                xajax.attr.remove(ele);
+            }
+            var data = xajax.get(ele, 'data');
+            ele.prop = xajax.get(data, 'new');
+            return xajax.attr.add(ele);
+        }
     };
 }(xajax));
 /**
@@ -1693,6 +1751,7 @@ xajax.tools.$ = function (sId) {
 
 //sId not an string so return it maybe its an object.
     if (typeof sId !== 'string') {
+        
         return sId;
     }
     obj = oDoc.getElementById(sId);
@@ -2041,6 +2100,7 @@ xajax.tools.getRequestObject = function () {
     // be reassigned by now and therefore, it will not loop.
     return xajax.tools.getRequestObject();
 };
+
 /*
 	Function: xajax.tools.getBrowserHTML
 	
@@ -2073,8 +2133,10 @@ xajax.tools.getBrowserHTML = function (sValue) {
     elWorkspace.innerHTML = sValue;
     var browserHTML = elWorkspace.innerHTML;
     elWorkspace.innerHTML = '';
+    
     return browserHTML;
 };
+
 /*
 	Function: xajax.tools.willChange
 	
@@ -2112,6 +2174,7 @@ xajax.tools.willChange = function (element, attribute, newData) {
     }
     return false;
 };
+
 /*
 	Function: xajax.tools.getFormValues
 	
@@ -2138,6 +2201,7 @@ xajax.tools.getFormValues = function (parent) {
     if ('string' == typeof parent)
         parent = xajax.$(parent);
     var aFormValues = {};
+
 //		JW: Removing these tests so that form values can be retrieved from a specified
 //		container element like a DIV, regardless of whether they exist in a form or not.
 //
@@ -2148,6 +2212,7 @@ xajax.tools.getFormValues = function (parent) {
             xajax.tools._getFormValues(aFormValues, parent.childNodes, submitDisabledElements, prefix);
     return aFormValues;
 };
+
 /*
 	Function: xajax.tools._getFormValues
 	
@@ -2164,6 +2229,7 @@ xajax.tools._getFormValues = function (aFormValues, children, submitDisabledElem
         xajax.tools._getFormValue(aFormValues, child, submitDisabledElements, prefix);
     }
 };
+
 /*
 	Function: xajax.tools._getFormValue
 	
@@ -2210,6 +2276,7 @@ xajax.tools._getFormValue = function (aFormValues, child, submitDisabledElements
         var p = aFormValues; // pointer reset
         while (a.length != 0) {
             var sa = a.substr(0, a.indexOf(']') + 1);
+            
             var lk = k; //save last key
             var lp = p; //save last pointer
             a = a.substr(a.indexOf(']') + 1);
@@ -2229,6 +2296,7 @@ xajax.tools._getFormValue = function (aFormValues, child, submitDisabledElements
                 for (var i in lp[lk]) k++;
             }
             if (typeof p[k] == 'undefined') {
+                
                 p[k] = {};
             }
         }
@@ -2237,6 +2305,7 @@ xajax.tools._getFormValue = function (aFormValues, child, submitDisabledElements
         aFormValues[name] = values;
     }
 };
+
 /*
 	Function: xajax.tools.stripOnPrefix
 	
@@ -2255,8 +2324,10 @@ xajax.tools.stripOnPrefix = function (sEventName) {
     sEventName = sEventName.toLowerCase();
     if (0 == sEventName.indexOf('on'))
         sEventName = sEventName.replace(/on/, '');
+    
     return sEventName;
 };
+
 /*
 	Function: xajax.tools.addOnPrefix
 	
@@ -2275,6 +2346,7 @@ xajax.tools.addOnPrefix = function (sEventName) {
     sEventName = sEventName.toLowerCase();
     if (0 != sEventName.indexOf('on'))
         sEventName = 'on' + sEventName;
+    
     return sEventName;
 };
 /*
@@ -2284,6 +2356,7 @@ xajax.tools.addOnPrefix = function (sEventName) {
 	and processing First In Last Out (FILO) buffers.
 */
 xajax.tools.queue = {};
+
 /*
 	Function: create
 	
@@ -2333,6 +2406,7 @@ xajax.tools.queue.retry = function (obj, count) {
     obj.retries = retries;
     return true;
 };
+
 /*
 	Function: xajax.tools.queue.rewind
 	
@@ -2350,6 +2424,7 @@ xajax.tools.queue.rewind = function (theQ) {
     else
         theQ.start = theQ.size;
 };
+
 /*
 	Function: xajax.tools.queue.setWakeup
 	
@@ -2376,6 +2451,7 @@ xajax.tools.queue.setWakeup = function (theQ, when) {
         xajax.tools.queue.process(theQ);
     }, when);
 };
+
 /*
 	Function: xajax.tools.queue.process
 	
@@ -2422,6 +2498,7 @@ xajax.tools.queue.process = function (theQ) {
     }
     return true;
 };
+
 /*
 	Function: xajax.tools.queue.push
 	
@@ -2446,6 +2523,7 @@ xajax.tools.queue.push = function (theQ, obj) {
     } else
         throw {code: 10003};
 };
+
 /*
 	Function: xajax.tools.queue.pushFront
 	
@@ -2465,6 +2543,7 @@ xajax.tools.queue.pushFront = function (theQ, obj) {
     xajax.tools.queue.rewind(theQ);
     theQ.commands[theQ.start] = obj;
 };
+
 /*
 	Function: xajax.tools.queue.pop
 	
@@ -2492,10 +2571,12 @@ xajax.tools.queue.pop = function (theQ) {
     theQ.start = next;
     return obj;
 };
+
 /*
 	Class: xajax.responseProcessor
 */
 xajax.responseProcessor = {};
+
 /*
 	Function: xajax.responseProcessor.json
 	
@@ -2507,6 +2588,7 @@ xajax.responseProcessor = {};
 	
 	oRequest - (object):  The request context object.
 */
+
 xajax.tools.json = {};
 xajax.tools.json.processFragment = function (nodes, seq, oRet, oRequest) {
     var xx = xajax;
@@ -2580,6 +2662,7 @@ xajax.responseProcessor.json = function (oRequest) {
     }
     return oRet;
 };
+
 /*
 	Function: xajax.responseProcessor.xml
 	
@@ -2632,12 +2715,15 @@ xajax.responseProcessor.xml = function (oRequest) {
 // xajax js
 // xajax dom
 // xajax domResponse
+
 /*
 	Class: xajax.css
 */
+
 /*
 	Class: xajax.forms
 */
+
 /*
 	Class: xajax.events
 */

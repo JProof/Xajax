@@ -113,6 +113,6 @@
             
             The global callback object which is active for every request.
         */
-        global: create()
     };
+    xajax.callback.global = xajax.callback.create();
 }(xajax));
