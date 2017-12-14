@@ -1,7 +1,9 @@
 /** Core Configuration Module **/
 (function (xjx) {
     'use strict';
-    xjx.config = {};
+    xjx.config = function (key) {
+        return xjx.config.getOption(key);
+    };
     /*
 	Function: xajax.config.setDefault
 	

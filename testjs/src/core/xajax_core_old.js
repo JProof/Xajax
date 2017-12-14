@@ -34,7 +34,7 @@ xajax.get = function (obj, ident) {
 		<xajax.$> and <xjx.$>
 */
 xajax.tools.$ = function (sId) {
-    var oDoc = xajax.config.baseDocument;
+    var oDoc = xajax.config('baseDocument');//xajax.config.baseDocument;
     if (!sId)
         return null;
     var obj;
@@ -615,7 +615,7 @@ xajax.tools.json.processFragment = function (nodes, seq, oRet, oRequest) {
                 nodes[nodeName][a]= "0" is an valid xajax response stack item
                 nodes[nodeName][a]= "pop" is an method from somewhere but not from xjxobj
                 */
-                if (parseInt(a) !== a) continue;
+                if (parseInt(a) != a) continue;
                 var obj = nodes[nodeName][a];
                 obj.fullName = '*unknown*';
                 obj.sequence = seq;
@@ -741,124 +741,12 @@ xajax.responseRedirectCodes = ['301', '302', '307'];
 	
 	The object that manages commands and command handlers.
 */
-/*
-	Function: xajax.command.handler.call
-	
-	Calls the registered command handler for the specified command
-	(you should always check isRegistered before calling this function)
 
-	Parameters:
-		command - (object):
-			- cmd: The Name of the function.
 
-	Returns:
-		true - (boolean) :
-*/
-xajax.command.handler.call = function (command) {
-    var shortName = command.cmd;
-    return xajax.command.handler.handlers[shortName](command);
-};
-xajax.command.handler.register('rcmplt', function (args) {
-    xajax.completeResponse(args.request);
-    return true;
-});
-xajax.command.handler.register('css', function (args) {
-    args.fullName = 'includeCSS';
-    if ('undefined' == typeof args.media)
-        args.media = 'screen';
-    return xajax.css.add(args.data, args.media);
-});
-xajax.command.handler.register('rcss', function (args) {
-    args.fullName = 'removeCSS';
-    if ('undefined' == typeof args.media)
-        args.media = 'screen';
-    return xajax.css.remove(args.data, args.media);
-});
-xajax.command.handler.register('wcss', function (args) {
-    args.fullName = 'waitForCSS';
-    return xajax.css.waitForCSS(args);
-});
-xajax.command.handler.register('as', function (args) {
-    args.fullName = 'assign/clear';
-    try {
-        return xajax.dom.assign(args.target, args.prop, args.data);
-    } catch (e) {
-        // do nothing, if the debug module is installed it will
-        // catch and handle the exception
-    }
-    return true;
-});
-xajax.command.handler.register('ap', function (args) {
-    args.fullName = 'append';
-    return xajax.dom.append(args.target, args.prop, args.data);
-});
-xajax.command.handler.register('pp', function (args) {
-    args.fullName = 'prepend';
-    return xajax.dom.prepend(args.target, args.prop, args.data);
-});
-xajax.command.handler.register('rp', function (args) {
-    args.fullName = 'replace';
-    return xajax.dom.replace(args.id, args.prop, args.data);
-});
-xajax.command.handler.register('rm', function (args) {
-    args.fullName = 'remove';
-    return xajax.dom.remove(args.id);
-});
-xajax.command.handler.register('ce', function (args) {
-    args.fullName = 'create';
-    return xajax.dom.create(args.id, args.data, args.prop);
-});
-xajax.command.handler.register('ie', function (args) {
-    args.fullName = 'insert';
-    return xajax.dom.insert(args.id, args.data, args.prop);
-});
-xajax.command.handler.register('ia', function (args) {
-    args.fullName = 'insertAfter';
-    return xajax.dom.insertAfter(args.id, args.data, args.prop);
-});
-xajax.command.handler.register('DSR', xajax.domResponse.startResponse);
-xajax.command.handler.register('DCE', xajax.domResponse.createElement);
-xajax.command.handler.register('DSA', xajax.domResponse.setAttribute);
-xajax.command.handler.register('DAC', xajax.domResponse.appendChild);
-xajax.command.handler.register('DIB', xajax.domResponse.insertBefore);
-xajax.command.handler.register('DIA', xajax.domResponse.insertAfter);
-xajax.command.handler.register('DAT', xajax.domResponse.appendText);
-xajax.command.handler.register('DRC', xajax.domResponse.removeChildren);
-xajax.command.handler.register('DER', xajax.domResponse.endResponse);
+
 /**
  *  @since 0.7.1
  * */
-xajax.command.handler.register('attr:ad', xajax.attr.add);
-xajax.command.handler.register('attr:re', xajax.attr.remove);
-xajax.command.handler.register('attr:rp', xajax.attr.replace);
-xajax.command.handler.register('c:as', xajax.dom.contextAssign);
-xajax.command.handler.register('c:ap', xajax.dom.contextAppend);
-xajax.command.handler.register('c:pp', xajax.dom.contextPrepend);
-xajax.command.handler.register('s', xajax.js.sleep);
-xajax.command.handler.register('ino', xajax.js.includeScriptOnce);
-xajax.command.handler.register('in', xajax.js.includeScript);
-xajax.command.handler.register('rjs', xajax.js.removeScript);
-xajax.command.handler.register('wf', xajax.js.waitFor);
-xajax.command.handler.register('js', xajax.js.execute);
-xajax.command.handler.register('jc', xajax.js.call);
-xajax.command.handler.register('sf', xajax.js.setFunction);
-xajax.command.handler.register('wpf', xajax.js.wrapFunction);
-xajax.command.handler.register('al', function (args) {
-    args.fullName = 'alert';
-    alert(args.data);
-    return true;
-});
-xajax.command.handler.register('cc', xajax.js.confirmCommands);
-xajax.command.handler.register('ci', xajax.forms.createInput);
-xajax.command.handler.register('ii', xajax.forms.insertInput);
-xajax.command.handler.register('iia', xajax.forms.insertInputAfter);
-xajax.command.handler.register('ev', xajax.events.setEvent);
-xajax.command.handler.register('ah', xajax.events.addHandler);
-xajax.command.handler.register('rh', xajax.events.removeHandler);
-xajax.command.handler.register('dbg', function (args) {
-    args.fullName = 'debug message';
-    return true;
-});
 /*
 	Function: xajax.initializeRequest
 	
@@ -1307,13 +1195,13 @@ xajax.getResponseProcessor = function (oRequest) {
 	false - The command signalled that it needs to pause processing.
 */
 xajax.executeCommand = function (command) {
-    if (xajax.command.handler.isRegistered(command)) {
+    if (xajax.command.isRegistered(command)) {
         // it is important to grab the element here as the previous command
         // might have just created the element
         if (command.id)
             command.target = xajax.$(command.id);
         // process the command
-        if (false === xajax.command.handler.call(command)) {
+        if (false === xajax.command.call(command)) {
             xajax.tools.queue.pushFront(xajax.response, command);
             return false;
         }

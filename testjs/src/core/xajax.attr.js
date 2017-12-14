@@ -1,3 +1,4 @@
+/** xajax attr **/
 (function (xjx) {
     xjx.attr = {
         that: this,
