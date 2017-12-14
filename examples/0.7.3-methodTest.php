@@ -19,11 +19,15 @@ require_once __DIR__ . '/bootstrap.php';
 use Xajax\Factory;
 
 set_error_handler('\Xajax\Errors\Handler::addError');
-
+Factory::getScripts()->getConfiguration()->setUseUncompressedScripts(true);
 $xConfig = Factory::getInstance()->getConfig();
+
 $xConfig->setErrorHandler('\Xajax\Errors\Handler::addException')->setToHtml(true);
 $xufListDirectory = Xajax\Plugins\Userfunction\Request::autoRegister('listDirectory');
 
+Factory::getScripts()->addScript(new Xajax\Scripts\Core(['scriptName' => 'xajax',
+                                                         'fileName'   => 'xajax_core.js',
+                                                         'dir'        => dirname(__DIR__) . '/testjs/dist/js']));
 /**
  * Call directly an method during method-name
  *

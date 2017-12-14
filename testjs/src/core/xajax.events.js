@@ -2,6 +2,48 @@
 	Class: xajax.events
 */
 (function (xjx) {
+    
+    
+    /*
+        Function: xajax.tools.stripOnPrefix
+        
+        Detect, and if found, remove the prefix 'on' from the specified
+        string.  This is used while working with event handlers.
+        
+        Parameters:
+        
+        sEventName - (string): The string to be modified.
+        
+        Returns:
+        
+        string - The modified string.
+    */
+    xjx.tools.stripOnPrefix = function (sEventName) {
+        sEventName = sEventName.toLowerCase();
+        if (0 === sEventName.indexOf('on'))
+            sEventName = sEventName.replace(/on/, '');
+        return sEventName;
+    };
+    /*
+        Function: xajax.tools.addOnPrefix
+        
+        Detect, and add if not found, the prefix 'on' from the specified
+        string.  This is used while working with event handlers.
+        
+        Parameters:
+        
+        sEventName - (string): The string to be modified.
+        
+        Returns:
+        
+        string - The modified string.
+    */
+    xjx.tools.addOnPrefix = function (sEventName) {
+        sEventName = sEventName.toLowerCase();
+        if (0 !== sEventName.indexOf('on'))
+            sEventName = 'on' + sEventName;
+        return sEventName;
+    };
     xjx.events = {
         /*
             Function: xajax.events.setEvent

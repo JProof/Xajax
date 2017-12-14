@@ -134,7 +134,7 @@
         var obj = xajax.tools.queue.pop(theQ);
         while (null != obj) {
             try {
-                if (false == xajax.executeCommand(obj))
+                if (false === xajax.executeCommand(obj))
                     return false;
             } catch (e) {
             }
@@ -161,7 +161,7 @@
         var next = theQ.end + 1;
         if (next > theQ.size)
             next = 0;
-        if (next != theQ.start) {
+        if (next !== theQ.start) {
             theQ.commands[theQ.end] = obj;
             theQ.end = next;
         } else
@@ -183,7 +183,7 @@
             The object you would like stored in the queue.
     */
     xjx.tools.queue.pushFront = function (theQ, obj) {
-        xajax.tools.queue.rewind(theQ);
+        xjx.tools.queue.rewind(theQ);
         theQ.commands[theQ.start] = obj;
     };
     /*
@@ -203,7 +203,7 @@
     */
     xjx.tools.queue.pop = function (theQ) {
         var next = theQ.start;
-        if (next == theQ.end)
+        if (next === theQ.end)
             return null;
         next++;
         if (next > theQ.size)
