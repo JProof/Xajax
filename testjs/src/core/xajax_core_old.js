@@ -45,10 +45,8 @@ xajax.tools.$ = function (sId) {
                 return obj;
         }
     }
-
 //sId not an string so return it maybe its an object.
     if (typeof sId !== 'string') {
-        
         return sId;
     }
     obj = oDoc.getElementById(sId);
@@ -58,7 +56,6 @@ xajax.tools.$ = function (sId) {
         return oDoc.all[sId];
     return obj;
 };
-
 /*
 	Function xajax.tools.in_array
 	
@@ -89,7 +86,6 @@ xajax.tools.in_array = function (array, valueToCheck) {
     }
     return false;
 };
-
 /*
 	Function: xajax.tools.doubleQuotes
 	
@@ -108,7 +104,6 @@ xajax.tools.doubleQuotes = function (haystack) {
     if (typeof haystack === 'undefined') return false;
     return haystack.replace(new RegExp('\'', 'g'), '"');
 };
-
 /*
 	Function: xajax.tools.singleQuotes
 	
@@ -126,7 +121,6 @@ xajax.tools.singleQuotes = function(haystack) {
 	return haystack.replace(new RegExp('"', 'g'), "'");
 }
 */
-
 /*
 	Function: xajax.tools._escape
 	
@@ -190,7 +184,6 @@ xajax.tools._escape = function(data) {
 	return data;
 }
 */
-
 /*
 	Function: xajax.tools._objectToXML
 	
@@ -215,7 +208,6 @@ xajax.tools._escape = function(data) {
 	
 	<xajax.config.maxObjectDepth> and <xajax.config.maxObjectSize>
 */
-
 /*
 xajax.tools._objectToXML = function(obj, guard) {
 	var aXml = [];
@@ -268,7 +260,6 @@ xajax.tools._objectToXML = function(obj, guard) {
 	return aXml.join('');
 }
 */
-
 /*
 	Function: xajax.tools._enforceDataType
 	
@@ -295,7 +286,6 @@ xajax.tools._enforceDataType = function (value) {
 //		value = new String(value);
     return value;
 };
-
 /*
 	Function: xajax.tools._nodeToObject
 	
@@ -349,7 +339,6 @@ xajax.tools._nodeToObject = function (node) {
     }
     throw {code: 10001, data: node.nodeName};
 };
-
 /*
 	Function: xajax.tools.getRequestObject
 	
@@ -364,7 +353,7 @@ xajax.tools.getRequestObject = function () {
     if ('undefined' !== typeof XMLHttpRequest) {
         xajax.tools.getRequestObject = function () {
             return new XMLHttpRequest();
-        }
+        };
     } else if ('undefined' !== typeof ActiveXObject) {
         xajax.tools.getRequestObject = function () {
             try {
@@ -382,22 +371,20 @@ xajax.tools.getRequestObject = function () {
                 };
                 return xajax.tools.getRequestObject();
             }
-        }
+        };
     } else if (window.createRequest) {
         xajax.tools.getRequestObject = function () {
             return window.createRequest();
-        }
+        };
     } else {
         xajax.tools.getRequestObject = function () {
             throw {code: 10002};
-        }
+        };
     }
-    
     // this would seem to cause an infinite loop, however, the function should
     // be reassigned by now and therefore, it will not loop.
     return xajax.tools.getRequestObject();
 };
-
 /*
 	Function: xajax.tools.getBrowserHTML
 	
@@ -430,10 +417,8 @@ xajax.tools.getBrowserHTML = function (sValue) {
     elWorkspace.innerHTML = sValue;
     var browserHTML = elWorkspace.innerHTML;
     elWorkspace.innerHTML = '';
-    
     return browserHTML;
 };
-
 /*
 	Function: xajax.tools.willChange
 	
@@ -471,7 +456,6 @@ xajax.tools.willChange = function (element, attribute, newData) {
     }
     return false;
 };
-
 /*
 	Function: xajax.tools.getFormValues
 	
@@ -498,7 +482,6 @@ xajax.tools.getFormValues = function (parent) {
     if ('string' == typeof parent)
         parent = xajax.$(parent);
     var aFormValues = {};
-
 //		JW: Removing these tests so that form values can be retrieved from a specified
 //		container element like a DIV, regardless of whether they exist in a form or not.
 //
@@ -509,7 +492,6 @@ xajax.tools.getFormValues = function (parent) {
             xajax.tools._getFormValues(aFormValues, parent.childNodes, submitDisabledElements, prefix);
     return aFormValues;
 };
-
 /*
 	Function: xajax.tools._getFormValues
 	
@@ -526,7 +508,6 @@ xajax.tools._getFormValues = function (aFormValues, children, submitDisabledElem
         xajax.tools._getFormValue(aFormValues, child, submitDisabledElements, prefix);
     }
 };
-
 /*
 	Function: xajax.tools._getFormValue
 	
@@ -573,7 +554,6 @@ xajax.tools._getFormValue = function (aFormValues, child, submitDisabledElements
         var p = aFormValues; // pointer reset
         while (a.length != 0) {
             var sa = a.substr(0, a.indexOf(']') + 1);
-            
             var lk = k; //save last key
             var lp = p; //save last pointer
             a = a.substr(a.indexOf(']') + 1);
@@ -593,7 +573,6 @@ xajax.tools._getFormValue = function (aFormValues, child, submitDisabledElements
                 for (var i in lp[lk]) k++;
             }
             if (typeof p[k] == 'undefined') {
-                
                 p[k] = {};
             }
         }
@@ -602,7 +581,6 @@ xajax.tools._getFormValue = function (aFormValues, child, submitDisabledElements
         aFormValues[name] = values;
     }
 };
-
 /*
 	Function: xajax.tools.stripOnPrefix
 	
@@ -621,10 +599,8 @@ xajax.tools.stripOnPrefix = function (sEventName) {
     sEventName = sEventName.toLowerCase();
     if (0 == sEventName.indexOf('on'))
         sEventName = sEventName.replace(/on/, '');
-    
     return sEventName;
 };
-
 /*
 	Function: xajax.tools.addOnPrefix
 	
@@ -643,7 +619,6 @@ xajax.tools.addOnPrefix = function (sEventName) {
     sEventName = sEventName.toLowerCase();
     if (0 != sEventName.indexOf('on'))
         sEventName = 'on' + sEventName;
-    
     return sEventName;
 };
 /*
@@ -652,227 +627,10 @@ xajax.tools.addOnPrefix = function (sEventName) {
 	This contains the code and variables for building, populating
 	and processing First In Last Out (FILO) buffers.
 */
-xajax.tools.queue = {};
-
-/*
-	Function: create
-	
-	Construct and return a new queue object.
-	
-	Parameters:
-	
-	size - (integer):
-		The number of entries the queue will be able to hold.
-*/
-xajax.tools.queue.create = function (size) {
-    return {
-        start: 0,
-        size: size,
-        end: 0,
-        commands: [],
-        timeout: null
-    }
-};
-
-/*
-	Function: xajax.tools.queue.retry
-	
-	Maintains a retry counter for the given object.
-	
-	Parameters:
-	
-	obj - (object):
-		The object to track the retry count for.
-		
-	count - (integer):
-		The number of times the operation should be attempted
-		before a failure is indicated.
-		
-	Returns:
-	
-	true - The object has not exhausted all the retries.
-	false - The object has exhausted the retry count specified.
-*/
-xajax.tools.queue.retry = function (obj, count) {
-    var retries = obj.retries;
-    if (retries) {
-        --retries;
-        if (1 > retries)
-            return false;
-    } else retries = count;
-    obj.retries = retries;
-    return true;
-};
-
-/*
-	Function: xajax.tools.queue.rewind
-	
-	Rewind the buffer head pointer, effectively reinserting the
-	last retrieved object into the buffer.
-	
-	Parameters:
-	
-	theQ - (object):
-		The queue to be rewound.
-*/
-xajax.tools.queue.rewind = function (theQ) {
-    if (0 < theQ.start)
-        --theQ.start;
-    else
-        theQ.start = theQ.size;
-};
-
-/*
-	Function: xajax.tools.queue.setWakeup
-	
-	Set or reset a timeout that is used to restart processing
-	of the queue.  This allows the queue to asynchronously wait
-	for an event to occur (giving the browser time to process
-	pending events, like loading files)
-	
-	Parameters:
-	
-	theQ - (object):
-		The queue to process upon timeout.
-		
-	when - (integer):
-		The number of milliseconds to wait before starting/
-		restarting the processing of the queue.
-*/
-xajax.tools.queue.setWakeup = function (theQ, when) {
-    if (null != theQ.timeout) {
-        clearTimeout(theQ.timeout);
-        theQ.timeout = null;
-    }
-    theQ.timout = setTimeout(function () {
-        xajax.tools.queue.process(theQ);
-    }, when);
-};
-
-/*
-	Function: xajax.tools.queue.process
-	
-	While entries exist in the queue, pull and entry out and
-	process it's command.  When a command returns false, the
-	processing is halted.
-	
-	Parameters:
-	
-	theQ - (object): The queue object to process.  This should
-		have been crated by calling <xajax.tools.queue.create>.
-	
-	Returns:
-
-	true - The queue was fully processed and is now empty.
-	false - The queue processing was halted before the
-		queue was fully processed.
-		
-	Note:
-	
-	- Use <xajax.tools.queue.setWakeup> or call this function to
-	cause the queue processing to continue.
-
-	- This will clear the associated timeout, this function is not
-	designed to be reentrant.
-	
-	- When an exception is caught, do nothing; if the debug module
-	is installed, it will catch the exception and handle it.
-*/
-xajax.tools.queue.process = function (theQ) {
-    if (null != theQ.timeout) {
-        clearTimeout(theQ.timeout);
-        theQ.timeout = null;
-    }
-    var obj = xajax.tools.queue.pop(theQ);
-    while (null != obj) {
-        try {
-            if (false == xajax.executeCommand(obj))
-                return false;
-        } catch (e) {
-        }
-        delete obj;
-        obj = xajax.tools.queue.pop(theQ);
-    }
-    return true;
-};
-
-/*
-	Function: xajax.tools.queue.push
-	
-	Push a new object into the tail of the buffer maintained by the
-	specified queue object.
-	
-	Parameters:
-	
-	theQ - (object):
-		The queue in which you would like the object stored.
-		
-	obj - (object):
-		The object you would like stored in the queue.
-*/
-xajax.tools.queue.push = function (theQ, obj) {
-    var next = theQ.end + 1;
-    if (next > theQ.size)
-        next = 0;
-    if (next != theQ.start) {
-        theQ.commands[theQ.end] = obj;
-        theQ.end = next;
-    } else
-        throw {code: 10003};
-};
-
-/*
-	Function: xajax.tools.queue.pushFront
-	
-	Push a new object into the head of the buffer maintained by
-	the specified queue object.  This effectively pushes an object
-	to the front of the queue... it will be processed first.
-	
-	Parameters:
-	
-	theQ - (object):
-		The queue in which you would like the object stored.
-		
-	obj - (object):
-		The object you would like stored in the queue.
-*/
-xajax.tools.queue.pushFront = function (theQ, obj) {
-    xajax.tools.queue.rewind(theQ);
-    theQ.commands[theQ.start] = obj;
-};
-
-/*
-	Function: xajax.tools.queue.pop
-	
-	Attempt to pop an object off the head of the queue.
-	
-	Parameters:
-	
-	theQ - (object):
-		The queue object you would like to modify.
-		
-	Returns:
-	
-	object - The object that was at the head of the queue or
-		null if the queue was empty.
-*/
-xajax.tools.queue.pop = function (theQ) {
-    var next = theQ.start;
-    if (next == theQ.end)
-        return null;
-    next++;
-    if (next > theQ.size)
-        next = 0;
-    var obj = theQ.commands[theQ.start];
-    delete theQ.commands[theQ.start];
-    theQ.start = next;
-    return obj;
-};
 
 /*
 	Class: xajax.responseProcessor
 */
-xajax.responseProcessor = {};
 
 /*
 	Function: xajax.responseProcessor.json
@@ -885,7 +643,6 @@ xajax.responseProcessor = {};
 	
 	oRequest - (object):  The request context object.
 */
-
 xajax.tools.json = {};
 xajax.tools.json.processFragment = function (nodes, seq, oRet, oRequest) {
     var xx = xajax;
@@ -917,121 +674,32 @@ xajax.tools.json.processFragment = function (nodes, seq, oRet, oRequest) {
     }
     return oRet;
 };
-xajax.responseProcessor.json = function (oRequest) {
-    var xx = xajax;
-    var xt = xx.tools;
-    var xcb = xx.callback;
-    var gcb = xcb.global;
-    var lcb = oRequest.callback;
-    var oRet = oRequest.returnValue;
-    if (xt.in_array(xx.responseSuccessCodes, oRequest.request.status)) {
-        xcb.execute([gcb, lcb], 'onSuccess', oRequest);
-        var seq = 0;
-        if (oRequest.request.responseText) {
-            try {
-                var responseJSON = eval('(' + oRequest.request.responseText + ')');
-            } catch (ex) {
-                throw(ex);
-            }
-            if (('object' == typeof responseJSON) && ('object' == typeof responseJSON.xjxobj)) {
-                oRequest.status.onProcessing();
-                oRet = xt.json.processFragment(responseJSON, seq, oRet, oRequest);
-            } else {
-            }
-        }
-        var obj = {};
-        obj.fullName = 'Response Complete';
-        obj.sequence = seq;
-        obj.request = oRequest;
-        obj.context = oRequest.context;
-        obj.cmd = 'rcmplt';
-        xt.queue.push(xx.response, obj);
-        // do not re-start the queue if a timeout is set
-        if (null == xx.response.timeout)
-            xt.queue.process(xx.response);
-    } else if (xt.in_array(xx.responseRedirectCodes, oRequest.request.status)) {
-        xcb.execute([gcb, lcb], 'onRedirect', oRequest);
-        window.location = oRequest.request.getResponseHeader('location');
-        xx.completeResponse(oRequest);
-    } else if (xt.in_array(xx.responseErrorsForAlert, oRequest.request.status)) {
-        xcb.execute([gcb, lcb], 'onFailure', oRequest);
-        xx.completeResponse(oRequest);
-    }
-    return oRet;
-};
-
+/*
+Function: xajax.responseProcessor.json
+ */
 /*
 	Function: xajax.responseProcessor.xml
-	
-	Parse the response XML into a series of commands.  The commands
-	are constructed by calling <xajax.tools.xml.parseAttributes> and
-	<xajax.tools.xml.parseChildren>.
-	
-	Parameters:
-	
-	oRequest - (object):  The request context object.
+
 */
-xajax.responseProcessor.xml = function (oRequest) {
-    var xx = xajax;
-    var xt = xx.tools;
-    var xcb = xx.callback;
-    var gcb = xcb.global;
-    var lcb = oRequest.callback;
-    var oRet = oRequest.returnValue;
-    if (xt.in_array(xx.responseSuccessCodes, oRequest.request.status)) {
-        xcb.execute([gcb, lcb], 'onSuccess', oRequest);
-        var seq = 0;
-        if (oRequest.request.responseXML) {
-            var responseXML = oRequest.request.responseXML;
-            if (responseXML.documentElement) {
-                oRequest.status.onProcessing();
-                var child = responseXML.documentElement.firstChild;
-                oRet = xt.xml.processFragment(child, seq, oRet, oRequest);
-            }
-        }
-        var obj = {};
-        obj.fullName = 'Response Complete';
-        obj.sequence = seq;
-        obj.request = oRequest;
-        obj.context = oRequest.context;
-        obj.cmd = 'rcmplt';
-        xt.queue.push(xx.response, obj);
-        // do not re-start the queue if a timeout is set
-        if (null == xx.response.timeout)
-            xt.queue.process(xx.response);
-    } else if (xt.in_array(xx.responseRedirectCodes, oRequest.request.status)) {
-        xcb.execute([gcb, lcb], 'onRedirect', oRequest);
-        window.location = oRequest.request.getResponseHeader('location');
-        xx.completeResponse(oRequest);
-    } else if (xt.in_array(xx.responseErrorsForAlert, oRequest.request.status)) {
-        xcb.execute([gcb, lcb], 'onFailure', oRequest);
-        xx.completeResponse(oRequest);
-    }
-    return oRet;
-};
+
 // xajax js
 // xajax dom
 // xajax domResponse
-
 /*
 	Class: xajax.css
 */
-
 /*
 	Class: xajax.forms
 */
-
 /*
 	Class: xajax.events
 */
 /*
     Class: xajax.callback
 */
-
 /*
 	Class: xajax
 */
-
 /*
 	Object: xajax.response
 	
@@ -1039,7 +707,6 @@ xajax.responseProcessor.xml = function (oRequest) {
 	from the server, until they are processed.
 */
 xajax.response = xajax.tools.queue.create(xajax.config.responseQueueSize);
-
 /*
 	Object: responseSuccessCodes
 	
@@ -1050,7 +717,6 @@ xajax.response = xajax.tools.queue.create(xajax.config.responseQueueSize);
 	These values should match those specified in the HTTP standard.
 */
 xajax.responseSuccessCodes = ['0', '200'];
-
 // 10.4.1 400 Bad Request
 // 10.4.2 401 Unauthorized
 // 10.4.3 402 Payment Required
@@ -1076,7 +742,6 @@ xajax.responseSuccessCodes = ['0', '200'];
 // 10.5.4 503 Service Unavailable
 // 10.5.5 504 Gateway Timeout
 // 10.5.6 505 HTTP Version Not Supported
-
 /*
 	Object: responseErrorsForAlert
 	
@@ -1094,7 +759,6 @@ xajax.responseErrorsForAlert = [
     '501',
     '502',
     '503'];
-
 // 10.3.1 300 Multiple Choices
 // 10.3.2 301 Moved Permanently
 // 10.3.3 302 Found
@@ -1103,7 +767,6 @@ xajax.responseErrorsForAlert = [
 // 10.3.6 305 Use Proxy
 // 10.3.7 306 (Unused)
 // 10.3.8 307 Temporary Redirect
-
 /*
 	Object: responseRedirectCodes
 	
@@ -1115,7 +778,6 @@ xajax.responseErrorsForAlert = [
 	the xajax request should be sent to another URL.
 */
 xajax.responseRedirectCodes = ['301', '302', '307'];
-
 /*
 	Class: xajax.command
 	
@@ -1123,7 +785,6 @@ xajax.responseRedirectCodes = ['301', '302', '307'];
 */
 if ('undefined' == typeof xajax.command)
     xajax.command = {};
-
 /*
 	Function: xajax.command.create
 	
@@ -1139,7 +800,6 @@ xajax.command.create = function (sequence, request, context) {
     newCmd.context = context;
     return newCmd;
 };
-
 /*
 	Class: xajax.command.handler
 	
@@ -1147,7 +807,6 @@ xajax.command.create = function (sequence, request, context) {
 */
 if ('undefined' == typeof xajax.command.handler)
     xajax.command.handler = {};
-
 /*
 	Object: handlers
 	
@@ -1156,7 +815,6 @@ if ('undefined' == typeof xajax.command.handler)
 */
 if ('undefined' == typeof xajax.command.handler.handlers)
     xajax.command.handler.handlers = [];
-
 /*
 	Function: xajax.command.handler.register
 	
@@ -1165,7 +823,6 @@ if ('undefined' == typeof xajax.command.handler.handlers)
 xajax.command.handler.register = function (shortName, func) {
     xajax.command.handler.handlers[shortName] = func;
 };
-
 /*
 	Function: xajax.command.handler.unregister
 	
@@ -1182,7 +839,6 @@ xajax.command.handler.unregister = function (shortName) {
     delete xajax.command.handler.handlers[shortName];
     return func;
 };
-
 /*
 	Function: xajax.command.handler.isRegistered
 	
@@ -1203,7 +859,6 @@ xajax.command.handler.isRegistered = function (command) {
         return true;
     return false;
 };
-
 /*
 	Function: xajax.command.handler.call
 	
@@ -1288,7 +943,6 @@ xajax.command.handler.register('DIA', xajax.domResponse.insertAfter);
 xajax.command.handler.register('DAT', xajax.domResponse.appendText);
 xajax.command.handler.register('DRC', xajax.domResponse.removeChildren);
 xajax.command.handler.register('DER', xajax.domResponse.endResponse);
-
 /**
  *  @since 0.7.1
  * */
@@ -1323,7 +977,6 @@ xajax.command.handler.register('dbg', function (args) {
     args.fullName = 'debug message';
     return true;
 });
-
 /*
 	Function: xajax.initializeRequest
 	
@@ -1365,7 +1018,6 @@ xajax.initializeRequest = function (oRequest) {
     oRequest.set('maxObjectDepth', xc.getOption('maxObjectDepth'));
     oRequest.set('maxObjectSize', xc.getOption('maxObjectSize'));
     oRequest.set('context', window);
-    
     var xcb = xx.callback;
     var gcb = xcb.global;
     var lcb = xcb.create();
@@ -1398,7 +1050,6 @@ xajax.initializeRequest = function (oRequest) {
     oRequest.method = oRequest.method.toUpperCase();
     if ('GET' != oRequest.method)
         oRequest.method = 'POST';	// W3C: Method is case sensitive
-    
     oRequest.requestRetry = oRequest.retry;
     oRequest.append('postHeaders', {
         'content-type': oRequest.contentType
@@ -1494,7 +1145,6 @@ xajax.processParameters = function (oRequest) {
     }
     oRequest.requestData = rd.join('');
 };
-
 /*
 	Function: xajax.prepareRequest
 	
@@ -1542,11 +1192,11 @@ xajax.prepareRequest = function (oRequest) {
         };
         oRequest.finishRequest = function () {
             return this.returnValue;
-        }
+        };
     } else {
         oRequest.finishRequest = function () {
             return xajax.responseReceived(oRequest);
-        }
+        };
     }
     if ('undefined' != typeof oRequest.userName && 'undefined' != typeof oRequest.password) {
         oRequest.open = function () {
@@ -1556,14 +1206,14 @@ xajax.prepareRequest = function (oRequest) {
               'asynchronous' == this.mode,
               oRequest.userName,
               oRequest.password);
-        }
+        };
     } else {
         oRequest.open = function () {
             this.request.open(
               this.method,
               this.requestURI,
               'asynchronous' == this.mode);
-        }
+        };
     }
     if ('POST' == oRequest.method) {	// W3C: Method is case sensitive
         oRequest.applyRequestHeaders = function () {
@@ -1580,12 +1230,12 @@ xajax.prepareRequest = function (oRequest) {
                 if (0 == this.requestRetry) this.requestRetry = 1;
                 throw e;
             }
-        }
+        };
     } else {
         oRequest.applyRequestHeaders = function () {
             this.setCommonRequestHeaders();
             this.setGetRequestHeaders();
-        }
+        };
     }
 };
 /*
@@ -1652,7 +1302,6 @@ xajax.submitRequest = function (oRequest) {
     xcb.execute([gcb, lcb], 'onResponseDelay', oRequest);
     xcb.execute([gcb, lcb], 'onExpiration', oRequest);
     xcb.execute([gcb, lcb], 'onRequest', oRequest);
-    
     oRequest.open();
     oRequest.applyRequestHeaders();
     oRequest.cursor.onWaiting();
@@ -1827,7 +1476,6 @@ xajax.completeResponse = function (oRequest) {
     delete oRequest['cursor'];
     delete oRequest['challengeResponse'];
 };
-
 /*
 	Function: xajax.$
 	
