@@ -57,10 +57,7 @@
                     if ('string' === typeof element)
                         element = xajax.$(element);
                     sEvent = xajax.tools.stripOnPrefix(sEvent);
-                    eval('element.addEventListener(';
-                    ' + sEvent + ';
-                    ', ' + fun + ', false);';
-                )
+                    eval('element.addEventListener("' + sEvent + '", ' + fun + ', false);');
                     return true;
                 };
             } else {
@@ -72,10 +69,7 @@
                     if ('string' === typeof element)
                         element = xajax.$(element);
                     sEvent = xajax.tools.addOnPrefix(sEvent);
-                    eval('element.attachEvent(';
-                    ' + sEvent + ';
-                    ', ' + fun + ', false);';
-                )
+                    eval('element.attachEvent("' + sEvent + '", ' + fun + ', false);');
                     return true;
                 };
             }
@@ -108,10 +102,7 @@
                     if ('string' === typeof element)
                         element = xajax.$(element);
                     sEvent = xajax.tools.stripOnPrefix(sEvent);
-                    eval('element.removeEventListener(';
-                    ' + sEvent + ';
-                    ', ' + fun + ', false);';
-                )
+                    eval('element.removeEventListener("' + sEvent + '", ' + fun + ', false);');
                     return true;
                 };
             } else {
@@ -123,10 +114,7 @@
                     if ('string' === typeof element)
                         element = xajax.$(element);
                     sEvent = xajax.tools.addOnPrefix(sEvent);
-                    eval('element.detachEvent(';
-                    ' + sEvent + ';
-                    ', ' + fun + ', false);';
-                )
+                    eval('element.detachEvent("' + sEvent + '", ' + fun + ', false);');
                     return true;
                 };
             }

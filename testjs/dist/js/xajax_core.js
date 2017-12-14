@@ -1460,10 +1460,7 @@ console.log(xajax);
                     if ('string' === typeof element)
                         element = xajax.$(element);
                     sEvent = xajax.tools.stripOnPrefix(sEvent);
-                    eval('element.addEventListener(';
-                    ' + sEvent + ';
-                    ', ' + fun + ', false);';
-                )
+                    eval('element.addEventListener("' + sEvent + '", ' + fun + ', false);');
                     return true;
                 };
             } else {
@@ -1475,10 +1472,7 @@ console.log(xajax);
                     if ('string' === typeof element)
                         element = xajax.$(element);
                     sEvent = xajax.tools.addOnPrefix(sEvent);
-                    eval('element.attachEvent(';
-                    ' + sEvent + ';
-                    ', ' + fun + ', false);';
-                )
+                    eval('element.attachEvent("' + sEvent + '", ' + fun + ', false);');
                     return true;
                 };
             }
@@ -1511,10 +1505,7 @@ console.log(xajax);
                     if ('string' === typeof element)
                         element = xajax.$(element);
                     sEvent = xajax.tools.stripOnPrefix(sEvent);
-                    eval('element.removeEventListener(';
-                    ' + sEvent + ';
-                    ', ' + fun + ', false);';
-                )
+                    eval('element.removeEventListener("' + sEvent + '", ' + fun + ', false);');
                     return true;
                 };
             } else {
@@ -1526,10 +1517,7 @@ console.log(xajax);
                     if ('string' === typeof element)
                         element = xajax.$(element);
                     sEvent = xajax.tools.addOnPrefix(sEvent);
-                    eval('element.detachEvent(';
-                    ' + sEvent + ';
-                    ', ' + fun + ', false);';
-                )
+                    eval('element.detachEvent("' + sEvent + '", ' + fun + ', false);');
                     return true;
                 };
             }
@@ -1702,6 +1690,7 @@ xajax.tools.$ = function (sId) {
                 return obj;
         }
     }
+
 //sId not an string so return it maybe its an object.
     if (typeof sId !== 'string') {
         return sId;
@@ -1713,6 +1702,7 @@ xajax.tools.$ = function (sId) {
         return oDoc.all[sId];
     return obj;
 };
+
 /*
 	Function xajax.tools.in_array
 	
@@ -1743,6 +1733,7 @@ xajax.tools.in_array = function (array, valueToCheck) {
     }
     return false;
 };
+
 /*
 	Function: xajax.tools.doubleQuotes
 	
@@ -1758,13 +1749,10 @@ xajax.tools.in_array = function (array, valueToCheck) {
 	string - A new string with the modifications applied.
 */
 xajax.tools.doubleQuotes = function (haystack) {
-    if (typeof haystack == 'undefined') return false;
-    return haystack.replace(new RegExp('';
-    ', ';
-    g;
-    '), ';
-    "');
+    if (typeof haystack === 'undefined') return false;
+    return haystack.replace(new RegExp('\'', 'g'), '"');
 };
+
 /*
 	Function: xajax.tools.singleQuotes
 	
@@ -1782,6 +1770,7 @@ xajax.tools.singleQuotes = function(haystack) {
 	return haystack.replace(new RegExp('"', 'g'), "'");
 }
 */
+
 /*
 	Function: xajax.tools._escape
 	
@@ -1845,6 +1834,7 @@ xajax.tools._escape = function(data) {
 	return data;
 }
 */
+
 /*
 	Function: xajax.tools._objectToXML
 	
@@ -1869,6 +1859,7 @@ xajax.tools._escape = function(data) {
 	
 	<xajax.config.maxObjectDepth> and <xajax.config.maxObjectSize>
 */
+
 /*
 xajax.tools._objectToXML = function(obj, guard) {
 	var aXml = [];
@@ -1921,6 +1912,7 @@ xajax.tools._objectToXML = function(obj, guard) {
 	return aXml.join('');
 }
 */
+
 /*
 	Function: xajax.tools._enforceDataType
 	
@@ -1947,6 +1939,7 @@ xajax.tools._enforceDataType = function (value) {
 //		value = new String(value);
     return value;
 };
+
 /*
 	Function: xajax.tools._nodeToObject
 	
@@ -2000,6 +1993,7 @@ xajax.tools._nodeToObject = function (node) {
     }
     throw {code: 10001, data: node.nodeName};
 };
+
 /*
 	Function: xajax.tools.getRequestObject
 	
@@ -2014,7 +2008,7 @@ xajax.tools.getRequestObject = function () {
     if ('undefined' != typeof XMLHttpRequest) {
         xajax.tools.getRequestObject = function () {
             return new XMLHttpRequest();
-        };
+        }
     } else if ('undefined' != typeof ActiveXObject) {
         xajax.tools.getRequestObject = function () {
             try {
@@ -2032,16 +2026,17 @@ xajax.tools.getRequestObject = function () {
                 };
                 return xajax.tools.getRequestObject();
             }
-        };
+        }
     } else if (window.createRequest) {
         xajax.tools.getRequestObject = function () {
             return window.createRequest();
-        };
+        }
     } else {
         xajax.tools.getRequestObject = function () {
             throw {code: 10002};
-        };
+        }
     }
+    
     // this would seem to cause an infinite loop, however, the function should
     // be reassigned by now and therefore, it will not loop.
     return xajax.tools.getRequestObject();
@@ -2306,8 +2301,9 @@ xajax.tools.queue.create = function (size) {
         end: 0,
         commands: [],
         timeout: null
-    };
+    }
 };
+
 /*
 	Function: xajax.tools.queue.retry
 	
@@ -3030,7 +3026,6 @@ xajax.initializeRequest = function (oRequest) {
     if ('undefined' == typeof oRequest.URI)
         throw {code: 10005};
 };
-
 /*
 	Function: xajax.processParameters
 	

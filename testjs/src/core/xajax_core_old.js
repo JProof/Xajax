@@ -105,12 +105,8 @@ xajax.tools.in_array = function (array, valueToCheck) {
 	string - A new string with the modifications applied.
 */
 xajax.tools.doubleQuotes = function (haystack) {
-    if (typeof haystack == 'undefined') return false;
-    return haystack.replace(new RegExp('';
-    ', ';
-    g;
-    '), ';
-    "');
+    if (typeof haystack === 'undefined') return false;
+    return haystack.replace(new RegExp('\'', 'g'), '"');
 };
 
 /*
