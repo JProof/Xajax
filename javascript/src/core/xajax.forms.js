@@ -25,7 +25,7 @@
                     return baseDoc.createElement('<input type="' + type + '" name="' + name + '" id="' + id + '">');
                 };
             } else {
-                xajax.forms.getInput = function (type, name, id) {
+                xjx.forms.getInput = function (type, name, id) {
                     var Obj = baseDoc.createElement('input');
                     Obj.setAttribute('type', type);
                     Obj.setAttribute('name', name);
@@ -33,7 +33,7 @@
                     return Obj;
                 };
             }
-            return xajax.forms.getInput(type, name, id);
+            return xjx.forms.getInput(type, name, id);
         },
         /*
             Function: xajax.forms.createInput
@@ -59,8 +59,8 @@
             var sName = command.data;
             var sId = command.prop;
             if ('string' === typeof objParent)
-                objParent = xajax.$(objParent);
-            var target = xajax.forms.getInput(sType, sName, sId);
+                objParent = xjx.$(objParent);
+            var target = xjx.forms.getInput(sType, sName, sId);
             if (objParent && target) {
                 objParent.appendChild(target);
             }
@@ -90,8 +90,8 @@
             var sName = command.data;
             var sId = command.prop;
             if ('string' === typeof objSibling)
-                objSibling = xajax.$(objSibling);
-            var target = xajax.forms.getInput(sType, sName, sId);
+                objSibling = xjx.$(objSibling);
+            var target = xjx.forms.getInput(sType, sName, sId);
             if (target && objSibling && objSibling.parentNode)
                 objSibling.parentNode.insertBefore(target, objSibling);
             return true;
@@ -120,8 +120,8 @@
             var sName = command.data;
             var sId = command.prop;
             if ('string' === typeof objSibling)
-                objSibling = xajax.$(objSibling);
-            var target = xajax.forms.getInput(sType, sName, sId);
+                objSibling = xjx.$(objSibling);
+            var target = xjx.forms.getInput(sType, sName, sId);
             if (target && objSibling && objSibling.parentNode)
                 objSibling.parentNode.insertBefore(target, objSibling.nextSibling);
             return true;
