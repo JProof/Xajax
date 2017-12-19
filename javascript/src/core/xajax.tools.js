@@ -39,7 +39,7 @@
                 @deprecated an other method such as in jquery is need
         */
         $: function (sId) {
-            if (!sId) { return null; }
+            if (!sId) { return {}; }
             if ($xa.isElement(sId)) { return sId;}
             var obj;
             var oDoc = $xa.config('baseDocument');//xajax.config.baseDocument;
@@ -59,7 +59,7 @@
                 return obj;
             if (oDoc.all)
                 return oDoc.all[sId];
-            return null;
+            return {};
         }
     }
     ;

@@ -31,8 +31,7 @@
           'wcss': function (args) {
               args.fullName = 'waitForCSS';
               return xajax.css.waitForCSS(args);
-          }
-          ,
+          },
           'as': function (args) {
               args.fullName = 'assign/clear';
               try {
@@ -42,38 +41,31 @@
                   // catch and handle the exception
               }
               return true;
-          }
-          ,
+          },
           'ap': function (args) {
               args.fullName = 'append';
               return xajax.dom.append(args.target, args.prop, args.data);
-          }
-          ,
+          },
           'pp': function (args) {
               args.fullName = 'prepend';
               return xajax.dom.prepend(args.target, args.prop, args.data);
-          }
-          ,
+          },
           'rp': function (args) {
               args.fullName = 'replace';
               return xajax.dom.replace(args.id, args.prop, args.data);
-          }
-          ,
+          },
           'rm': function (args) {
               args.fullName = 'remove';
               return xajax.dom.remove(args.id);
-          }
-          ,
+          },
           'ce': function (args) {
               args.fullName = 'create';
               return xajax.dom.create(args.id, args.data, args.prop);
-          }
-          ,
+          },
           'ie': function (args) {
               args.fullName = 'insert';
               return xajax.dom.insert(args.id, args.data, args.prop);
-          }
-          ,
+          },
           'ia': function (args) {
               args.fullName = 'insertAfter';
               return xajax.dom.insertAfter(args.id, args.data, args.prop);
@@ -87,9 +79,8 @@
           'DAT': xajax.domResponse.appendText,
           'DRC': xajax.domResponse.removeChildren,
           'DER': xajax.domResponse.endResponse,
-          'attr:ad': xajax.attr.add,
-          'attr:re': xajax.attr.remove,
-          'attr:rp': xajax.attr.replace,
+          'attr:ad': xajax.addAttrib,
+          'attr:re': xajax.removeAttr,
           'c:as': xajax.dom.contextAssign,
           'c:ap': xajax.dom.contextAppend,
           'c:pp': xajax.dom.contextPrepend,
@@ -106,8 +97,7 @@
               args.fullName = 'alert';
               alert(args.data);
               return true;
-          }
-          ,
+          },
           'cc': xajax.js.confirmCommands,
           'ci': xajax.forms.createInput,
           'ii': xajax.forms.insertInput,

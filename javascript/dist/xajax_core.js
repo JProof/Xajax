@@ -28,12 +28,52 @@
 	<xajax_core.js> file, or by specifying the appropriate configuration
 	options on a per call basis.
 */
-if ("undefined" === typeof xajax) {
+if ('undefined' === typeof xajax) {
     var xajax = {};
 }
+
+/**
+ * Diverse Core-Helper Helpers
+ * **/
+(function (xjx) {
+    /**
+     * Short tester to save a lot of typeof's
+     * */
+    xjx.isStr = function (ele) {
+        return typeof ele === 'string';
+    };
+    /**
+     * Short tester to save a lot of typeof's
+     * */
+    xjx.isNum = function (ele) {
+        return typeof ele === 'number';
+    };
+    /**
+     * Check the value is valid as attribute value
+     *
+     * @property ele string or number
+     * @return bool
+     * */
+    xjx.isAttribValue = function (val) {
+        return xjx.isNum(val) || xjx.isStr(val);
+    };
+    /**
+     * Safe getting of an Object element
+     * @since 0.7.1
+     * */
+    xjx.getObjEle = function (obj, ident) {
+        if (('object' === typeof obj) && 'string' === typeof ident && ident in obj) {
+            return obj[ident];
+        }
+        return void 0;
+    };
+}(xajax));
 /** Core Configuration Module **/
 (function (xjx) {
     'use strict';
+    /**
+     * @example to get Access to config Properties use xajax.config('parameterName');
+     **/
     xjx.config = function (key) {
         return xjx.config.getOption(key);
     };
@@ -328,9 +368,65 @@ if ("undefined" === typeof xajax) {
   This contains utility functions which are used throughout
   the xajax core.
 */
-(function (xjx) {
+(function ($xa) {
     'use strict';
-    xjx.tools = {};
+    // checks the given element s an HTML Element
+    $xa.isElement = function (element) {
+        // works on major browsers back to IE7
+        return element instanceof Element;
+    };
+    $xa.tools = {
+        /*
+            Function: xajax.tools.$
+        
+            Shorthand for finding a uniquely named element within
+            the document.
+        
+            Parameters:
+            sId - (string):
+                The unique name of the element (specified by the
+                ID attribute), not to be confused with the name
+                attribute on form elements.
+                
+            Returns:
+            
+            object - The element found or null.
+            
+            Note:
+                This function uses the <xajax.config.baseDocument>
+                which allows <xajax> to operate on the main window
+                document as well as documents from contained
+                iframes and child windows.
+            
+            See also:
+                <xajax.$> and <xjx.$>
+                @deprecated an other method such as in jquery is need
+        */
+        $: function (sId) {
+            if (!sId) { return {}; }
+            if ($xa.isElement(sId)) { return sId;}
+            var obj;
+            var oDoc = $xa.config('baseDocument');//xajax.config.baseDocument;
+            if ('object' === typeof sId) {
+                if (undefined !== sId.id) {
+                    obj = oDoc.getElementById(sId.id);
+                    if (obj)
+                        return obj;
+                }
+            }
+            //sId not an string so return it maybe its an object.
+            if (!$xa.isStr(sId)) {
+                return sId;
+            }
+            obj = oDoc.getElementById(sId);
+            if (obj)
+                return obj;
+            if (oDoc.all)
+                return oDoc.all[sId];
+            return {};
+        }
+    }
+    ;
 }(xajax));
 /*
 	Class: xajax.tools.queue
@@ -1072,7 +1168,7 @@ if ("undefined" === typeof xajax) {
 	Class: xajax.dom
 */
 (function (xjx) {
-    xajax.dom = {
+    xjx.dom = {
         /*
             Function: xajax.dom.assign
             
@@ -2011,7 +2107,7 @@ if ("undefined" === typeof xajax) {
                 for (var i = 0; i < iLen; ++i)
                     xajax.callback.execute(oCallback[i], sFunction, args);
             }
-        },
+        }
         /*
             Class: xajax.callback.global
             
@@ -2022,58 +2118,106 @@ if ("undefined" === typeof xajax) {
 }(xajax));
 /** xajax attr **/
 (function (xjx) {
-    xjx.attr = {
-        that: this,
-        has: function (ele) {
-            var hasAttrib = false;
+    /*
+   * remove all useless stuff
+   * @property str string
+   * @return string
+   * **/
+    var remS = function (str) {
+        return (xjx.isStr(str)) ? str.replace(/\s\s+/g, ' ') : '';
+    };
+    /**
+     * internal proxy to remove the old xajax.tools.$ class
+     * */
+    var getEle = function (elem) {
+        return xjx.tools.$(elem);
+    };
+    /**
+     * Adds an class string
+     *
+     * @property ele element or element-id
+     * @property val class to add
+     */
+    xjx.addClass = function (elem, val) {
+        var ident = 'class';
+        if (xjx.isAttribValue(val) && null !== (elem = getEle(elem))) {
+            if (true === xajax.hasAttrib(elem, ident)) {
+                elem.setAttribute(ident, elem.getAttribute(ident) + ' ' + val);
+            } else {
+                elem.setAttribute(ident, val);
+            }
+        }
+    };
+    /**
+     * Removes an class from element
+     *
+     * @property ele element or element-id
+     * @property val value to removes from
+     */
+    xjx.removeClass = function (elem, val) {
+        var ident = 'class';
+        elem = getEle(elem);
+        if (xjx.isAttribValue(val) && true === xjx.hasAttrib(elem, ident)) {
             try {
-                hasAttrib = xajax.tools.$(xajax.get(ele, 'id')).hasAttribute(xajax.get(ele, 'prop'));
+                var nS = remS(elem.getAttribute(ident).replace(val, ''));
+                elem.setAttribute(ident, nS.trim());
             } catch (error) {
                 throw error;
             }
-            return hasAttrib;
-        },
-        /**
-         * ele={'id',prop,data[value]};
-         * ***/
-        add: function (ele) {
-            if (!xajax.attr.has(ele)) {
-                var elem = xajax.tools.$(xajax.get(ele, 'id'));
-                try {
-                    var data = xajax.get(ele, 'data');
-                    var value = xajax.get(data, 'value');
-                    value = (typeof value === 'string') ? value : '';
-                    elem.setAttribute(xajax.get(ele, 'prop'), value);
-                } catch (error) {
-                    throw error;
-                }
-                return true;
-            }
-        }, /**
-         * ele={'id',prop};
-         */
-        remove: function (ele) {
-            if (xajax.attr.has(ele)) {
-                var elem = xajax.tools.$(xajax.get(ele, 'id'));
-                try {
-                    elem.removeAttribute(xajax.get(ele, 'prop'));
-                } catch (error) {
-                    throw error;
-                }
-                return true;
-            }
-        },
-        /**
-         * ele={'id',prop,data[value,new]};
-         * ***/
-        replace: function (ele) {
-            if (xajax.attr.has(ele)) {
-                xajax.attr.remove(ele);
-            }
-            var data = xajax.get(ele, 'data');
-            ele.prop = xajax.get(data, 'new');
-            return xajax.attr.add(ele);
+            return true;
         }
+    };
+    /**
+     * Checks an Class exists
+     *
+     * @property ele element or element-id
+     * @property val class to add
+     */
+    xjx.hasClass = function (elem, val) {
+        var res = false;
+        var ident = 'class';
+        if (xjx.isAttribValue(val) && null !== (elem = getEle(elem))) {
+            if (true === xajax.hasAttrib(elem, ident)) {
+                var parts = elem.getAttribute(ident).split(' ');
+                parts.forEach(function (value) {
+                    if (value === val) {
+                        return res = true;
+                    }
+                });
+            }
+        }
+        return res;
+    };
+    xjx.hasAttrib = function (elem, prop) {
+        if (xjx.isStr(prop) && (elem = getEle(elem))) {
+            return elem.hasAttribute(prop);
+        }
+        return false;
+    };
+    /**
+     * Adding an Attribute if it not exists
+     *
+     * @property ele element or element-id
+     * @property prop attribute to set
+     * @property val value to set
+     **/
+    xjx.addAttrib = function (elem, prop, val) {
+        elem = getEle(elem);
+        if (xjx.isAttribValue(val) && xjx.isStr(prop))
+            if (false === xajax.hasAttrib(elem, prop))
+                elem.setAttribute(prop, val);
+            else
+                elem.setAttribute(prop, elem.getAttribute(prop) + val);
+    };
+    /**
+     * Remove an Attribute if exists
+     *
+     * @property ele element or element-id
+     * @property prop attribute to remove
+     */
+    xjx.removeAttr = function (elem, prop) {
+        if (xjx.isStr(prop) && true === xajax.attr.has(prop))
+            elem.removeAttribute(prop);
     };
 }(xajax));
 /*
@@ -2109,8 +2253,7 @@ if ("undefined" === typeof xajax) {
           'wcss': function (args) {
               args.fullName = 'waitForCSS';
               return xajax.css.waitForCSS(args);
-          }
-          ,
+          },
           'as': function (args) {
               args.fullName = 'assign/clear';
               try {
@@ -2120,38 +2263,31 @@ if ("undefined" === typeof xajax) {
                   // catch and handle the exception
               }
               return true;
-          }
-          ,
+          },
           'ap': function (args) {
               args.fullName = 'append';
               return xajax.dom.append(args.target, args.prop, args.data);
-          }
-          ,
+          },
           'pp': function (args) {
               args.fullName = 'prepend';
               return xajax.dom.prepend(args.target, args.prop, args.data);
-          }
-          ,
+          },
           'rp': function (args) {
               args.fullName = 'replace';
               return xajax.dom.replace(args.id, args.prop, args.data);
-          }
-          ,
+          },
           'rm': function (args) {
               args.fullName = 'remove';
               return xajax.dom.remove(args.id);
-          }
-          ,
+          },
           'ce': function (args) {
               args.fullName = 'create';
               return xajax.dom.create(args.id, args.data, args.prop);
-          }
-          ,
+          },
           'ie': function (args) {
               args.fullName = 'insert';
               return xajax.dom.insert(args.id, args.data, args.prop);
-          }
-          ,
+          },
           'ia': function (args) {
               args.fullName = 'insertAfter';
               return xajax.dom.insertAfter(args.id, args.data, args.prop);
@@ -2165,9 +2301,8 @@ if ("undefined" === typeof xajax) {
           'DAT': xajax.domResponse.appendText,
           'DRC': xajax.domResponse.removeChildren,
           'DER': xajax.domResponse.endResponse,
-          'attr:ad': xajax.attr.add,
-          'attr:re': xajax.attr.remove,
-          'attr:rp': xajax.attr.replace,
+          'attr:ad': xajax.addAttrib,
+          'attr:re': xajax.removeAttr,
           'c:as': xajax.dom.contextAssign,
           'c:ap': xajax.dom.contextAppend,
           'c:pp': xajax.dom.contextPrepend,
@@ -2184,8 +2319,7 @@ if ("undefined" === typeof xajax) {
               args.fullName = 'alert';
               alert(args.data);
               return true;
-          }
-          ,
+          },
           'cc': xajax.js.confirmCommands,
           'ci': xajax.forms.createInput,
           'ii': xajax.forms.insertInput,
@@ -2273,64 +2407,6 @@ if ("undefined" === typeof xajax) {
         return handlers[shortName](command);
     };
 }(xajax));
-/**
- * @since 0.7.1
- * getterHelper
- * */
-xajax.get = function (obj, ident) {
-    if ('object' === typeof obj && 'string' === typeof ident && ident in obj) {
-        return obj[ident];
-    }
-    return void 0;
-};
-/*
-	Function: xajax.tools.$
-
-	Shorthand for finding a uniquely named element within
-	the document.
-
-	Parameters:
-	sId - (string):
-		The unique name of the element (specified by the
-		ID attribute), not to be confused with the name
-		attribute on form elements.
-		
-	Returns:
-	
-	object - The element found or null.
-	
-	Note:
-		This function uses the <xajax.config.baseDocument>
-		which allows <xajax> to operate on the main window
-		document as well as documents from contained
-		iframes and child windows.
-	
-	See also:
-		<xajax.$> and <xjx.$>
-*/
-xajax.tools.$ = function (sId) {
-    var oDoc = xajax.config('baseDocument');//xajax.config.baseDocument;
-    if (!sId)
-        return null;
-    var obj;
-    if ('object' === typeof sId) {
-        if (undefined !== sId.id) {
-            obj = oDoc.getElementById(sId.id);
-            if (obj)
-                return obj;
-        }
-    }
-//sId not an string so return it maybe its an object.
-    if (typeof sId !== 'string') {
-        return sId;
-    }
-    obj = oDoc.getElementById(sId);
-    if (obj)
-        return obj;
-    if (oDoc.all)
-        return oDoc.all[sId];
-    return obj;
-};
 /*
 	Function xajax.tools.in_array
 	
@@ -3016,9 +3092,6 @@ xajax.responseRedirectCodes = ['301', '302', '307'];
 	
 	The object that manages commands and command handlers.
 */
-
-
-
 /**
  *  @since 0.7.1
  * */

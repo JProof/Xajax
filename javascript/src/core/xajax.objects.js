@@ -16,11 +16,12 @@
     };
     /**
      * Check the value is valid as attribute value
+     *
      * @property ele string or number
      * @return bool
      * */
-    xjx.isAttribValue = function (ele) {
-        return xjx.isNum(ele) || xjx.isStr(ele);
+    xjx.isAttribValue = function (val) {
+        return xjx.isNum(val) || xjx.isStr(val);
     };
     /**
      * Safe getting of an Object element
