@@ -372,7 +372,7 @@ if ('undefined' === typeof xajax) {
     'use strict';
     // checks the given element s an HTML Element
     $xa.isElement = function (element) {
-        // works on major browsers back to IE7
+        // until IE7
         return element instanceof Element;
     };
     $xa.tools = {
@@ -383,7 +383,7 @@ if ('undefined' === typeof xajax) {
             the document.
         
             Parameters:
-            sId - (string):
+            sId - (string||object):
                 The unique name of the element (specified by the
                 ID attribute), not to be confused with the name
                 attribute on form elements.
@@ -403,30 +403,21 @@ if ('undefined' === typeof xajax) {
                 @deprecated an other method such as in jquery is need
         */
         $: function (sId) {
-            if (!sId) { return {}; }
+            // nothing
+            if ('undefined' === typeof sId) { return null; }
+            // is already node
             if ($xa.isElement(sId)) { return sId;}
-            var obj;
-            var oDoc = $xa.config('baseDocument');//xajax.config.baseDocument;
-            if ('object' === typeof sId) {
-                if (undefined !== sId.id) {
-                    obj = oDoc.getElementById(sId.id);
-                    if (obj)
-                        return obj;
-                }
+            var baseDoc = $xa.config('baseDocument');//xajax.config.baseDocument;
+            if ('object' === typeof sId && undefined !== sId.id) {
+                return baseDoc.getElementById(sId.id);
             }
             //sId not an string so return it maybe its an object.
             if (!$xa.isStr(sId)) {
-                return sId;
+                return null;
             }
-            obj = oDoc.getElementById(sId);
-            if (obj)
-                return obj;
-            if (oDoc.all)
-                return oDoc.all[sId];
-            return {};
+            return baseDoc.getElementById(sId);
         }
-    }
-    ;
+    };
 }(xajax));
 /*
 	Class: xajax.tools.queue

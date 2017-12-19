@@ -68,7 +68,7 @@ describe('Attribute and ClassName Tests', function () {
         xajax.addAttrib('attribTester', 'myTestAttrib', 'myAttribValue');
         controls.currentAttrib.should.equal('myAttribValue');
     });
-    it('overwrite AttributeValue on an existing attribute Html Element', function () {
+    it('adding 2 AttributeValues on an existing attribute Html Element', function () {
         xajax.addAttrib('attribTester', 'myTestAttrib', 'myOld');
         xajax.addAttrib('attribTester', 'myTestAttrib', ' myAttribValue');
         controls.currentAttrib.should.equal('myOld myAttribValue');

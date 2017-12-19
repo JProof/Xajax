@@ -1,8 +1,8 @@
 'use strict';
 /*
- * Unit tests for lib/calculator.js
+ *
  */
-describe('Element Test', function () {
+describe('getElement Testings', function () {
     
     // API for interacting with the page.
     var controls = {
@@ -34,5 +34,8 @@ describe('Element Test', function () {
     });
     it('get element by xajax typical obj.id', function () {
         controls.domElement.should.equal(xajax.tools.$({id: 'existingElement'}));
+    });
+    it('get element by xajax typical obj.id but not Exists', function () {
+        assert.equal(null, xajax.tools.$({id: 'notExisting'}));
     });
 });

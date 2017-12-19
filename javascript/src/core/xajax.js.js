@@ -27,8 +27,8 @@
             command.fullName = 'includeScriptOnce';
             var fileName = command.data;
             // Check for existing script tag for this file.
-            var oDoc = xajax.config.baseDocument;
-            var loadedScripts = oDoc.getElementsByTagName('script');
+            var baseDoc = xjx.getContext(context);
+            var loadedScripts = baseDoc.getElementsByTagName('script');
             var iLen = loadedScripts.length;
             for (var i = 0; i < iLen; ++i) {
                 var script = loadedScripts[i];
@@ -53,11 +53,12 @@
 	
 	true - The reference was added.
 */
-        includeScript: function (command) {
+        includeScript: function (command,context) {
+            // todo check object command
             command.fullName = 'includeScript';
-            var oDoc = xajax.config.baseDocument;
-            var objHead = oDoc.getElementsByTagName('head');
-            var objScript = oDoc.createElement('script');
+            var baseDoc = xjx.getContext(context||command.context);
+            var objHead = baseDoc.getElementsByTagName('head');
+            var objScript = baseDoc.createElement('script');
             objScript.src = command.data;
             if ('undefined' === typeof command.type) objScript.type = 'text/javascript';
             else objScript.type = command.type;
@@ -79,12 +80,13 @@
             
             true - The script was not found or was removed.
         */
-        removeScript: function (command) {
+        removeScript: function (command,context) {
             command.fullName = 'removeScript';
+            // todo check object command
             var fileName = command.data;
             var unload = command.unld;
-            var oDoc = xajax.config.baseDocument;
-            var loadedScripts = oDoc.getElementsByTagName('script');
+            var baseDoc = xjx.getContext(context||command.context);
+            var loadedScripts = baseDoc.getElementsByTagName('script');
             var iLen = loadedScripts.length;
             for (var i = 0; i < iLen; ++i) {
                 var script = loadedScripts[i];

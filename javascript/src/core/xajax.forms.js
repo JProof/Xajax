@@ -18,15 +18,15 @@
             
             object - The new input element.
         */
-        getInput: function (type, name, id) {
+        getInput: function (type, name, id, context) {
+            var baseDoc = xjx.getContext(context);
             if ('undefined' === typeof window.addEventListener) {
                 xajax.forms.getInput = function (type, name, id) {
-                    return xajax.config.baseDocument.createElement('<input type="' + type + '" name="' + name + '" id="' + id + '">');
+                    return baseDoc.createElement('<input type="' + type + '" name="' + name + '" id="' + id + '">');
                 };
             } else {
                 xajax.forms.getInput = function (type, name, id) {
-                    var oDoc = xajax.config.baseDocument;
-                    var Obj = oDoc.createElement('input');
+                    var Obj = baseDoc.createElement('input');
                     Obj.setAttribute('type', type);
                     Obj.setAttribute('name', name);
                     Obj.setAttribute('id', id);

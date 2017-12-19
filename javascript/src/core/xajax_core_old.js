@@ -345,17 +345,18 @@ xajax.tools.getRequestObject = function () {
 	
 	The (potentially modified) html code or text.
 */
-xajax.tools.getBrowserHTML = function (sValue) {
-    var oDoc = xajax.config.baseDocument;
-    if (!oDoc.body)
+xajax.tools.getBrowserHTML = function (sValue, context) {
+    // todo check object command
+    var baseDoc = xjx.getContext(context);
+    if (!baseDoc.body)
         return '';
     var elWorkspace = xajax.$('xajax_temp_workspace');
     if (!elWorkspace) {
-        elWorkspace = oDoc.createElement('div');
+        elWorkspace = baseDoc.createElement('div');
         elWorkspace.setAttribute('id', 'xajax_temp_workspace');
         elWorkspace.style.display = 'none';
         elWorkspace.style.visibility = 'hidden';
-        oDoc.body.appendChild(elWorkspace);
+        baseDoc.body.appendChild(elWorkspace);
     }
     elWorkspace.innerHTML = sValue;
     var browserHTML = elWorkspace.innerHTML;

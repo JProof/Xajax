@@ -19,8 +19,8 @@
             
             true - The operation completed successfully.
         */
-        add: function (fileName, media) {
-            var oDoc = xajax.config.baseDocument;
+        add: function (fileName, media, context) {
+            var oDoc = xjx.getContext(context);
             var oHeads = oDoc.getElementsByTagName('head');
             var oHead = oHeads[0];
             var oLinks = oHead.getElementsByTagName('link');
@@ -53,8 +53,8 @@
             
             true - The operation completed successfully.
         */
-        remove: function (fileName, media) {
-            var oDoc = xajax.config.baseDocument;
+        remove: function (fileName, media, context) {
+            var oDoc = xjx.getContext(context);
             var oHeads = oDoc.getElementsByTagName('head');
             var oHead = oHeads[0];
             var oLinks = oHead.getElementsByTagName('link');
@@ -86,8 +86,10 @@
             false - The .css files do not appear to be loaded and the timeout
                 has not expired.
         */
-        waitForCSS: function (args) {
-            var oDocSS = xajax.config.baseDocument.styleSheets;
+        waitForCSS: function (args, context) {
+            var oDoc = xjx.getContext(context);
+            // todo property styleSheets exists
+            var oDocSS = oDoc.styleSheets;
             var ssEnabled = [];
             var iLen = oDocSS.length;
             for (var i = 0; i < iLen; ++i) {

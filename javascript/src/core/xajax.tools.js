@@ -4,14 +4,27 @@
   This contains utility functions which are used throughout
   the xajax core.
 */
-(function ($xa) {
+(function (xjx) {
     'use strict';
     // checks the given element s an HTML Element
-    $xa.isElement = function (element) {
-        // works on major browsers back to IE7
+    xjx.isElement = function (element) {
+        // until IE7
         return element instanceof Element;
     };
-    $xa.tools = {
+    /**
+     * Getting the "document" as context so you are able to use iframe support
+     * @since 0.7.3
+     *
+     * **/
+    xjx.getContext = function (con) {
+        if (con) return con;
+        if ('object' === typeof (con = xjx.config('baseDocument'))) return con;
+        return window.document;
+    };
+    /**
+     * Xajax Document Tools
+     * */
+    xjx.tools = {
         /*
             Function: xajax.tools.$
         
@@ -19,7 +32,7 @@
             the document.
         
             Parameters:
-            sId - (string):
+            sId - (string||object):
                 The unique name of the element (specified by the
                 ID attribute), not to be confused with the name
                 attribute on form elements.
@@ -36,31 +49,28 @@
             
             See also:
                 <xajax.$> and <xjx.$>
-                @deprecated an other method such as in jquery is need
         */
-        $: function (sId) {
-            if (!sId) { return {}; }
-            if ($xa.isElement(sId)) { return sId;}
-            var obj;
-            var oDoc = $xa.config('baseDocument');//xajax.config.baseDocument;
-            if ('object' === typeof sId) {
-                if (undefined !== sId.id) {
-                    obj = oDoc.getElementById(sId.id);
-                    if (obj)
-                        return obj;
-                }
+        $: function (sId, context) {
+            // nothing
+            if ('undefined' === typeof sId) { return null; }
+            // is already node
+            if (xjx.isElement(sId)) { return sId;}
+            var baseDoc = xjx.getContext(context);
+            if ('object' === typeof sId && undefined !== sId.id) {
+                return baseDoc.getElementById(sId.id);
             }
             //sId not an string so return it maybe its an object.
-            if (!$xa.isStr(sId)) {
-                return sId;
+            if (!xjx.isStr(sId)) {
+                return null;
             }
-            obj = oDoc.getElementById(sId);
-            if (obj)
-                return obj;
-            if (oDoc.all)
-                return oDoc.all[sId];
-            return {};
+            return baseDoc.getElementById(sId);
+        },
+        /**
+         * Searching by something
+         * **/
+        $$: function (eleS, context) {
+            var ele;
+            if (ele = xjx.tools.$(eleS, context)) return ele;
         }
-    }
-    ;
+    };
 }(xajax));

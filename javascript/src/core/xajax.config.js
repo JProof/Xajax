@@ -94,7 +94,7 @@
 	locating elements by ID.
 	@todo more explanations
 */
-        'baseDocument': document,
+        'baseDocument': window.document,
         /*
             String: requestURI
             
