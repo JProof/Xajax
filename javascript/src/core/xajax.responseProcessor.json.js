@@ -16,7 +16,7 @@
                     throw(ex);
                 }
                 if (('object' === typeof responseJSON) && ('object' === typeof responseJSON.xjxobj)) {
-                    oRequest.status.onProcessing();
+                    // oRequest.status.onProcessing();
                     oRet = xt.json.processFragment(responseJSON, seq, oRet, oRequest);
                 } else {
                 }
@@ -27,10 +27,10 @@
             obj.request = oRequest;
             obj.context = oRequest.context;
             obj.cmd = 'rcmplt';
-            xt.queue.push(xx.response, obj);
+            xjx.queue.push(xx.response, obj);
             // do not re-start the queue if a timeout is set
             if (null == xx.response.timeout)
-                xt.queue.process(xx.response);
+                xjx.queue.process(xx.response);
         } else if (xt.in_array(xx.responseRedirectCodes, oRequest.request.status)) {
             xcb.execute([gcb, lcb], 'onRedirect', oRequest);
             window.location = oRequest.request.getResponseHeader('location');

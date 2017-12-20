@@ -14,7 +14,6 @@ module.exports = function (config) {
             scriptStackDir + 'xajax.init.js',
             scriptStackDir + 'xajax.objects.js',
             scriptStackDir + 'xajax.config.js',
-            scriptStackDir + 'xajax.config.status.js',
             scriptStackDir + 'xajax.config.cursor.js',
             scriptStackDir + 'xajax.tools.js',
             scriptStackDir + 'xajax.tools.queue.js',
@@ -26,6 +25,7 @@ module.exports = function (config) {
             scriptStackDir + 'xajax.domResponse.js',
             scriptStackDir + 'xajax.css.js',
             scriptStackDir + 'xajax.forms.js',
+            scriptStackDir + 'xajax.forms.values.js',
             scriptStackDir + 'xajax.events.js',
             scriptStackDir + 'xajax.callback.js',
             // some extra tools

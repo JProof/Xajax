@@ -91,7 +91,7 @@
                 obj.context = oRequest.context;
                 xt.xml.parseAttributes(xmlNode, obj);
                 xt.xml.parseChildren(xmlNode, obj);
-                xt.queue.push(xx.response, obj);
+                xjx.queue.push(xx.response, obj);
             } else if ('xjxrv' == xmlNode.nodeName) {
                 oRet = xt._nodeToObject(xmlNode.firstChild);
             } else if ('debugmsg' == xmlNode.nodeName) {

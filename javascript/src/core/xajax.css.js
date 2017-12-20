@@ -29,14 +29,13 @@
             for (var i = 0; i < iLen && false === found; ++i)
                 if (0 <= oLinks[i].href.indexOf(fileName) && oLinks[i].media === media)
                     found = true;
-            if (false === found) {
-                var oCSS = oDoc.createElement('link');
-                oCSS.rel = 'stylesheet';
-                oCSS.type = 'text/css';
-                oCSS.href = fileName;
-                oCSS.media = media;
-                oHead.appendChild(oCSS);
-            }
+            if (true === found) return true;
+            var oCSS = oDoc.createElement('link');
+            oCSS.rel = 'stylesheet';
+            oCSS.type = 'text/css';
+            oCSS.href = fileName;
+            oCSS.media = media;
+            oHead.appendChild(oCSS);
             return true;
         },
         /*
@@ -89,6 +88,7 @@
         waitForCSS: function (args, context) {
             var oDoc = xjx.getContext(context);
             // todo property styleSheets exists
+            // todo test
             var oDocSS = oDoc.styleSheets;
             var ssEnabled = [];
             var iLen = oDocSS.length;
@@ -104,15 +104,15 @@
                 }
             }
             var ssLoaded = true;
-            var iLen = ssEnabled.length;
-            for (var i = 0; i < iLen; ++i)
-                if (0 === ssEnabled[i])
+            var ssEnL = ssEnabled.length;
+            for (var t = 0; t < ssEnL; ++t)
+                if (0 === ssEnabled[t])
                     ssLoaded = false;
             if (false === ssLoaded) {
                 // inject a delay in the queue processing
                 // handle retry counter
-                if (xajax.tools.queue.retry(args, args.prop)) {
-                    xajax.tools.queue.setWakeup(xajax.response, 10);
+                if (xajax.queue.retry(args, args.prop)) {
+                    xajax.queue.setWakeup(xajax.response, 10);
                     return false;
                 }
                 // give up, continue processing queue

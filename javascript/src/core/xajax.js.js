@@ -128,8 +128,8 @@
             command.fullName = 'sleep';
             // inject a delay in the queue processing
             // handle retry counter
-            if (xajax.tools.queue.retry(command, command.prop)) {
-                xajax.tools.queue.setWakeup(xajax.response, 100);
+            if (xajax.queue.retry(command, command.prop)) {
+                xajax.queue.setWakeup(xajax.response, 100);
                 return false;
             }
             // wake up, continue processing queue
@@ -157,7 +157,7 @@
             var numberOfCommands = command.id;
             if (false === confirm(msg)) {
                 while (0 < numberOfCommands) {
-                    xajax.tools.queue.pop(xajax.response);
+                    xajax.queue.pop(xajax.response);
                     --numberOfCommands;
                 }
             }
@@ -232,8 +232,8 @@
             if (false === bResult) {
                 // inject a delay in the queue processing
                 // handle retry counter
-                if (xajax.tools.queue.retry(args, args.prop)) {
-                    xajax.tools.queue.setWakeup(xajax.response, 100);
+                if (xajax.queue.retry(args, args.prop)) {
+                    xajax.queue.setWakeup(xajax.response, 100);
                     return false;
                 }
                 // give up, continue processing queue

@@ -7,6 +7,7 @@ Current development xajax 0.7.3
 * UTF-8
 * remove procedurally "php-echo" inside Scripts
 
+* js removed windows.status  // @see https://www.w3schools.com/jsref/prop_win_status.asp 
 * removed the JSON-Extralibrary
 
 Changes

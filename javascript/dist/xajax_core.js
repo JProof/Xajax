@@ -164,7 +164,7 @@ if ('undefined' === typeof xajax) {
 	locating elements by ID.
 	@todo more explanations
 */
-        'baseDocument': document,
+        'baseDocument': window.document,
         /*
             String: requestURI
             
@@ -265,59 +265,6 @@ if ('undefined' === typeof xajax) {
 }(xajax));
 // config end
 /*
-    Class: xajax.config.status
-    
-    Provides support for updating the browser's status bar during
-    the request process.  By splitting the status bar functionality
-    into an object, the xajax developer has the opportunity to
-    customize the status bar messages prior to sending xajax requests.
-*/
-(function (xjx) {
-    xjx.config.status = {
-        /*
-            Function: update
-            
-            Constructs and returns a set of event handlers that will be
-            called by the xajax framework to set the status bar messages.
-        */
-        update: function () {
-            return {
-                onRequest: function () {
-                    window.status = 'Sending Request...';
-                },
-                onWaiting: function () {
-                    window.status = 'Waiting for Response...';
-                },
-                onProcessing: function () {
-                    window.status = 'Processing...';
-                },
-                onComplete: function () {
-                    window.status = 'Done.';
-                }
-            };
-        },
-        /*
-            Function: dontUpdate
-            
-            Constructs and returns a set of event handlers that will be
-            called by the xajax framework where status bar updates
-            would normally occur.
-        */
-        dontUpdate: function () {
-            return {
-                onRequest: function () {
-                },
-                onWaiting: function () {
-                },
-                onProcessing: function () {
-                },
-                onComplete: function () {
-                }
-            };
-        }
-    };
-}(xajax));
-/*
     Class: xajax.config.cursor
     
     Provides the base functionality for updating the browser's cursor
@@ -368,272 +315,315 @@ if ('undefined' === typeof xajax) {
   This contains utility functions which are used throughout
   the xajax core.
 */
-(function ($xa) {
+(function (xjx) {
     'use strict';
     // checks the given element s an HTML Element
-    $xa.isElement = function (element) {
+    xjx.isElement = function (element) {
         // until IE7
         return element instanceof Element;
     };
-    $xa.tools = {
+    /**
+     * Getting the "document" as context so you are able to use iframe support
+     *
+     * @since 0.7.0
+     * **/
+    xjx.getContext = function (con) {
+        if (con) return con;
+        if ('object' === typeof (con = xjx.config('baseDocument'))) return con;
+        return window.document;
+    };
+    /**
+     * Getting straight id element
+     * **/
+    function getEle(sId, baseDoc) {
+        
+        // nothing
+        if ('undefined' === typeof sId) return null;
+        // is already node
+        if (xjx.isElement(sId)) return sId;
+        if ('object' === typeof sId && undefined !== sId.id)
+            return baseDoc.getElementById(sId.id);
+        //sId not an string so return it maybe its an object.
+        if (!xjx.isStr(sId))
+            return null;
+        return baseDoc.getElementById(sId);
+    }
+    /**
+     * QuerySelector @todo make more complex
+     *
+     * @property eleS
+     * @property baseDoc
+     * @private Search
+     * **/
+    /**
+     * Xajax Document Tools
+     * */
+    if (undefined === xjx.tools) {xjx.tools = {};}
+    xjx.tools = {
         /*
-            Function: xajax.tools.$
+           Function: xajax.tools.$
+       
+           Shorthand for finding a uniquely named element within
+           the document.
+       
+           Parameters:
+           sId - (string||object):
+               The unique name of the element (specified by the
+               ID attribute), not to be confused with the name
+               attribute on form elements.
+               
+           Returns:
+           
+           object - The element found or null.
+           
+           Note:
+               This function uses the <xajax.config.baseDocument>
+               which allows <xajax> to operate on the main window
+               document as well as documents from contained
+               iframes and child windows.
+           
+           See also:
+               <xajax.$> and <xjx.$>
+       */
         
-            Shorthand for finding a uniquely named element within
-            the document.
-        
-            Parameters:
-            sId - (string||object):
-                The unique name of the element (specified by the
-                ID attribute), not to be confused with the name
-                attribute on form elements.
-                
-            Returns:
-            
-            object - The element found or null.
-            
-            Note:
-                This function uses the <xajax.config.baseDocument>
-                which allows <xajax> to operate on the main window
-                document as well as documents from contained
-                iframes and child windows.
-            
-            See also:
-                <xajax.$> and <xjx.$>
-                @deprecated an other method such as in jquery is need
-        */
-        $: function (sId) {
-            // nothing
-            if ('undefined' === typeof sId) { return null; }
-            // is already node
-            if ($xa.isElement(sId)) { return sId;}
-            var baseDoc = $xa.config('baseDocument');//xajax.config.baseDocument;
-            if ('object' === typeof sId && undefined !== sId.id) {
-                return baseDoc.getElementById(sId.id);
-            }
-            //sId not an string so return it maybe its an object.
-            if (!$xa.isStr(sId)) {
-                return null;
-            }
-            return baseDoc.getElementById(sId);
+        $: function (eleS, context) {
+            return getEle(eleS, xjx.getContext(context));
+        },
+        /**
+         * query selector
+         *
+         * @return null|Element
+         * **/
+        qs: function (eleS, context) {
+            return xjx.getContext(context).querySelector(eleS);
+        },
+        /**
+         * query selector all
+         *
+         * @return null|NodeList
+         * **/
+        qsa: function (eleS, context) {
+            return xjx.getContext(context).querySelectorAll(eleS);
         }
     };
 }(xajax));
 /*
-	Class: xajax.tools.queue
+	Class: xajax.queue
 	
 	This contains the code and variables for building, populating
 	and processing First In Last Out (FILO) buffers.
 */
 (function (xjx) {
-    xjx.tools.queue = {};
-    /*
-        Function: create
-        
-        Construct and return a new queue object.
-        
-        Parameters:
-        
-        size - (integer):
-            The number of entries the queue will be able to hold.
-    */
-    xjx.tools.queue.create = function (size) {
-        return {
-            start: 0,
-            size: size,
-            end: 0,
-            commands: [],
-            timeout: null
-        };
-    };
-    /*
-        Function: xajax.tools.queue.retry
-        
-        Maintains a retry counter for the given object.
-        
-        Parameters:
-        
-        obj - (object):
-            The object to track the retry count for.
+    xjx.queue = {
+        /*
+            Function: create
             
-        count - (integer):
-            The number of times the operation should be attempted
-            before a failure is indicated.
+            Construct and return a new queue object.
             
-        Returns:
-        
-        true - The object has not exhausted all the retries.
-        false - The object has exhausted the retry count specified.
-    */
-    xjx.tools.queue.retry = function (obj, count) {
-        var retries = obj.retries;
-        if (retries) {
-            --retries;
-            if (1 > retries)
-                return false;
-        } else retries = count;
-        obj.retries = retries;
-        return true;
-    };
-    /*
-        Function: xajax.tools.queue.rewind
-        
-        Rewind the buffer head pointer, effectively reinserting the
-        last retrieved object into the buffer.
-        
-        Parameters:
-        
-        theQ - (object):
-            The queue to be rewound.
-    */
-    xjx.tools.queue.rewind = function (theQ) {
-        if (0 < theQ.start)
-            --theQ.start;
-        else
-            theQ.start = theQ.size;
-    };
-    /*
-        Function: xajax.tools.queue.setWakeup
-        
-        Set or reset a timeout that is used to restart processing
-        of the queue.  This allows the queue to asynchronously wait
-        for an event to occur (giving the browser time to process
-        pending events, like loading files)
-        
-        Parameters:
-        
-        theQ - (object):
-            The queue to process upon timeout.
+            Parameters:
             
-        when - (integer):
-            The number of milliseconds to wait before starting/
-            restarting the processing of the queue.
-    */
-    xjx.tools.queue.setWakeup = function (theQ, when) {
-        if (null != theQ.timeout) {
-            clearTimeout(theQ.timeout);
-            theQ.timeout = null;
-        }
-        theQ.timout = setTimeout(function () {
-            xajax.tools.queue.process(theQ);
-        }, when);
-    };
-    /*
-        Function: xajax.tools.queue.process
-        
-        While entries exist in the queue, pull and entry out and
-        process it's command.  When a command returns false, the
-        processing is halted.
-        
-        Parameters:
-        
-        theQ - (object): The queue object to process.  This should
-            have been crated by calling <xajax.tools.queue.create>.
-        
-        Returns:
-    
-        true - The queue was fully processed and is now empty.
-        false - The queue processing was halted before the
-            queue was fully processed.
+            size - (integer):
+                The number of entries the queue will be able to hold.
+        */
+        create: function (size) {
+            return {
+                start: 0,
+                size: size,
+                end: 0,
+                commands: [],
+                timeout: null
+            };
+        },
+        /*
+            Function: xajax.queue.retry
             
-        Note:
-        
-        - Use <xajax.tools.queue.setWakeup> or call this function to
-        cause the queue processing to continue.
-    
-        - This will clear the associated timeout, this function is not
-        designed to be reentrant.
-        
-        - When an exception is caught, do nothing; if the debug module
-        is installed, it will catch the exception and handle it.
-    */
-    xjx.tools.queue.process = function (theQ) {
-        if (null != theQ.timeout) {
-            clearTimeout(theQ.timeout);
-            theQ.timeout = null;
-        }
-        var obj = xajax.tools.queue.pop(theQ);
-        while (null != obj) {
-            try {
-                if (false === xajax.executeCommand(obj))
+            Maintains a retry counter for the given object.
+            
+            Parameters:
+            
+            obj - (object):
+                The object to track the retry count for.
+                
+            count - (integer):
+                The number of times the operation should be attempted
+                before a failure is indicated.
+                
+            Returns:
+            
+            true - The object has not exhausted all the retries.
+            false - The object has exhausted the retry count specified.
+        */
+        retry: function (obj, count) {
+            var retries = obj.retries;
+            if (retries) {
+                --retries;
+                if (1 > retries)
                     return false;
-            } catch (e) {
+            } else retries = count;
+            obj.retries = retries;
+            return true;
+        },
+        /*
+            Function: xajax.queue.rewind
+            
+            Rewind the buffer head pointer, effectively reinserting the
+            last retrieved object into the buffer.
+            
+            Parameters:
+            
+            theQ - (object):
+                The queue to be rewound.
+        */
+        rewind: function (theQ) {
+            if (0 < theQ.start)
+                --theQ.start;
+            else
+                theQ.start = theQ.size;
+        },
+        /*
+            Function: xajax.queue.setWakeup
+            
+            Set or reset a timeout that is used to restart processing
+            of the queue.  This allows the queue to asynchronously wait
+            for an event to occur (giving the browser time to process
+            pending events, like loading files)
+            
+            Parameters:
+            
+            theQ - (object):
+                The queue to process upon timeout.
+                
+            when - (integer):
+                The number of milliseconds to wait before starting/
+                restarting the processing of the queue.
+        */
+        setWakeup: function (theQ, when) {
+            if (null != theQ.timeout) {
+                clearTimeout(theQ.timeout);
+                theQ.timeout = null;
             }
-            delete obj;
-            obj = xajax.tools.queue.pop(theQ);
+            theQ.timout = setTimeout(function () {
+                xajax.queue.process(theQ);
+            }, when);
+        },
+        /*
+            Function: xajax.queue.process
+            
+            While entries exist in the queue, pull and entry out and
+            process it's command.  When a command returns false, the
+            processing is halted.
+            
+            Parameters:
+            
+            theQ - (object): The queue object to process.  This should
+                have been crated by calling <xajax.queue.create>.
+            
+            Returns:
+        
+            true - The queue was fully processed and is now empty.
+            false - The queue processing was halted before the
+                queue was fully processed.
+                
+            Note:
+            
+            - Use <xajax.queue.setWakeup> or call this function to
+            cause the queue processing to continue.
+        
+            - This will clear the associated timeout, this function is not
+            designed to be reentrant.
+            
+            - When an exception is caught, do nothing; if the debug module
+            is installed, it will catch the exception and handle it.
+        */
+        process: function (theQ) {
+            if (null != theQ.timeout) {
+                clearTimeout(theQ.timeout);
+                theQ.timeout = null;
+            }
+            var obj = xajax.queue.pop(theQ);
+            while (null != obj) {
+                try {
+                    if (false === xajax.executeCommand(obj))
+                        return false;
+                } catch (e) {
+                }
+                delete obj;
+                obj = xajax.queue.pop(theQ);
+            }
+            return true;
+        },
+        /*
+            Function: xajax.queue.push
+            
+            Push a new object into the tail of the buffer maintained by the
+            specified queue object.
+            
+            Parameters:
+            
+            theQ - (object):
+                The queue in which you would like the object stored.
+                
+            obj - (object):
+                The object you would like stored in the queue.
+        */
+        push: function (theQ, obj) {
+            var next = theQ.end + 1;
+            if (next > theQ.size)
+                next = 0;
+            if (next !== theQ.start) {
+                theQ.commands[theQ.end] = obj;
+                theQ.end = next;
+            } else
+                throw {code: 10003};
+        },
+        /*
+            Function: xajax.queue.pushFront
+            
+            Push a new object into the head of the buffer maintained by
+            the specified queue object.  This effectively pushes an object
+            to the front of the queue... it will be processed first.
+            
+            Parameters:
+            
+            theQ - (object):
+                The queue in which you would like the object stored.
+                
+            obj - (object):
+                The object you would like stored in the queue.
+        */
+        pushFront: function (theQ, obj) {
+            xjx.queue.rewind(theQ);
+            theQ.commands[theQ.start] = obj;
+        },
+        /*
+            Function: xajax.queue.pop
+            
+            Attempt to pop an object off the head of the queue.
+            
+            Parameters:
+            
+            theQ - (object):
+                The queue object you would like to modify.
+                
+            Returns:
+            
+            object - The object that was at the head of the queue or
+                null if the queue was empty.
+        */
+        pop: function (theQ) {
+            var next = theQ.start;
+            if (next === theQ.end)
+                return null;
+            next++;
+            if (next > theQ.size)
+                next = 0;
+            var obj = theQ.commands[theQ.start];
+            delete theQ.commands[theQ.start];
+            theQ.start = next;
+            return obj;
         }
-        return true;
-    };
-    /*
-        Function: xajax.tools.queue.push
-        
-        Push a new object into the tail of the buffer maintained by the
-        specified queue object.
-        
-        Parameters:
-        
-        theQ - (object):
-            The queue in which you would like the object stored.
-            
-        obj - (object):
-            The object you would like stored in the queue.
-    */
-    xjx.tools.queue.push = function (theQ, obj) {
-        var next = theQ.end + 1;
-        if (next > theQ.size)
-            next = 0;
-        if (next !== theQ.start) {
-            theQ.commands[theQ.end] = obj;
-            theQ.end = next;
-        } else
-            throw {code: 10003};
-    };
-    /*
-        Function: xajax.tools.queue.pushFront
-        
-        Push a new object into the head of the buffer maintained by
-        the specified queue object.  This effectively pushes an object
-        to the front of the queue... it will be processed first.
-        
-        Parameters:
-        
-        theQ - (object):
-            The queue in which you would like the object stored.
-            
-        obj - (object):
-            The object you would like stored in the queue.
-    */
-    xjx.tools.queue.pushFront = function (theQ, obj) {
-        xjx.tools.queue.rewind(theQ);
-        theQ.commands[theQ.start] = obj;
-    };
-    /*
-        Function: xajax.tools.queue.pop
-        
-        Attempt to pop an object off the head of the queue.
-        
-        Parameters:
-        
-        theQ - (object):
-            The queue object you would like to modify.
-            
-        Returns:
-        
-        object - The object that was at the head of the queue or
-            null if the queue was empty.
-    */
-    xjx.tools.queue.pop = function (theQ) {
-        var next = theQ.start;
-        if (next === theQ.end)
-            return null;
-        next++;
-        if (next > theQ.size)
-            next = 0;
-        var obj = theQ.commands[theQ.start];
-        delete theQ.commands[theQ.start];
-        theQ.start = next;
-        return obj;
-    };
+    }
+    ;
 }(xajax));
 /*
 	Class: xajax.responseProcessor
@@ -659,7 +649,7 @@ if ('undefined' === typeof xajax) {
                     throw(ex);
                 }
                 if (('object' === typeof responseJSON) && ('object' === typeof responseJSON.xjxobj)) {
-                    oRequest.status.onProcessing();
+                    // oRequest.status.onProcessing();
                     oRet = xt.json.processFragment(responseJSON, seq, oRet, oRequest);
                 } else {
                 }
@@ -670,10 +660,10 @@ if ('undefined' === typeof xajax) {
             obj.request = oRequest;
             obj.context = oRequest.context;
             obj.cmd = 'rcmplt';
-            xt.queue.push(xx.response, obj);
+            xjx.queue.push(xx.response, obj);
             // do not re-start the queue if a timeout is set
             if (null == xx.response.timeout)
-                xt.queue.process(xx.response);
+                xjx.queue.process(xx.response);
         } else if (xt.in_array(xx.responseRedirectCodes, oRequest.request.status)) {
             xcb.execute([gcb, lcb], 'onRedirect', oRequest);
             window.location = oRequest.request.getResponseHeader('location');
@@ -710,7 +700,7 @@ if ('undefined' === typeof xajax) {
             if (oRequest.request.responseXML) {
                 var responseXML = oRequest.request.responseXML;
                 if (responseXML.documentElement) {
-                    oRequest.status.onProcessing();
+                 //   oRequest.status.onProcessing();
                     var child = responseXML.documentElement.firstChild;
                     oRet = xt.xml.processFragment(child, seq, oRet, oRequest);
                 }
@@ -721,10 +711,10 @@ if ('undefined' === typeof xajax) {
             obj.request = oRequest;
             obj.context = oRequest.context;
             obj.cmd = 'rcmplt';
-            xt.queue.push(xx.response, obj);
+            xjx.queue.push(xx.response, obj);
             // do not re-start the queue if a timeout is set
             if (null == xx.response.timeout)
-                xt.queue.process(xx.response);
+                xjx.queue.process(xx.response);
         } else if (xt.in_array(xx.responseRedirectCodes, oRequest.request.status)) {
             xcb.execute([gcb, lcb], 'onRedirect', oRequest);
             window.location = oRequest.request.getResponseHeader('location');
@@ -765,8 +755,8 @@ if ('undefined' === typeof xajax) {
             command.fullName = 'includeScriptOnce';
             var fileName = command.data;
             // Check for existing script tag for this file.
-            var oDoc = xajax.config.baseDocument;
-            var loadedScripts = oDoc.getElementsByTagName('script');
+            var baseDoc = xjx.getContext(context);
+            var loadedScripts = baseDoc.getElementsByTagName('script');
             var iLen = loadedScripts.length;
             for (var i = 0; i < iLen; ++i) {
                 var script = loadedScripts[i];
@@ -791,11 +781,12 @@ if ('undefined' === typeof xajax) {
 	
 	true - The reference was added.
 */
-        includeScript: function (command) {
+        includeScript: function (command,context) {
+            // todo check object command
             command.fullName = 'includeScript';
-            var oDoc = xajax.config.baseDocument;
-            var objHead = oDoc.getElementsByTagName('head');
-            var objScript = oDoc.createElement('script');
+            var baseDoc = xjx.getContext(context||command.context);
+            var objHead = baseDoc.getElementsByTagName('head');
+            var objScript = baseDoc.createElement('script');
             objScript.src = command.data;
             if ('undefined' === typeof command.type) objScript.type = 'text/javascript';
             else objScript.type = command.type;
@@ -817,12 +808,13 @@ if ('undefined' === typeof xajax) {
             
             true - The script was not found or was removed.
         */
-        removeScript: function (command) {
+        removeScript: function (command,context) {
             command.fullName = 'removeScript';
+            // todo check object command
             var fileName = command.data;
             var unload = command.unld;
-            var oDoc = xajax.config.baseDocument;
-            var loadedScripts = oDoc.getElementsByTagName('script');
+            var baseDoc = xjx.getContext(context||command.context);
+            var loadedScripts = baseDoc.getElementsByTagName('script');
             var iLen = loadedScripts.length;
             for (var i = 0; i < iLen; ++i) {
                 var script = loadedScripts[i];
@@ -864,8 +856,8 @@ if ('undefined' === typeof xajax) {
             command.fullName = 'sleep';
             // inject a delay in the queue processing
             // handle retry counter
-            if (xajax.tools.queue.retry(command, command.prop)) {
-                xajax.tools.queue.setWakeup(xajax.response, 100);
+            if (xajax.queue.retry(command, command.prop)) {
+                xajax.queue.setWakeup(xajax.response, 100);
                 return false;
             }
             // wake up, continue processing queue
@@ -893,7 +885,7 @@ if ('undefined' === typeof xajax) {
             var numberOfCommands = command.id;
             if (false === confirm(msg)) {
                 while (0 < numberOfCommands) {
-                    xajax.tools.queue.pop(xajax.response);
+                    xajax.queue.pop(xajax.response);
                     --numberOfCommands;
                 }
             }
@@ -968,8 +960,8 @@ if ('undefined' === typeof xajax) {
             if (false === bResult) {
                 // inject a delay in the queue processing
                 // handle retry counter
-                if (xajax.tools.queue.retry(args, args.prop)) {
-                    xajax.tools.queue.setWakeup(xajax.response, 100);
+                if (xajax.queue.retry(args, args.prop)) {
+                    xajax.queue.setWakeup(xajax.response, 100);
                     return false;
                 }
                 // give up, continue processing queue
@@ -1593,8 +1585,8 @@ if ('undefined' === typeof xajax) {
             
             true - The operation completed successfully.
         */
-        add: function (fileName, media) {
-            var oDoc = xajax.config.baseDocument;
+        add: function (fileName, media, context) {
+            var oDoc = xjx.getContext(context);
             var oHeads = oDoc.getElementsByTagName('head');
             var oHead = oHeads[0];
             var oLinks = oHead.getElementsByTagName('link');
@@ -1603,14 +1595,13 @@ if ('undefined' === typeof xajax) {
             for (var i = 0; i < iLen && false === found; ++i)
                 if (0 <= oLinks[i].href.indexOf(fileName) && oLinks[i].media === media)
                     found = true;
-            if (false === found) {
-                var oCSS = oDoc.createElement('link');
-                oCSS.rel = 'stylesheet';
-                oCSS.type = 'text/css';
-                oCSS.href = fileName;
-                oCSS.media = media;
-                oHead.appendChild(oCSS);
-            }
+            if (true === found) return true;
+            var oCSS = oDoc.createElement('link');
+            oCSS.rel = 'stylesheet';
+            oCSS.type = 'text/css';
+            oCSS.href = fileName;
+            oCSS.media = media;
+            oHead.appendChild(oCSS);
             return true;
         },
         /*
@@ -1627,8 +1618,8 @@ if ('undefined' === typeof xajax) {
             
             true - The operation completed successfully.
         */
-        remove: function (fileName, media) {
-            var oDoc = xajax.config.baseDocument;
+        remove: function (fileName, media, context) {
+            var oDoc = xjx.getContext(context);
             var oHeads = oDoc.getElementsByTagName('head');
             var oHead = oHeads[0];
             var oLinks = oHead.getElementsByTagName('link');
@@ -1660,8 +1651,11 @@ if ('undefined' === typeof xajax) {
             false - The .css files do not appear to be loaded and the timeout
                 has not expired.
         */
-        waitForCSS: function (args) {
-            var oDocSS = xajax.config.baseDocument.styleSheets;
+        waitForCSS: function (args, context) {
+            var oDoc = xjx.getContext(context);
+            // todo property styleSheets exists
+            // todo test
+            var oDocSS = oDoc.styleSheets;
             var ssEnabled = [];
             var iLen = oDocSS.length;
             for (var i = 0; i < iLen; ++i) {
@@ -1676,15 +1670,15 @@ if ('undefined' === typeof xajax) {
                 }
             }
             var ssLoaded = true;
-            var iLen = ssEnabled.length;
-            for (var i = 0; i < iLen; ++i)
-                if (0 === ssEnabled[i])
+            var ssEnL = ssEnabled.length;
+            for (var t = 0; t < ssEnL; ++t)
+                if (0 === ssEnabled[t])
                     ssLoaded = false;
             if (false === ssLoaded) {
                 // inject a delay in the queue processing
                 // handle retry counter
-                if (xajax.tools.queue.retry(args, args.prop)) {
-                    xajax.tools.queue.setWakeup(xajax.response, 10);
+                if (xajax.queue.retry(args, args.prop)) {
+                    xajax.queue.setWakeup(xajax.response, 10);
                     return false;
                 }
                 // give up, continue processing queue
@@ -1713,22 +1707,22 @@ if ('undefined' === typeof xajax) {
             
             object - The new input element.
         */
-        getInput: function (type, name, id) {
+        getInput: function (type, name, id, context) {
+            var baseDoc = xjx.getContext(context);
             if ('undefined' === typeof window.addEventListener) {
                 xajax.forms.getInput = function (type, name, id) {
-                    return xajax.config.baseDocument.createElement('<input type="' + type + '" name="' + name + '" id="' + id + '">');
+                    return baseDoc.createElement('<input type="' + type + '" name="' + name + '" id="' + id + '">');
                 };
             } else {
-                xajax.forms.getInput = function (type, name, id) {
-                    var oDoc = xajax.config.baseDocument;
-                    var Obj = oDoc.createElement('input');
+                xjx.forms.getInput = function (type, name, id) {
+                    var Obj = baseDoc.createElement('input');
                     Obj.setAttribute('type', type);
                     Obj.setAttribute('name', name);
                     Obj.setAttribute('id', id);
                     return Obj;
                 };
             }
-            return xajax.forms.getInput(type, name, id);
+            return xjx.forms.getInput(type, name, id);
         },
         /*
             Function: xajax.forms.createInput
@@ -1754,8 +1748,8 @@ if ('undefined' === typeof xajax) {
             var sName = command.data;
             var sId = command.prop;
             if ('string' === typeof objParent)
-                objParent = xajax.$(objParent);
-            var target = xajax.forms.getInput(sType, sName, sId);
+                objParent = xjx.$(objParent);
+            var target = xjx.forms.getInput(sType, sName, sId);
             if (objParent && target) {
                 objParent.appendChild(target);
             }
@@ -1785,8 +1779,8 @@ if ('undefined' === typeof xajax) {
             var sName = command.data;
             var sId = command.prop;
             if ('string' === typeof objSibling)
-                objSibling = xajax.$(objSibling);
-            var target = xajax.forms.getInput(sType, sName, sId);
+                objSibling = xjx.$(objSibling);
+            var target = xjx.forms.getInput(sType, sName, sId);
             if (target && objSibling && objSibling.parentNode)
                 objSibling.parentNode.insertBefore(target, objSibling);
             return true;
@@ -1815,11 +1809,143 @@ if ('undefined' === typeof xajax) {
             var sName = command.data;
             var sId = command.prop;
             if ('string' === typeof objSibling)
-                objSibling = xajax.$(objSibling);
-            var target = xajax.forms.getInput(sType, sName, sId);
+                objSibling = xjx.$(objSibling);
+            var target = xjx.forms.getInput(sType, sName, sId);
             if (target && objSibling && objSibling.parentNode)
                 objSibling.parentNode.insertBefore(target, objSibling.nextSibling);
             return true;
+        }
+    };
+}(xajax));
+// xajax form values handler
+(function (xjx) {
+    
+    /*
+           Function: xajax.tools._getFormValues
+           
+           Used internally by <xajax.tools.getFormValues> to recursively get the value
+           of form elements.  This function will extract all form element values
+           regardless of the depth of the element within the form.
+       */
+    var _getFormValues = function (aFormValues, children, submitDisabledElements, prefix) {
+        var iLen = children.length;
+        for (var i = 0; i < iLen; ++i) {
+            var child = children[i];
+            if (('undefined' !== typeof child.childNodes) && (child.type !== 'select-one') && (child.type !== 'select-multiple'))
+                _getFormValues(aFormValues, child.childNodes, submitDisabledElements, prefix);
+            _getFormValue(aFormValues, child, submitDisabledElements, prefix);
+        }
+    };
+    /*
+            Function: xajax.tools._getFormValue
+            
+            Used internally by <xajax.tools._getFormValues> to extract a single form value.
+            This will detect the type of element (radio, checkbox, multi-select) and
+            add it's value(s) to the form values array.
+        
+            Modified version for multidimensional arrays
+        */
+    var _getFormValue = function (aFormValues, child, submitDisabledElements, prefix) {
+        if (!child.name)
+            return;
+        if ('PARAM' === child.tagName) return;
+        if (child.disabled)
+            if (true == child.disabled)
+                if (false == submitDisabledElements)
+                    return;
+        if (prefix !== child.name.substring(0, prefix.length))
+            return;
+        if (child.type)
+            if (child.type === 'radio' || child.type === 'checkbox')
+                if (false == child.checked)
+                    return;
+        var name = child.name;
+        var values = [];
+        if ('select-multiple' === child.type) {
+            var jLen = child.length;
+            for (var j = 0; j < jLen; ++j) {
+                var option = child.options[j];
+                if (true == option.selected)
+                    values.push(option.value);
+            }
+        } else {
+            values = child.value;
+        }
+        var keyBegin = name.indexOf('[');
+        /* exists name/object before the Bracket?*/
+        if (0 <= keyBegin) {
+            var n = name;
+            var k = n.substr(0, n.indexOf('['));
+            var a = n.substr(n.indexOf('['));
+            if (typeof aFormValues[k] === 'undefined')
+                aFormValues[k] = {};
+            var p = aFormValues; // pointer reset
+            while (a.length !== 0) {
+                var sa = a.substr(0, a.indexOf(']') + 1);
+                var lk = k; //save last key
+                var lp = p; //save last pointer
+                a = a.substr(a.indexOf(']') + 1);
+                p = p[k];
+                k = sa.substr(1, sa.length - 2);
+                if (k === '') {
+                    if ('select-multiple' === child.type) {
+                        k = lk; //restore last key
+                        p = lp;
+                    } else {
+                        k = p.length;
+                    }
+                }
+                if (typeof k === 'undefined') {
+                    /*check against the global aFormValues Stack which is the next(last) usable index */
+                    k = 0;
+                    for (var i in lp[lk]) k++;
+                }
+                if (typeof p[k] === 'undefined') {
+                    p[k] = {};
+                }
+            }
+            p[k] = values;
+        } else {
+            aFormValues[name] = values;
+        }
+    };
+    /*
+	Function: xajax.tools.getFormValues
+	
+	Build an associative array of form elements and their values from
+	the specified form.
+	
+	Parameters:
+	
+	element - (string): The unique name (id) of the form to be processed.
+	disabled - (boolean, optional): Include form elements which are currently disabled.
+	prefix - (string, optional): A prefix used for selecting form elements.
+
+	Returns:
+	
+	An associative array of form element id and value.
+*/
+    xjx.forms = {
+        getFormValues: function (parent) {
+            var submitDisabledElements = false;
+            if (arguments.length > 1 && arguments[1] == true)
+                submitDisabledElements = true;
+            var prefix = '';
+            if (arguments.length > 2)
+                prefix = arguments[2];
+            // todo check parent is type?!
+            if ('string' === typeof parent)
+                parent = xjx.$(parent);
+            var aFormValues = {};
+//		JW: Removing these tests so that form values can be retrieved from a specified
+//		container element like a DIV, regardless of whether they exist in a form or not.
+//
+//		if (parent.tagName)
+//			if ('FORM' == parent.tagName.toUpperCase())
+            if (parent)
+                if (parent.childNodes)
+                    _getFormValues(aFormValues, parent.childNodes, submitDisabledElements, prefix);
+            return aFormValues;
         }
     };
 }(xajax));
@@ -2745,17 +2871,18 @@ xajax.tools.getRequestObject = function () {
 	
 	The (potentially modified) html code or text.
 */
-xajax.tools.getBrowserHTML = function (sValue) {
-    var oDoc = xajax.config.baseDocument;
-    if (!oDoc.body)
+xajax.tools.getBrowserHTML = function (sValue, context) {
+    // todo check object command
+    var baseDoc = xjx.getContext(context);
+    if (!baseDoc.body)
         return '';
     var elWorkspace = xajax.$('xajax_temp_workspace');
     if (!elWorkspace) {
-        elWorkspace = oDoc.createElement('div');
+        elWorkspace = baseDoc.createElement('div');
         elWorkspace.setAttribute('id', 'xajax_temp_workspace');
         elWorkspace.style.display = 'none';
         elWorkspace.style.visibility = 'hidden';
-        oDoc.body.appendChild(elWorkspace);
+        baseDoc.body.appendChild(elWorkspace);
     }
     elWorkspace.innerHTML = sValue;
     var browserHTML = elWorkspace.innerHTML;
@@ -2800,132 +2927,7 @@ xajax.tools.willChange = function (element, attribute, newData) {
     return false;
 };
 /*
-	Function: xajax.tools.getFormValues
-	
-	Build an associative array of form elements and their values from
-	the specified form.
-	
-	Parameters:
-	
-	element - (string): The unique name (id) of the form to be processed.
-	disabled - (boolean, optional): Include form elements which are currently disabled.
-	prefix - (string, optional): A prefix used for selecting form elements.
-
-	Returns:
-	
-	An associative array of form element id and value.
-*/
-xajax.tools.getFormValues = function (parent) {
-    var submitDisabledElements = false;
-    if (arguments.length > 1 && arguments[1] == true)
-        submitDisabledElements = true;
-    var prefix = '';
-    if (arguments.length > 2)
-        prefix = arguments[2];
-    if ('string' === typeof parent)
-        parent = xajax.$(parent);
-    var aFormValues = {};
-//		JW: Removing these tests so that form values can be retrieved from a specified
-//		container element like a DIV, regardless of whether they exist in a form or not.
-//
-//		if (parent.tagName)
-//			if ('FORM' == parent.tagName.toUpperCase())
-    if (parent)
-        if (parent.childNodes)
-            xajax.tools._getFormValues(aFormValues, parent.childNodes, submitDisabledElements, prefix);
-    return aFormValues;
-};
-/*
-	Function: xajax.tools._getFormValues
-	
-	Used internally by <xajax.tools.getFormValues> to recursively get the value
-	of form elements.  This function will extract all form element values
-	regardless of the depth of the element within the form.
-*/
-xajax.tools._getFormValues = function (aFormValues, children, submitDisabledElements, prefix) {
-    var iLen = children.length;
-    for (var i = 0; i < iLen; ++i) {
-        var child = children[i];
-        if (('undefined' !== typeof child.childNodes) && (child.type !== 'select-one') && (child.type !== 'select-multiple'))
-            xajax.tools._getFormValues(aFormValues, child.childNodes, submitDisabledElements, prefix);
-        xajax.tools._getFormValue(aFormValues, child, submitDisabledElements, prefix);
-    }
-};
-/*
-	Function: xajax.tools._getFormValue
-	
-	Used internally by <xajax.tools._getFormValues> to extract a single form value.
-	This will detect the type of element (radio, checkbox, multi-select) and
-	add it's value(s) to the form values array.
-
-	Modified version for multidimensional arrays
-*/
-xajax.tools._getFormValue = function (aFormValues, child, submitDisabledElements, prefix) {
-    if (!child.name)
-        return;
-    if ('PARAM' === child.tagName) return;
-    if (child.disabled)
-        if (true == child.disabled)
-            if (false == submitDisabledElements)
-                return;
-    if (prefix !== child.name.substring(0, prefix.length))
-        return;
-    if (child.type)
-        if (child.type === 'radio' || child.type === 'checkbox')
-            if (false == child.checked)
-                return;
-    var name = child.name;
-    var values = [];
-    if ('select-multiple' === child.type) {
-        var jLen = child.length;
-        for (var j = 0; j < jLen; ++j) {
-            var option = child.options[j];
-            if (true == option.selected)
-                values.push(option.value);
-        }
-    } else {
-        values = child.value;
-    }
-    var keyBegin = name.indexOf('[');
-    /* exists name/object before the Bracket?*/
-    if (0 <= keyBegin) {
-        var n = name;
-        var k = n.substr(0, n.indexOf('['));
-        var a = n.substr(n.indexOf('['));
-        if (typeof aFormValues[k] === 'undefined')
-            aFormValues[k] = {};
-        var p = aFormValues; // pointer reset
-        while (a.length !== 0) {
-            var sa = a.substr(0, a.indexOf(']') + 1);
-            var lk = k; //save last key
-            var lp = p; //save last pointer
-            a = a.substr(a.indexOf(']') + 1);
-            p = p[k];
-            k = sa.substr(1, sa.length - 2);
-            if (k === '') {
-                if ('select-multiple' === child.type) {
-                    k = lk; //restore last key
-                    p = lp;
-                } else {
-                    k = p.length;
-                }
-            }
-            if (typeof k === 'undefined') {
-                /*check against the global aFormValues Stack wich is the next(last) usable index */
-                k = 0;
-                for (var i in lp[lk]) k++;
-            }
-            if (typeof p[k] === 'undefined') {
-                p[k] = {};
-            }
-        }
-        p[k] = values;
-    } else {
-        aFormValues[name] = values;
-    }
-};
-/*
-	Class: xajax.tools.queue
+	Class: xajax.queue
 	
 	This contains the code and variables for building, populating
 	and processing First In Last Out (FILO) buffers.
@@ -2947,7 +2949,6 @@ xajax.tools._getFormValue = function (aFormValues, child, submitDisabledElements
 xajax.tools.json = {};
 xajax.tools.json.processFragment = function (nodes, seq, oRet, oRequest) {
     var xx = xajax;
-    var xt = xx.tools;
     for (var nodeName in nodes) {
         if ('xjxobj' === nodeName) {
             for (var a in nodes[nodeName]) {
@@ -2963,7 +2964,7 @@ xajax.tools.json.processFragment = function (nodes, seq, oRet, oRequest) {
                 obj.sequence = seq;
                 obj.request = oRequest;
                 obj.context = oRequest.context;
-                xt.queue.push(xx.response, obj);
+                xx.queue.push(xx.response, obj);
                 ++seq;
             }
         } else if ('xjxrv' === nodeName) {
@@ -3006,7 +3007,7 @@ Function: xajax.responseProcessor.json
 	The response queue that holds response commands, once received
 	from the server, until they are processed.
 */
-xajax.response = xajax.tools.queue.create(xajax.config.responseQueueSize);
+xajax.response = xajax.queue.create(xajax.config.responseQueueSize);
 /*
 	Object: responseSuccessCodes
 	
@@ -3150,9 +3151,6 @@ xajax.initializeRequest = function (oRequest) {
             oRequest.callback = [oRequest.callback, lcb];
     } else
         oRequest.callback = lcb;
-    oRequest.status = (oRequest.statusMessages) ?
-      xc.status.update() :
-      xc.status.dontUpdate();
     oRequest.cursor = (oRequest.waitCursor) ?
       xc.cursor.update() :
       xc.cursor.dontUpdate();
@@ -3401,7 +3399,7 @@ xajax.request = function () {
 	oRequest - (object):  The request context object.
 */
 xajax.submitRequest = function (oRequest) {
-    oRequest.status.onRequest();
+    //  oRequest.status.onRequest();
     var xcb = xajax.callback;
     var gcb = xcb.global;
     var lcb = oRequest.callback;
@@ -3412,7 +3410,7 @@ xajax.submitRequest = function (oRequest) {
     oRequest.applyRequestHeaders();
     // todo work with emiters
     oRequest.cursor.onWaiting();
-    oRequest.status.onWaiting();
+    //   oRequest.status.onWaiting();
     xajax._internalSend(oRequest);
     // synchronous mode causes response to be processed immediately here
     return oRequest.finishRequest();
@@ -3541,7 +3539,7 @@ xajax.executeCommand = function (command) {
             command.target = xajax.$(command.id);
         // process the command
         if (false === xajax.command.call(command)) {
-            xajax.tools.queue.pushFront(xajax.response, command);
+            xajax.queue.pushFront(xajax.response, command);
             return false;
         }
     }
@@ -3561,7 +3559,7 @@ xajax.completeResponse = function (oRequest) {
     xajax.callback.execute(
       [xajax.callback.global, oRequest.callback], 'onComplete', oRequest);
     oRequest.cursor.onComplete();
-    oRequest.status.onComplete();
+    //oRequest.status.onComplete();
     // clean up -- these items are restored when the request is initiated
     var resets = [
         'functionName',

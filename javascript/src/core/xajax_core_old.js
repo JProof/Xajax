@@ -401,132 +401,7 @@ xajax.tools.willChange = function (element, attribute, newData) {
     return false;
 };
 /*
-	Function: xajax.tools.getFormValues
-	
-	Build an associative array of form elements and their values from
-	the specified form.
-	
-	Parameters:
-	
-	element - (string): The unique name (id) of the form to be processed.
-	disabled - (boolean, optional): Include form elements which are currently disabled.
-	prefix - (string, optional): A prefix used for selecting form elements.
-
-	Returns:
-	
-	An associative array of form element id and value.
-*/
-xajax.tools.getFormValues = function (parent) {
-    var submitDisabledElements = false;
-    if (arguments.length > 1 && arguments[1] == true)
-        submitDisabledElements = true;
-    var prefix = '';
-    if (arguments.length > 2)
-        prefix = arguments[2];
-    if ('string' === typeof parent)
-        parent = xajax.$(parent);
-    var aFormValues = {};
-//		JW: Removing these tests so that form values can be retrieved from a specified
-//		container element like a DIV, regardless of whether they exist in a form or not.
-//
-//		if (parent.tagName)
-//			if ('FORM' == parent.tagName.toUpperCase())
-    if (parent)
-        if (parent.childNodes)
-            xajax.tools._getFormValues(aFormValues, parent.childNodes, submitDisabledElements, prefix);
-    return aFormValues;
-};
-/*
-	Function: xajax.tools._getFormValues
-	
-	Used internally by <xajax.tools.getFormValues> to recursively get the value
-	of form elements.  This function will extract all form element values
-	regardless of the depth of the element within the form.
-*/
-xajax.tools._getFormValues = function (aFormValues, children, submitDisabledElements, prefix) {
-    var iLen = children.length;
-    for (var i = 0; i < iLen; ++i) {
-        var child = children[i];
-        if (('undefined' !== typeof child.childNodes) && (child.type !== 'select-one') && (child.type !== 'select-multiple'))
-            xajax.tools._getFormValues(aFormValues, child.childNodes, submitDisabledElements, prefix);
-        xajax.tools._getFormValue(aFormValues, child, submitDisabledElements, prefix);
-    }
-};
-/*
-	Function: xajax.tools._getFormValue
-	
-	Used internally by <xajax.tools._getFormValues> to extract a single form value.
-	This will detect the type of element (radio, checkbox, multi-select) and
-	add it's value(s) to the form values array.
-
-	Modified version for multidimensional arrays
-*/
-xajax.tools._getFormValue = function (aFormValues, child, submitDisabledElements, prefix) {
-    if (!child.name)
-        return;
-    if ('PARAM' === child.tagName) return;
-    if (child.disabled)
-        if (true == child.disabled)
-            if (false == submitDisabledElements)
-                return;
-    if (prefix !== child.name.substring(0, prefix.length))
-        return;
-    if (child.type)
-        if (child.type === 'radio' || child.type === 'checkbox')
-            if (false == child.checked)
-                return;
-    var name = child.name;
-    var values = [];
-    if ('select-multiple' === child.type) {
-        var jLen = child.length;
-        for (var j = 0; j < jLen; ++j) {
-            var option = child.options[j];
-            if (true == option.selected)
-                values.push(option.value);
-        }
-    } else {
-        values = child.value;
-    }
-    var keyBegin = name.indexOf('[');
-    /* exists name/object before the Bracket?*/
-    if (0 <= keyBegin) {
-        var n = name;
-        var k = n.substr(0, n.indexOf('['));
-        var a = n.substr(n.indexOf('['));
-        if (typeof aFormValues[k] === 'undefined')
-            aFormValues[k] = {};
-        var p = aFormValues; // pointer reset
-        while (a.length !== 0) {
-            var sa = a.substr(0, a.indexOf(']') + 1);
-            var lk = k; //save last key
-            var lp = p; //save last pointer
-            a = a.substr(a.indexOf(']') + 1);
-            p = p[k];
-            k = sa.substr(1, sa.length - 2);
-            if (k === '') {
-                if ('select-multiple' === child.type) {
-                    k = lk; //restore last key
-                    p = lp;
-                } else {
-                    k = p.length;
-                }
-            }
-            if (typeof k === 'undefined') {
-                /*check against the global aFormValues Stack wich is the next(last) usable index */
-                k = 0;
-                for (var i in lp[lk]) k++;
-            }
-            if (typeof p[k] === 'undefined') {
-                p[k] = {};
-            }
-        }
-        p[k] = values;
-    } else {
-        aFormValues[name] = values;
-    }
-};
-/*
-	Class: xajax.tools.queue
+	Class: xajax.queue
 	
 	This contains the code and variables for building, populating
 	and processing First In Last Out (FILO) buffers.
@@ -548,7 +423,6 @@ xajax.tools._getFormValue = function (aFormValues, child, submitDisabledElements
 xajax.tools.json = {};
 xajax.tools.json.processFragment = function (nodes, seq, oRet, oRequest) {
     var xx = xajax;
-    var xt = xx.tools;
     for (var nodeName in nodes) {
         if ('xjxobj' === nodeName) {
             for (var a in nodes[nodeName]) {
@@ -564,7 +438,7 @@ xajax.tools.json.processFragment = function (nodes, seq, oRet, oRequest) {
                 obj.sequence = seq;
                 obj.request = oRequest;
                 obj.context = oRequest.context;
-                xt.queue.push(xx.response, obj);
+                xx.queue.push(xx.response, obj);
                 ++seq;
             }
         } else if ('xjxrv' === nodeName) {
@@ -607,7 +481,7 @@ Function: xajax.responseProcessor.json
 	The response queue that holds response commands, once received
 	from the server, until they are processed.
 */
-xajax.response = xajax.tools.queue.create(xajax.config.responseQueueSize);
+xajax.response = xajax.queue.create(xajax.config.responseQueueSize);
 /*
 	Object: responseSuccessCodes
 	
@@ -751,9 +625,6 @@ xajax.initializeRequest = function (oRequest) {
             oRequest.callback = [oRequest.callback, lcb];
     } else
         oRequest.callback = lcb;
-    oRequest.status = (oRequest.statusMessages) ?
-      xc.status.update() :
-      xc.status.dontUpdate();
     oRequest.cursor = (oRequest.waitCursor) ?
       xc.cursor.update() :
       xc.cursor.dontUpdate();
@@ -1002,7 +873,7 @@ xajax.request = function () {
 	oRequest - (object):  The request context object.
 */
 xajax.submitRequest = function (oRequest) {
-    oRequest.status.onRequest();
+    //  oRequest.status.onRequest();
     var xcb = xajax.callback;
     var gcb = xcb.global;
     var lcb = oRequest.callback;
@@ -1013,7 +884,7 @@ xajax.submitRequest = function (oRequest) {
     oRequest.applyRequestHeaders();
     // todo work with emiters
     oRequest.cursor.onWaiting();
-    oRequest.status.onWaiting();
+    //   oRequest.status.onWaiting();
     xajax._internalSend(oRequest);
     // synchronous mode causes response to be processed immediately here
     return oRequest.finishRequest();
@@ -1142,7 +1013,7 @@ xajax.executeCommand = function (command) {
             command.target = xajax.$(command.id);
         // process the command
         if (false === xajax.command.call(command)) {
-            xajax.tools.queue.pushFront(xajax.response, command);
+            xajax.queue.pushFront(xajax.response, command);
             return false;
         }
     }
@@ -1162,7 +1033,7 @@ xajax.completeResponse = function (oRequest) {
     xajax.callback.execute(
       [xajax.callback.global, oRequest.callback], 'onComplete', oRequest);
     oRequest.cursor.onComplete();
-    oRequest.status.onComplete();
+    //oRequest.status.onComplete();
     // clean up -- these items are restored when the request is initiated
     var resets = [
         'functionName',
