@@ -33,9 +33,12 @@ module.exports = function (config) {
             scriptStackDir + 'xajax.command.js',
             //"src/core/xajax.event.js"
             scriptStackDir + 'xajax_core_old.js',
+            'test/unit/formFieldNameObjectTest.js',
+            'test/unit/formValuesTest.js',
+            'test/unit/formValuesSelectTest.js',
             'test/unit/elementTest.js',
             'test/unit/attributeTest.js',
-            {pattern: 'spec/fixtures/*.html'}
+            {pattern: 'spec/fixtures/**/*.html'}
         ],
         // list of files to exclude
         exclude: [],
@@ -58,7 +61,7 @@ module.exports = function (config) {
         // possible values: config.LOG_DISABLE || config.LOG_ERROR || config.LOG_WARN || config.LOG_INFO || config.LOG_DEBUG
         logLevel: config.LOG_INFO,
         // enable / disable watching file and executing tests whenever any file changes
-        autoWatch: true,
+        autoWatch: false,
         // start these browsers
         // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
         browsers: ['Chrome', 'Firefox'],

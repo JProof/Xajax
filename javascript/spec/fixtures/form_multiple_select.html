@@ -1,0 +1,33 @@
+<div id="fixture">
+	<form id="regular">
+		<select name="selectOne">
+			<option value="testOptionOneValue">Option</option>
+			<option value="testOptionTwoValue">Option</option>
+		</select>
+	</form>
+	<form id="multiple-multiple">
+		<select name="selectOne" multiple>
+			<option value="testOptionOneValue">Option</option>
+			<option value="testOptionTwoValue">Option</option>
+		</select>
+	</form>
+	<form id="multiple-multiple-attr">
+		<select name="selectOne" multiple="multiple">
+			<option value="testOptionOneValue">Option</option>
+			<option value="testOptionTwoValue">Option</option>
+		</select>
+	</form>
+	<form id="multiple-multiple-attrBuggyVal">
+		<select name="selectOne" multiple="yes">
+			<option value="testOptionOneValue">Option</option>
+			<option value="testOptionTwoValue">Option</option>
+		</select>
+	</form>
+
+	<form id="nested">
+		<select name="selectOne">
+			<option value="testOptionOneValue">Option</option>
+			<option value="testOptionTwoValue">Option</option>
+		</select>
+	</form>
+</div>

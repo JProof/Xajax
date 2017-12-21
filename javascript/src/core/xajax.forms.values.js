@@ -2,11 +2,11 @@
 (function (xjx) {
     
     /*
-           Function: xajax.tools._getFormValues
-           
-           Used internally by <xajax.tools.getFormValues> to recursively get the value
-           of form elements.  This function will extract all form element values
-           regardless of the depth of the element within the form.
+       Function: xajax.tools._getFormValues
+       
+       Used internally by <xajax.tools.getFormValues> to recursively get the value
+       of form elements.  This function will extract all form element values
+       regardless of the depth of the element within the form.
        */
     var _getFormValues = function (aFormValues, children, submitDisabledElements, prefix) {
         var iLen = children.length;
@@ -17,25 +17,67 @@
             _getFormValue(aFormValues, child, submitDisabledElements, prefix);
         }
     };
-    /*
-            Function: xajax.tools._getFormValue
-            
-            Used internally by <xajax.tools._getFormValues> to extract a single form value.
-            This will detect the type of element (radio, checkbox, multi-select) and
-            add it's value(s) to the form values array.
-        
-            Modified version for multidimensional arrays
-        */
+    /**
+     * Try to readout the field Attribute name
+     *
+     * @property Element nEle
+     * @return string | null
+     * */
+    var getFieldName = function (nEle) {
+        var sName;
+        if (null !== (nEle = xjx.tools.$(nEle)))
+            if (null !== (sName = nEle.getAttribute('name'))) {
+                return sName;
+            }
+        return null;
+    };
+    /**
+     * @property sName string
+     *
+     * **/
+    var getFormFieldNameObject = function (sName) {
+        if (xjx.isStr(sName)) {
+            var parts = sName.replace(new RegExp('[', 'g'), '');
+            var s = parts.replace(']',':{}');
+            console.log(parts);
+            return parts;
+        }
+    };
+    xjx.extractName = function (sName) {
+        getFormFieldNameObject(sName);
+    };
+    var getSelectedValue = function () {
+    };
+    /**
+     * Function: xajax.tools._getFormValue
+     *
+     * Used internally by <xajax.tools._getFormValues> to extract a single form value.
+     * This will detect the type of element (radio, checkbox, multi-select) and
+     * add it's value(s) to the form values array.
+     *
+     * Modified version for multidimensional arrays
+     **/
     var _getFormValue = function (aFormValues, child, submitDisabledElements, prefix) {
         if (!child.name)
             return;
+        // todo check whats with param
         if ('PARAM' === child.tagName) return;
+        
+        // getting the html name-Attribute
+        var sFieldName = getFieldName(child);
+        if (null === sFieldName) return null;
+        var partsString = getFormFieldNameObject(sFieldName);
+        // check against disabled
         if (child.disabled)
             if (true == child.disabled)
                 if (false == submitDisabledElements)
                     return;
         if (prefix !== child.name.substring(0, prefix.length))
             return;
+        if (child.type)
+            if (child.type === 'select-one') {
+                getSelectedValue(child);
+            }
         if (child.type)
             if (child.type === 'radio' || child.type === 'checkbox')
                 if (false == child.checked)
@@ -90,39 +132,36 @@
             aFormValues[name] = values;
         }
     };
-    /*
-	Function: xajax.tools.getFormValues
-	
-	Build an associative array of form elements and their values from
-	the specified form.
-	
-	Parameters:
-	
-	element - (string): The unique name (id) of the form to be processed.
-	disabled - (boolean, optional): Include form elements which are currently disabled.
-	prefix - (string, optional): A prefix used for selecting form elements.
-
-	Returns:
-	
-	An associative array of form element id and value.
-*/
+    /**
+     * Function: xajax.tools.getFormValues
+     *
+     * Build an associative array of form elements and their values from
+     * the specified form.
+     *
+     * Parameters:
+     *
+     * element - (string): The unique name (id) of the form to be processed.
+     * disabled - (boolean, optional): Include form elements which are currently disabled.
+     * prefix - (string, optional): A prefix used for selecting form elements.
+     *
+     * @return null|object  Null on not found Parent form  An associative array of form element id and value.
+     */
     xjx.forms = {
         getFormValues: function (parent) {
+            
+            if (null === (parent = xjx.tools.$(parent))) return null;
+            
             var submitDisabledElements = false;
             if (arguments.length > 1 && arguments[1] == true)
                 submitDisabledElements = true;
             var prefix = '';
             if (arguments.length > 2)
                 prefix = arguments[2];
-            // todo check parent is type?!
-            if ('string' === typeof parent)
-                parent = xjx.$(parent);
+            parent = xjx.$(parent);
             var aFormValues = {};
 //		JW: Removing these tests so that form values can be retrieved from a specified
 //		container element like a DIV, regardless of whether they exist in a form or not.
 //
-//		if (parent.tagName)
-//			if ('FORM' == parent.tagName.toUpperCase())
             if (parent)
                 if (parent.childNodes)
                     _getFormValues(aFormValues, parent.childNodes, submitDisabledElements, prefix);

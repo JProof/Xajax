@@ -26,11 +26,13 @@
      * **/
     function getEle(sId, baseDoc) {
         
+        var tOf = typeof sId;
         // nothing
-        if ('undefined' === typeof sId) return null;
+        if (null === sId || 'undefined' === tOf) return null;
         // is already node
         if (xjx.isElement(sId)) return sId;
-        if ('object' === typeof sId && undefined !== sId.id)
+        // todo check against "undefined"
+        if ('object' === typeof sId && 'undefined' !== sId.id)
             return baseDoc.getElementById(sId.id);
         //sId not an string so return it maybe its an object.
         if (!xjx.isStr(sId))
