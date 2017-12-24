@@ -134,7 +134,7 @@
                 if (!child.checked)
                     return;
             }
-    
+            
             if (cT === 'select-one') {
                 if (child.selectedIndex)
                     values = child.options[child.selectedIndex].value;
@@ -198,8 +198,11 @@
                 _getFormValues(aFormValues, parent.childNodes, submitDisabledElements, prefix);
         return aFormValues;
     };
+    // old Hook
+    
     xjx.forms = {
         getFormValues: getFormValues,
+        // currently for unitTesting
         valueHandler: {merge: merge, extractFieldName: extractFieldName, listAsObject: listAsObject}
     };
     

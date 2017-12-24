@@ -1852,76 +1852,75 @@ if ('undefined' === typeof xajax) {
             }
         return null;
     };
-    var valueHandler = {
-        
-        /**
-         * Extract the FormField Name from string
-         *
-         * @property sName string
-         * @return object
-         * **/
-        extractFieldName: function (sName) {
-            if (xjx.isStr(sName)) {
-                // todo check against valid name (is not allowed to give back bracket)
-                if (sName.indexOf('[') === -1 || sName.indexOf(']') === -1) return new Array(sName.trim());
-                
-                var parts = sName.split(/[[\]]{1,2}/);
-                parts.length--;
-                var ret = [];
-                parts.forEach(function (value) {
-                    ret.push(value.trim());
-                });
-                return ret;
-            }
-        },
-        /*
-        * Method to create an Object from skeleton form field name
-        *
-        * @property {string} aLst
-        * @property {string|int|float|array} val
-        *
-        * @return object
-        * **/
-        listAsObject: function (aLst, val) {
-            // if no value we do not have to transport it@todo check html specs
-            if ('undefined' === typeof val || null === val) return null;
+    
+    /**
+     * Extract the FormField Name from string
+     *
+     * @property sName string
+     * @return object
+     * **/
+    var extractFieldName = function (sName) {
+        if (xjx.isStr(sName)) {
+            // todo check against valid name (is not allowed to give back bracket)
+            if (sName.indexOf('[') === -1 || sName.indexOf(']') === -1) return new Array(sName.trim());
             
-            var tmpObject = null, p = null, oldP = null;
-            
-            var lng = aLst.length;
-            for (lng; lng > 0; --lng) {
-                oldP = p;
-                p = {};
-                p[aLst[lng - 1]] = (null === oldP) ? val : oldP;
-                tmpObject = p;
-            }
-            return tmpObject;
-        },
-        merge: function (obj1, obj2) {
-            
-            for (var p in obj2) {
-                if (obj2.hasOwnProperty(p)) {
-                    if ('object' === typeof obj1[p]) {
-                        // recursive merge
-                        if ('object' === typeof obj2[p])
-                            obj1[p] = valueHandler.merge(obj1[p], obj2[p]);
-                        else
-                        // obj2 is not deeper
-                            obj1[p] = obj2[p];
-                    } else {
-                        if ('function' === typeof obj1.push)
-                        // numbered like checkboxes
-                            obj1.push(obj2[p]);
-                        else
-                        // regular push
-                            obj1[p] = obj2[p];
-                    }
-                }
-            }
-            
-            return obj1;
+            var parts = sName.split(/[[\]]{1,2}/);
+            parts.length--;
+            var ret = [];
+            parts.forEach(function (value) {
+                ret.push(value.trim());
+            });
+            return ret;
         }
     };
+    /*
+    * Method to create an Object from skeleton form field name
+    *
+    * @property {string} aLst
+    * @property {string|int|float|array} val
+    *
+    * @return object
+    * **/
+    var listAsObject = function (aLst, val) {
+        // if no value we do not have to transport it@todo check html specs
+        if ('undefined' === typeof val || null === val) return null;
+        
+        var tmpObject = null, p = null, oldP = null;
+        
+        var lng = aLst.length;
+        for (lng; lng > 0; --lng) {
+            oldP = p;
+            p = {};
+            p[aLst[lng - 1]] = (null === oldP) ? val : oldP;
+            tmpObject = p;
+        }
+        return tmpObject;
+    };
+    var merge = function (obj1, obj2) {
+        
+        for (var p in obj2) {
+            if (obj2.hasOwnProperty(p)) {
+                if ('object' === typeof obj1[p]) {
+                    // recursive merge
+                    if ('object' === typeof obj2[p])
+                        obj1[p] = merge(obj1[p], obj2[p]);
+                    else
+                    // obj2 is not deeper
+                        obj1[p] = obj2[p];
+                } else {
+                    if ('function' === typeof obj1.push)
+                    // numbered like checkboxes
+                        obj1.push(obj2[p]);
+                    else
+                    // regular push
+                        obj1[p] = obj2[p];
+                }
+            }
+        }
+        
+        return obj1;
+    };
+    
     /**
      * Function: xajax.tools._getFormValue
      *
@@ -1949,17 +1948,17 @@ if ('undefined' === typeof xajax) {
         
         if (prefix !== child.name.substring(0, prefix.length))
             return;
-        
-        if (child.type) {
+        var cT = child.type;
+        if (cT) {
             // kick down on null value
-            if (child.type === 'radio' || child.type === 'checkbox') {
-                if (false === child.checked)
+            if (cT === 'radio' || cT === 'checkbox') {
+                if (!child.checked)
                     return;
             }
             
-            if (child.type === 'select-one') {
-                if (child.selected)
-                    values = child.options[child.selected].value;
+            if (cT === 'select-one') {
+                if (child.selectedIndex)
+                    values = child.options[child.selectedIndex].value;
                 else
                 // nothing selected
                     return;
@@ -1970,7 +1969,7 @@ if ('undefined' === typeof xajax) {
                 var jLen = child.length;
                 for (var j = 0; j < jLen; ++j) {
                     var option = child.options[j];
-                    if (true === option.selected)
+                    if (option.selected)
                         values.push(option.value);
                 }
             } else {
@@ -1978,10 +1977,10 @@ if ('undefined' === typeof xajax) {
             }
         }
         // new Method
-        var fieldParts = valueHandler.extractFieldName(child.name);
-        var field = valueHandler.listAsObject(fieldParts, values);
+        var fieldParts = extractFieldName(child.name);
+        var field = listAsObject(fieldParts, values);
         
-        return valueHandler.merge(aFormValues, field);
+        return merge(aFormValues, field);
         
     };
     
@@ -1999,30 +1998,35 @@ if ('undefined' === typeof xajax) {
      *
      * @return null|object  Null on not found Parent form  An associative array of form element id and value.
      */
-    xjx.forms = {
-        getFormValues: function (parent) {
-            
-            if (null === (parent = xjx.tools.$(parent))) return null;
-            
-            var submitDisabledElements = false;
-            if (arguments.length > 1 && arguments[1] == true)
-                submitDisabledElements = true;
-            var prefix = '';
-            if (arguments.length > 2)
-                prefix = arguments[2];
-            parent = xjx.$(parent);
-            var aFormValues = {};
+    
+    var getFormValues = function (parent) {
+        
+        if (null === (parent = xjx.tools.$(parent))) return null;
+        
+        var submitDisabledElements = false;
+        if (arguments.length > 1 && arguments[1] === true)
+            submitDisabledElements = true;
+        var prefix = '';
+        if (arguments.length > 2)
+            prefix = arguments[2];
+        parent = xjx.$(parent);
+        var aFormValues = {};
 //		JW: Removing these tests so that form values can be retrieved from a specified
 //		container element like a DIV, regardless of whether they exist in a form or not.
 //
-            if (parent)
-                if (parent.childNodes)
-                    _getFormValues(aFormValues, parent.childNodes, submitDisabledElements, prefix);
-            return aFormValues;
-        }
+        if (parent)
+            if (parent.childNodes)
+                _getFormValues(aFormValues, parent.childNodes, submitDisabledElements, prefix);
+        return aFormValues;
+    };
+    // old Hook
+    
+    xjx.forms = {
+        getFormValues: getFormValues,
+        // currently for unitTesting
+        valueHandler: {merge: merge, extractFieldName: extractFieldName, listAsObject: listAsObject}
     };
     
-    xjx.forms.valueHandler = valueHandler;
 }(xajax));
 /*
 	Class: xajax.events
@@ -3259,7 +3263,7 @@ xajax.initializeRequest = function (oRequest) {
 */
 xajax.processParameters = function (oRequest) {
     var xx = xajax;
-    var xt = xx.tools;
+  
     var rd = [];
     var separator = '';
     for (var sCommand in oRequest.functionName) {
@@ -3282,12 +3286,7 @@ xajax.processParameters = function (oRequest) {
             var oVal = oRequest.parameters[i];
             if ('object' === typeof oVal && null !== oVal) {
                 try {
-//					var oGuard = {};
-//					oGuard.depth = 0;
-//					oGuard.maxDepth = oRequest.maxObjectDepth;
-//					oGuard.size = 0;
-//					oGuard.maxSize = oRequest.maxObjectSize;
-                    //oVal = xt._objectToXML(oVal, oGuard);
+
                     oVal = JSON.stringify(oVal);
                 } catch (e) {
                     oVal = '';
@@ -3666,16 +3665,11 @@ xajax.completeResponse = function (oRequest) {
 xajax.$ = xajax.tools.$;
 /*
 	Function: xajax.getFormValues
-	
+	@since 0.7.3 not anymore on tools!
 	Shortcut to <xajax.tools.getFormValues>.
 */
-xajax.getFormValues = xajax.tools.getFormValues;
-/*
-	Boolean: xajax.isLoaded
-	
-	true - xajax module is loaded.
-*/
-xajax.isLoaded = true;
+xajax.getFormValues = xajax.forms.getFormValues;
+
 /*
 	Class: xjx
 	
@@ -3693,5 +3687,16 @@ xjx.$ = xajax.tools.$;
 	
 	Shortcut to <xajax.tools.getFormValues>.
 */
-xjx.getFormValues = xajax.tools.getFormValues;
+// not used anymore listed in  xjx.forms
+//xjx.getFormValues = xajax.tools.getFormValues;
+// new class where the formHandler is located
+
+xjx.getFormValues = xajax.forms.getFormValues;
 xjx.request = xajax.request;
+
+/*
+	Boolean: xajax.isLoaded
+	
+	true - xajax module is loaded.
+*/
+xajax.isLoaded = true;

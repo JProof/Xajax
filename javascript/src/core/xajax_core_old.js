@@ -658,7 +658,7 @@ xajax.initializeRequest = function (oRequest) {
 */
 xajax.processParameters = function (oRequest) {
     var xx = xajax;
-    var xt = xx.tools;
+  
     var rd = [];
     var separator = '';
     for (var sCommand in oRequest.functionName) {
@@ -681,12 +681,7 @@ xajax.processParameters = function (oRequest) {
             var oVal = oRequest.parameters[i];
             if ('object' === typeof oVal && null !== oVal) {
                 try {
-//					var oGuard = {};
-//					oGuard.depth = 0;
-//					oGuard.maxDepth = oRequest.maxObjectDepth;
-//					oGuard.size = 0;
-//					oGuard.maxSize = oRequest.maxObjectSize;
-                    //oVal = xt._objectToXML(oVal, oGuard);
+
                     oVal = JSON.stringify(oVal);
                 } catch (e) {
                     oVal = '';
@@ -1065,16 +1060,11 @@ xajax.completeResponse = function (oRequest) {
 xajax.$ = xajax.tools.$;
 /*
 	Function: xajax.getFormValues
-	
+	@since 0.7.3 not anymore on tools!
 	Shortcut to <xajax.tools.getFormValues>.
 */
-xajax.getFormValues = xajax.tools.getFormValues;
-/*
-	Boolean: xajax.isLoaded
-	
-	true - xajax module is loaded.
-*/
-xajax.isLoaded = true;
+xajax.getFormValues = xajax.forms.getFormValues;
+
 /*
 	Class: xjx
 	
@@ -1092,5 +1082,16 @@ xjx.$ = xajax.tools.$;
 	
 	Shortcut to <xajax.tools.getFormValues>.
 */
-xjx.getFormValues = xajax.tools.getFormValues;
+// not used anymore listed in  xjx.forms
+//xjx.getFormValues = xajax.tools.getFormValues;
+// new class where the formHandler is located
+
+xjx.getFormValues = xajax.forms.getFormValues;
 xjx.request = xajax.request;
+
+/*
+	Boolean: xajax.isLoaded
+	
+	true - xajax module is loaded.
+*/
+xajax.isLoaded = true;
