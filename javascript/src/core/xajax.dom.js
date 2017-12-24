@@ -2,6 +2,7 @@
 	Class: xajax.dom
 */
 (function (xjx) {
+    
     xjx.dom = {
         /*
             Function: xajax.dom.assign
@@ -17,16 +18,18 @@
             Returns:
             
             true - The operation completed successfully.
+            @deprecated use xajax.html(); or xajax.wrapHtml()
         */
         assign: function (element, property, data) {
-            element = xjx.$(element);
+            if (null === (element = xjx.$(element))) return null;
             switch (property) {
                 case 'innerHTML':
-                    element.innerHTML = data;
+                    // switched to his own mechanism @since 0.7.3
+                    xjx.html(element, data);
                     break;
                 case 'outerHTML':
                     if ('undefined' === typeof element.outerHTML) {
-                        var r = xajax.config.baseDocument.createRange();
+                        var r = xjx.config('baseDocument').createRange();
                         r.setStartBefore(element);
                         var df = r.createContextualFragment(data);
                         element.parentNode.replaceChild(df, element);
@@ -325,5 +328,25 @@
             args.context.xajaxDelegateCall(args.data);
             return true;
         }
+        
     };
+    /**
+     * Simplify dom assign
+     *
+     * @param {string|Element} ele id of the element or an Element
+     * @param {string|undefined} content string to set the string | Leave empty content to get the content of the current Html-Element
+     *
+     * @return {string|null} returns the Element-Content or null if ele not found
+     * @since 0.7.3
+     *
+     * @todo adding context for xjx.$()
+     * **/
+    xjx.html = function (ele, content) {
+        if (null === (ele = xjx.$(ele))) return null;
+        if ('undefined' !== typeof content)
+            return ele.innerHTML = content;
+        else
+            return ele.innerHTML;
+    };
+    
 }(xajax));

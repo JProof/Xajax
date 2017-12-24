@@ -384,8 +384,13 @@ xajax.tools.getBrowserHTML = function (sValue, context) {
 	
 	true - The specified value differs from the current attribute value.
 	false - The specified value is the same as the current value.
+	
+	@deprecated not used anymore because of wild implementation
 */
 xajax.tools.willChange = function (element, attribute, newData) {
+    
+    
+    
     element = xajax.$(element);
     if (element) {
         var oldData;

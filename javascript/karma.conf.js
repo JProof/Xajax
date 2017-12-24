@@ -33,7 +33,7 @@ module.exports = function (config) {
             scriptStackDir + 'xajax.command.js',
             //"src/core/xajax.event.js"
             scriptStackDir + 'xajax_core_old.js',
-            
+            'test/bdd/xajax.domTest.js',
             'test/bdd/formValuesTest.js',
             'test/bdd/formFieldNameObjectTest.js',
             'test/bdd/elementTest.js',
