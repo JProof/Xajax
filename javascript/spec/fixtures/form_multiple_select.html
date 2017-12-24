@@ -1,33 +1,29 @@
 <div id="fixture">
 	<form id="regular">
-		<select name="selectOne">
-			<option value="testOptionOneValue">Option</option>
-			<option value="testOptionTwoValue">Option</option>
-		</select>
+		<label>
+			<select name="selectOne">
+				<option value="testOptionOneValue">Option</option>
+				<option value="testOptionTwoValue">Option</option>
+			</select>
+		</label>
 	</form>
-	<form id="multiple-multiple">
-		<select name="selectOne" multiple>
-			<option value="testOptionOneValue">Option</option>
-			<option value="testOptionTwoValue">Option</option>
-		</select>
+	<form id="single-two-checked">
+		<label>
+			<select name="selectOne">
+				<option selected value="testOptionOneValue">Option</option>
+				<option selected value="testOptionTwoValue">Option</option>
+			</select>
+		</label>
 	</form>
 	<form id="multiple-multiple-attr">
-		<select name="selectOne" multiple="multiple">
-			<option value="testOptionOneValue">Option</option>
-			<option value="testOptionTwoValue">Option</option>
-		</select>
-	</form>
-	<form id="multiple-multiple-attrBuggyVal">
-		<select name="selectOne" multiple="yes">
-			<option value="testOptionOneValue">Option</option>
-			<option value="testOptionTwoValue">Option</option>
-		</select>
-	</form>
-
-	<form id="nested">
-		<select name="selectOne">
-			<option value="testOptionOneValue">Option</option>
-			<option value="testOptionTwoValue">Option</option>
-		</select>
+		<label>
+			<select name="selectOne" multiple="multiple">
+				<option value="testOptionOneNotValue">Option</option>
+				<option selected value="testOptionTwoValue">Option</option>
+				<option value="testOptionTwoNotValue">Option</option>
+				<option selected value="testOptionThreeValue">Option</option>
+				<option value="testOptionThreeNotValue">Option</option>
+			</select>
+		</label>
 	</form>
 </div>

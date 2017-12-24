@@ -33,13 +33,14 @@ module.exports = function (config) {
             scriptStackDir + 'xajax.command.js',
             //"src/core/xajax.event.js"
             scriptStackDir + 'xajax_core_old.js',
-            'test/unit/formFieldNameObjectTest.js',
-            'test/unit/formValuesTest.js',
-            'test/unit/formValuesSelectTest.js',
-            'test/unit/elementTest.js',
-            'test/unit/attributeTest.js',
+            
+            'test/bdd/formValuesTest.js',
+            'test/bdd/formFieldNameObjectTest.js',
+            'test/bdd/elementTest.js',
+            'test/bdd/attributeTest.js',
             {pattern: 'spec/fixtures/**/*.html'}
         ],
+        
         // list of files to exclude
         exclude: [],
         // preprocess matching files before serving them to the browser

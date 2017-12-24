@@ -337,11 +337,13 @@ if ('undefined' === typeof xajax) {
      * **/
     function getEle(sId, baseDoc) {
         
+        var tOf = typeof sId;
         // nothing
-        if ('undefined' === typeof sId) return null;
+        if (null === sId || 'undefined' === tOf) return null;
         // is already node
         if (xjx.isElement(sId)) return sId;
-        if ('object' === typeof sId && undefined !== sId.id)
+        // todo check against "undefined"
+        if ('object' === typeof sId && 'undefined' !== sId.id)
             return baseDoc.getElementById(sId.id);
         //sId not an string so return it maybe its an object.
         if (!xjx.isStr(sId))
@@ -1821,11 +1823,11 @@ if ('undefined' === typeof xajax) {
 (function (xjx) {
     
     /*
-           Function: xajax.tools._getFormValues
-           
-           Used internally by <xajax.tools.getFormValues> to recursively get the value
-           of form elements.  This function will extract all form element values
-           regardless of the depth of the element within the form.
+       Function: xajax.tools._getFormValues
+       
+       Used internally by <xajax.tools.getFormValues> to recursively get the value
+       of form elements.  This function will extract all form element values
+       regardless of the depth of the element within the form.
        */
     var _getFormValues = function (aFormValues, children, submitDisabledElements, prefix) {
         var iLen = children.length;
@@ -1836,118 +1838,191 @@ if ('undefined' === typeof xajax) {
             _getFormValue(aFormValues, child, submitDisabledElements, prefix);
         }
     };
-    /*
-            Function: xajax.tools._getFormValue
-            
-            Used internally by <xajax.tools._getFormValues> to extract a single form value.
-            This will detect the type of element (radio, checkbox, multi-select) and
-            add it's value(s) to the form values array.
+    /**
+     * Try to readout the field Attribute name
+     *
+     * @property Element nEle
+     * @return string | null
+     * */
+    var getFieldName = function (nEle) {
+        var sName;
+        if (null !== (nEle = xjx.tools.$(nEle)))
+            if (null !== (sName = nEle.getAttribute('name'))) {
+                return sName;
+            }
+        return null;
+    };
+    var valueHandler = {
         
-            Modified version for multidimensional arrays
-        */
+        /**
+         * Extract the FormField Name from string
+         *
+         * @property sName string
+         * @return object
+         * **/
+        extractFieldName: function (sName) {
+            if (xjx.isStr(sName)) {
+                // todo check against valid name (is not allowed to give back bracket)
+                if (sName.indexOf('[') === -1 || sName.indexOf(']') === -1) return new Array(sName.trim());
+                
+                var parts = sName.split(/[[\]]{1,2}/);
+                parts.length--;
+                var ret = [];
+                parts.forEach(function (value) {
+                    ret.push(value.trim());
+                });
+                return ret;
+            }
+        },
+        /*
+        * Method to create an Object from skeleton form field name
+        *
+        * @property {string} aLst
+        * @property {string|int|float|array} val
+        *
+        * @return object
+        * **/
+        listAsObject: function (aLst, val) {
+            // if no value we do not have to transport it@todo check html specs
+            if ('undefined' === typeof val || null === val) return null;
+            
+            var tmpObject = null, p = null, oldP = null;
+            
+            var lng = aLst.length;
+            for (lng; lng > 0; --lng) {
+                oldP = p;
+                p = {};
+                p[aLst[lng - 1]] = (null === oldP) ? val : oldP;
+                tmpObject = p;
+            }
+            return tmpObject;
+        },
+        merge: function (obj1, obj2) {
+            
+            for (var p in obj2) {
+                if (obj2.hasOwnProperty(p)) {
+                    if ('object' === typeof obj1[p]) {
+                        // recursive merge
+                        if ('object' === typeof obj2[p])
+                            obj1[p] = valueHandler.merge(obj1[p], obj2[p]);
+                        else
+                        // obj2 is not deeper
+                            obj1[p] = obj2[p];
+                    } else {
+                        if ('function' === typeof obj1.push)
+                        // numbered like checkboxes
+                            obj1.push(obj2[p]);
+                        else
+                        // regular push
+                            obj1[p] = obj2[p];
+                    }
+                }
+            }
+            
+            return obj1;
+        }
+    };
+    /**
+     * Function: xajax.tools._getFormValue
+     *
+     * Used internally by <xajax.tools._getFormValues> to extract a single form value.
+     * This will detect the type of element (radio, checkbox, multi-select) and
+     * add it's value(s) to the form values array.
+     *
+     * Modified version for multidimensional arrays
+     **/
     var _getFormValue = function (aFormValues, child, submitDisabledElements, prefix) {
         if (!child.name)
             return;
+        // todo check whats with param
         if ('PARAM' === child.tagName) return;
+        
+        // getting the html name-Attribute
+        var sFieldName = getFieldName(child);
+        if (null === sFieldName) return null;
+        
+        // check against disabled
         if (child.disabled)
-            if (true == child.disabled)
-                if (false == submitDisabledElements)
+            if (true === child.disabled)
+                if (false === submitDisabledElements)
                     return;
+        
         if (prefix !== child.name.substring(0, prefix.length))
             return;
-        if (child.type)
-            if (child.type === 'radio' || child.type === 'checkbox')
-                if (false == child.checked)
+        
+        if (child.type) {
+            // kick down on null value
+            if (child.type === 'radio' || child.type === 'checkbox') {
+                if (false === child.checked)
                     return;
-        var name = child.name;
-        var values = [];
-        if ('select-multiple' === child.type) {
-            var jLen = child.length;
-            for (var j = 0; j < jLen; ++j) {
-                var option = child.options[j];
-                if (true == option.selected)
-                    values.push(option.value);
             }
-        } else {
-            values = child.value;
-        }
-        var keyBegin = name.indexOf('[');
-        /* exists name/object before the Bracket?*/
-        if (0 <= keyBegin) {
-            var n = name;
-            var k = n.substr(0, n.indexOf('['));
-            var a = n.substr(n.indexOf('['));
-            if (typeof aFormValues[k] === 'undefined')
-                aFormValues[k] = {};
-            var p = aFormValues; // pointer reset
-            while (a.length !== 0) {
-                var sa = a.substr(0, a.indexOf(']') + 1);
-                var lk = k; //save last key
-                var lp = p; //save last pointer
-                a = a.substr(a.indexOf(']') + 1);
-                p = p[k];
-                k = sa.substr(1, sa.length - 2);
-                if (k === '') {
-                    if ('select-multiple' === child.type) {
-                        k = lk; //restore last key
-                        p = lp;
-                    } else {
-                        k = p.length;
-                    }
-                }
-                if (typeof k === 'undefined') {
-                    /*check against the global aFormValues Stack which is the next(last) usable index */
-                    k = 0;
-                    for (var i in lp[lk]) k++;
-                }
-                if (typeof p[k] === 'undefined') {
-                    p[k] = {};
-                }
+            
+            if (child.type === 'select-one') {
+                if (child.selected)
+                    values = child.options[child.selected].value;
+                else
+                // nothing selected
+                    return;
             }
-            p[k] = values;
-        } else {
-            aFormValues[name] = values;
+            
+            else if ('select-multiple' === child.type) {
+                var values = [];
+                var jLen = child.length;
+                for (var j = 0; j < jLen; ++j) {
+                    var option = child.options[j];
+                    if (true === option.selected)
+                        values.push(option.value);
+                }
+            } else {
+                values = child.value;
+            }
         }
+        // new Method
+        var fieldParts = valueHandler.extractFieldName(child.name);
+        var field = valueHandler.listAsObject(fieldParts, values);
+        
+        return valueHandler.merge(aFormValues, field);
+        
     };
-    /*
-	Function: xajax.tools.getFormValues
-	
-	Build an associative array of form elements and their values from
-	the specified form.
-	
-	Parameters:
-	
-	element - (string): The unique name (id) of the form to be processed.
-	disabled - (boolean, optional): Include form elements which are currently disabled.
-	prefix - (string, optional): A prefix used for selecting form elements.
-
-	Returns:
-	
-	An associative array of form element id and value.
-*/
+    
+    /**
+     * Function: xajax.tools.getFormValues
+     *
+     * Build an associative array of form elements and their values from
+     * the specified form.
+     *
+     * Parameters:
+     *
+     * element - (string): The unique name (id) of the form to be processed.
+     * disabled - (boolean, optional): Include form elements which are currently disabled.
+     * prefix - (string, optional): A prefix used for selecting form elements.
+     *
+     * @return null|object  Null on not found Parent form  An associative array of form element id and value.
+     */
     xjx.forms = {
         getFormValues: function (parent) {
+            
+            if (null === (parent = xjx.tools.$(parent))) return null;
+            
             var submitDisabledElements = false;
             if (arguments.length > 1 && arguments[1] == true)
                 submitDisabledElements = true;
             var prefix = '';
             if (arguments.length > 2)
                 prefix = arguments[2];
-            // todo check parent is type?!
-            if ('string' === typeof parent)
-                parent = xjx.$(parent);
+            parent = xjx.$(parent);
             var aFormValues = {};
 //		JW: Removing these tests so that form values can be retrieved from a specified
 //		container element like a DIV, regardless of whether they exist in a form or not.
 //
-//		if (parent.tagName)
-//			if ('FORM' == parent.tagName.toUpperCase())
             if (parent)
                 if (parent.childNodes)
                     _getFormValues(aFormValues, parent.childNodes, submitDisabledElements, prefix);
             return aFormValues;
         }
     };
+    
+    xjx.forms.valueHandler = valueHandler;
 }(xajax));
 /*
 	Class: xajax.events

@@ -31,23 +31,75 @@
             }
         return null;
     };
+    
     /**
-     * @property sName string
+     * Extract the FormField Name from string
      *
+     * @property sName string
+     * @return object
      * **/
-    var getFormFieldNameObject = function (sName) {
+    var extractFieldName = function (sName) {
         if (xjx.isStr(sName)) {
-            var parts = sName.replace(new RegExp('[', 'g'), '');
-            var s = parts.replace(']',':{}');
-            console.log(parts);
-            return parts;
+            // todo check against valid name (is not allowed to give back bracket)
+            if (sName.indexOf('[') === -1 || sName.indexOf(']') === -1) return new Array(sName.trim());
+            
+            var parts = sName.split(/[[\]]{1,2}/);
+            parts.length--;
+            var ret = [];
+            parts.forEach(function (value) {
+                ret.push(value.trim());
+            });
+            return ret;
         }
     };
-    xjx.extractName = function (sName) {
-        getFormFieldNameObject(sName);
+    /*
+    * Method to create an Object from skeleton form field name
+    *
+    * @property {string} aLst
+    * @property {string|int|float|array} val
+    *
+    * @return object
+    * **/
+    var listAsObject = function (aLst, val) {
+        // if no value we do not have to transport it@todo check html specs
+        if ('undefined' === typeof val || null === val) return null;
+        
+        var tmpObject = null, p = null, oldP = null;
+        
+        var lng = aLst.length;
+        for (lng; lng > 0; --lng) {
+            oldP = p;
+            p = {};
+            p[aLst[lng - 1]] = (null === oldP) ? val : oldP;
+            tmpObject = p;
+        }
+        return tmpObject;
     };
-    var getSelectedValue = function () {
+    var merge = function (obj1, obj2) {
+        
+        for (var p in obj2) {
+            if (obj2.hasOwnProperty(p)) {
+                if ('object' === typeof obj1[p]) {
+                    // recursive merge
+                    if ('object' === typeof obj2[p])
+                        obj1[p] = merge(obj1[p], obj2[p]);
+                    else
+                    // obj2 is not deeper
+                        obj1[p] = obj2[p];
+                } else {
+                    if ('function' === typeof obj1.push)
+                    // numbered like checkboxes
+                        obj1.push(obj2[p]);
+                    else
+                    // regular push
+                        obj1[p] = obj2[p];
+                }
+            }
+        }
+        
+        return obj1;
     };
+    
     /**
      * Function: xajax.tools._getFormValue
      *
@@ -66,72 +118,51 @@
         // getting the html name-Attribute
         var sFieldName = getFieldName(child);
         if (null === sFieldName) return null;
-        var partsString = getFormFieldNameObject(sFieldName);
+        
         // check against disabled
         if (child.disabled)
-            if (true == child.disabled)
-                if (false == submitDisabledElements)
+            if (true === child.disabled)
+                if (false === submitDisabledElements)
                     return;
+        
         if (prefix !== child.name.substring(0, prefix.length))
             return;
-        if (child.type)
-            if (child.type === 'select-one') {
-                getSelectedValue(child);
-            }
-        if (child.type)
-            if (child.type === 'radio' || child.type === 'checkbox')
-                if (false == child.checked)
+        var cT = child.type;
+        if (cT) {
+            // kick down on null value
+            if (cT === 'radio' || cT === 'checkbox') {
+                if (!child.checked)
                     return;
-        var name = child.name;
-        var values = [];
-        if ('select-multiple' === child.type) {
-            var jLen = child.length;
-            for (var j = 0; j < jLen; ++j) {
-                var option = child.options[j];
-                if (true == option.selected)
-                    values.push(option.value);
             }
-        } else {
-            values = child.value;
-        }
-        var keyBegin = name.indexOf('[');
-        /* exists name/object before the Bracket?*/
-        if (0 <= keyBegin) {
-            var n = name;
-            var k = n.substr(0, n.indexOf('['));
-            var a = n.substr(n.indexOf('['));
-            if (typeof aFormValues[k] === 'undefined')
-                aFormValues[k] = {};
-            var p = aFormValues; // pointer reset
-            while (a.length !== 0) {
-                var sa = a.substr(0, a.indexOf(']') + 1);
-                var lk = k; //save last key
-                var lp = p; //save last pointer
-                a = a.substr(a.indexOf(']') + 1);
-                p = p[k];
-                k = sa.substr(1, sa.length - 2);
-                if (k === '') {
-                    if ('select-multiple' === child.type) {
-                        k = lk; //restore last key
-                        p = lp;
-                    } else {
-                        k = p.length;
-                    }
-                }
-                if (typeof k === 'undefined') {
-                    /*check against the global aFormValues Stack which is the next(last) usable index */
-                    k = 0;
-                    for (var i in lp[lk]) k++;
-                }
-                if (typeof p[k] === 'undefined') {
-                    p[k] = {};
-                }
+    
+            if (cT === 'select-one') {
+                if (child.selectedIndex)
+                    values = child.options[child.selectedIndex].value;
+                else
+                // nothing selected
+                    return;
             }
-            p[k] = values;
-        } else {
-            aFormValues[name] = values;
+            
+            else if ('select-multiple' === child.type) {
+                var values = [];
+                var jLen = child.length;
+                for (var j = 0; j < jLen; ++j) {
+                    var option = child.options[j];
+                    if (option.selected)
+                        values.push(option.value);
+                }
+            } else {
+                values = child.value;
+            }
         }
+        // new Method
+        var fieldParts = extractFieldName(child.name);
+        var field = listAsObject(fieldParts, values);
+        
+        return merge(aFormValues, field);
+        
     };
+    
     /**
      * Function: xajax.tools.getFormValues
      *
@@ -146,26 +177,30 @@
      *
      * @return null|object  Null on not found Parent form  An associative array of form element id and value.
      */
-    xjx.forms = {
-        getFormValues: function (parent) {
-            
-            if (null === (parent = xjx.tools.$(parent))) return null;
-            
-            var submitDisabledElements = false;
-            if (arguments.length > 1 && arguments[1] == true)
-                submitDisabledElements = true;
-            var prefix = '';
-            if (arguments.length > 2)
-                prefix = arguments[2];
-            parent = xjx.$(parent);
-            var aFormValues = {};
+    
+    var getFormValues = function (parent) {
+        
+        if (null === (parent = xjx.tools.$(parent))) return null;
+        
+        var submitDisabledElements = false;
+        if (arguments.length > 1 && arguments[1] === true)
+            submitDisabledElements = true;
+        var prefix = '';
+        if (arguments.length > 2)
+            prefix = arguments[2];
+        parent = xjx.$(parent);
+        var aFormValues = {};
 //		JW: Removing these tests so that form values can be retrieved from a specified
 //		container element like a DIV, regardless of whether they exist in a form or not.
 //
-            if (parent)
-                if (parent.childNodes)
-                    _getFormValues(aFormValues, parent.childNodes, submitDisabledElements, prefix);
-            return aFormValues;
-        }
+        if (parent)
+            if (parent.childNodes)
+                _getFormValues(aFormValues, parent.childNodes, submitDisabledElements, prefix);
+        return aFormValues;
     };
+    xjx.forms = {
+        getFormValues: getFormValues,
+        valueHandler: {merge: merge, extractFieldName: extractFieldName, listAsObject: listAsObject}
+    };
+    
 }(xajax));
