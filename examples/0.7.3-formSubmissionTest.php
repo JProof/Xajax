@@ -31,12 +31,16 @@ $xConfig = Factory::getInstance()->getConfig();
 $xConfig->setExitAllowed(true);
 $xConfig->setErrorHandler('\Xajax\Errors\Handler::addException')->setToHtml(true);
 
+// Response will be handled only if it is an Xajax Request
+$objResponse = Factory::getResponseInstance();
+$objResponse->html('testForm1', '<p>found</p>');
+
 /**JS Configuration**/
 $xScripts = Factory::getScripts();
 $xScripts->getConfiguration()->setDeferScriptGeneration(false)->setUseUncompressedScripts(true)->setDebug(false);
 
 $xajaxCmsGet  = Xajax\Plugins\Userfunction\Request::autoRegister('get');
-$xajaxCmsPost = Xajax\Plugins\Userfunction\Request::autoRegister('post');
+$xajaxCmsPost = Xajax\Plugins\Cms\Request::autoRegister('xajax_post');
 
 Factory::getScripts()->addScript(new Xajax\Scripts\Core(['scriptName' => 'xajax',
                                                          'fileName'   => 'xajax_core.js',

@@ -33,6 +33,7 @@
               return xajax.css.waitForCSS(args);
           },
           'as': function (args) {
+              // @deprecated
               args.fullName = 'assign/clear';
               try {
                   return xajax.dom.assign(args.target, args.prop, args.data);
@@ -105,6 +106,15 @@
           'ev': xajax.events.setEvent,
           'ah': xajax.events.addHandler,
           'rh': xajax.events.removeHandler,
+          'html': function (args) {
+              try {
+                  return xajax.html(args.id, args.data);
+              } catch (e) {
+                  // do nothing, if the debug module is installed it will
+                  // catch and handle the exception
+              }
+              return true;
+          },
           'dbg': function (args) {
               args.fullName = 'debug message';
               return true;

@@ -104,6 +104,6 @@ to deliver these JavaScriptFiles to the browser as well.
 In this case, a script can be prevented from being output. 
 
 ```php 
-Xajax\Factory::getScripts()->->setLockScript('jquery');
+Xajax\Factory::getScripts()->setLockScript('jquery');
 ```
 The setLockScript works only if the script was set with an method of Xajax\Factory::getScripts();
