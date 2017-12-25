@@ -531,6 +531,40 @@ class Response
 	}
 
 	/**
+	 * Adding Attribute Class
+	 *
+	 * @param string      $sTarget
+	 * @param null|string $cssClassName
+	 *
+	 * @return \Xajax\Response\Response
+	 */
+	public function addClass(string $sTarget, ?string $cssClassName = null): Response
+	{
+		return $this->addCommand(
+		    ['cmd' => 'cls:add',
+		     'id'  => $sTarget,
+		    ], $cssClassName
+		);
+	}
+
+	/**
+	 * Remove css Class if exists
+	 *
+	 * @param string      $sTarget
+	 * @param null|string $cssClassName
+	 *
+	 * @return \Xajax\Response\Response
+	 */
+	public function removeClass(string $sTarget, ?string $cssClassName = null): Response
+	{
+		return $this->addCommand(
+		    ['cmd' => 'cls:rem',
+		     'id'  => $sTarget,
+		    ], $cssClassName
+		);
+	}
+
+	/**
 	 * Add an Attribute to an Html-Tag
 	 *
 	 * @since 0.7.1

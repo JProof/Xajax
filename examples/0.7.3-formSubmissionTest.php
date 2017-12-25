@@ -33,7 +33,9 @@ $xConfig->setErrorHandler('\Xajax\Errors\Handler::addException')->setToHtml(true
 
 // Response will be handled only if it is an Xajax Request
 $objResponse = Factory::getResponseInstance();
-$objResponse->html('testForm1', '<p>found</p>');
+$objResponse->alert('responseReceived');
+
+
 
 /**JS Configuration**/
 $xScripts = Factory::getScripts();

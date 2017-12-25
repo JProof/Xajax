@@ -38,21 +38,25 @@ if ('undefined' === typeof xajax) {
 (function (xjx) {
     /**
      * Short tester to save a lot of typeof's
+     * @param {*} val
+     * @return {boolean}
      * */
-    xjx.isStr = function (ele) {
-        return typeof ele === 'string';
+    xjx.isStr = function (val) {
+        return 'string' === typeof val;
     };
     /**
      * Short tester to save a lot of typeof's
+     * @param {*} val
+     * @return {boolean}
      * */
-    xjx.isNum = function (ele) {
-        return typeof ele === 'number';
+    xjx.isNum = function (val) {
+        return 'number' === typeof val;
     };
     /**
      * Check the value is valid as attribute value
      *
-     * @property ele string or number
-     * @return bool
+     * @param {*} val
+     * @return {boolean}
      * */
     xjx.isAttribValue = function (val) {
         return xjx.isNum(val) || xjx.isStr(val);
@@ -60,10 +64,15 @@ if ('undefined' === typeof xajax) {
     /**
      * Safe getting of an Object element
      * @since 0.7.1
+     *
+     * @param {object} obj
+     * @param {object} key
+     *
+     * @return {*} content of the object
      * */
-    xjx.getObjEle = function (obj, ident) {
-        if (('object' === typeof obj) && 'string' === typeof ident && ident in obj) {
-            return obj[ident];
+    xjx.getObjEle = function (obj, key) {
+        if (('object' === typeof obj) && 'string' === typeof key && key in obj) {
+            return obj[key];
         }
         return void 0;
     };
@@ -2337,16 +2346,21 @@ if ('undefined' === typeof xajax) {
 }(xajax));
 /** xajax attr **/
 (function (xjx) {
-    /*
-   * remove all useless stuff
-   * @property str string
-   * @return string
-   * **/
+    /**
+     * remove all useless stuff
+     *
+     * @param {string} str
+     *
+     * @return {string}
+     * **/
     var remS = function (str) {
         return (xjx.isStr(str)) ? str.replace(/\s\s+/g, ' ') : '';
     };
     /**
      * internal proxy to remove the old xajax.tools.$ class
+     * @param {string|Element} elem Element or id=""
+     *
+     * @return {null|Element}
      * */
     var getEle = function (elem) {
         return xjx.tools.$(elem);
@@ -2354,13 +2368,13 @@ if ('undefined' === typeof xajax) {
     /**
      * Adds an class string
      *
-     * @property ele element or element-id
-     * @property val class to add
+     * @param {string|Element} elem Element or id=""
+     * @param {string} val class to add
      */
     xjx.addClass = function (elem, val) {
         var ident = 'class';
         if (xjx.isAttribValue(val) && null !== (elem = getEle(elem))) {
-            if (true === xajax.hasAttrib(elem, ident)) {
+            if (xjx.hasAttrib(elem, ident)) {
                 elem.setAttribute(ident, elem.getAttribute(ident) + ' ' + val);
             } else {
                 elem.setAttribute(ident, val);
@@ -2370,8 +2384,8 @@ if ('undefined' === typeof xajax) {
     /**
      * Removes an class from element
      *
-     * @property ele element or element-id
-     * @property val value to removes from
+     * @param {string|Element} elem Element or id=""
+     * @param {string} val class to remove
      */
     xjx.removeClass = function (elem, val) {
         var ident = 'class';
@@ -2389,8 +2403,8 @@ if ('undefined' === typeof xajax) {
     /**
      * Checks an Class exists
      *
-     * @property ele element or element-id
-     * @property val class to add
+     * @param {string|Element} elem Element or id=""
+     * @param {string} val class to check
      */
     xjx.hasClass = function (elem, val) {
         var res = false;
@@ -2407,6 +2421,14 @@ if ('undefined' === typeof xajax) {
         }
         return res;
     };
+    /**
+     * Checks an Class exists
+     *
+     * @param {string|Element} elem Element or id=""
+     * @param {string} prop attribute to check
+     *
+     * @return {boolean}
+     */
     xjx.hasAttrib = function (elem, prop) {
         if (xjx.isStr(prop) && (elem = getEle(elem))) {
             return elem.hasAttribute(prop);
@@ -2416,14 +2438,14 @@ if ('undefined' === typeof xajax) {
     /**
      * Adding an Attribute if it not exists
      *
-     * @property ele element or element-id
-     * @property prop attribute to set
-     * @property val value to set
+     * @param {string|Element} elem Element or id=""
+     * @param {string} prop attribute to check
+     * @param {string} val content to add in Attribute
      **/
     xjx.addAttrib = function (elem, prop, val) {
         elem = getEle(elem);
         if (xjx.isAttribValue(val) && xjx.isStr(prop))
-            if (false === xajax.hasAttrib(elem, prop))
+            if (!xjx.hasAttrib(elem, prop))
                 elem.setAttribute(prop, val);
             else
                 elem.setAttribute(prop, elem.getAttribute(prop) + val);
@@ -2431,11 +2453,11 @@ if ('undefined' === typeof xajax) {
     /**
      * Remove an Attribute if exists
      *
-     * @property ele element or element-id
-     * @property prop attribute to remove
+     * @param {string|Element} elem Element or id=""
+     * @param {string} prop attribute to remove
      */
     xjx.removeAttr = function (elem, prop) {
-        if (xjx.isStr(prop) && true === xajax.attr.has(prop))
+        if (xjx.isStr(prop) && true === xjx.hasAttrib(elem, prop))
             elem.removeAttribute(prop);
     };
 }(xajax));
@@ -2512,41 +2534,46 @@ if ('undefined' === typeof xajax) {
               args.fullName = 'insertAfter';
               return xajax.dom.insertAfter(args.id, args.data, args.prop);
           },
-          'DSR': xajax.domResponse.startResponse,
-          'DCE': xajax.domResponse.createElement,
-          'DSA': xajax.domResponse.setAttribute,
-          'DAC': xajax.domResponse.appendChild,
-          'DIB': xajax.domResponse.insertBefore,
-          'DIA': xajax.domResponse.insertAfter,
-          'DAT': xajax.domResponse.appendText,
-          'DRC': xajax.domResponse.removeChildren,
-          'DER': xajax.domResponse.endResponse,
-          'attr:ad': xajax.addAttrib,
-          'attr:re': xajax.removeAttr,
-          'c:as': xajax.dom.contextAssign,
-          'c:ap': xajax.dom.contextAppend,
-          'c:pp': xajax.dom.contextPrepend,
-          's': xajax.js.sleep,
-          'ino': xajax.js.includeScriptOnce,
-          'in': xajax.js.includeScript,
-          'rjs': xajax.js.removeScript,
-          'wf': xajax.js.waitFor,
-          'js': xajax.js.execute,
-          'jc': xajax.js.call,
-          'sf': xajax.js.setFunction,
-          'wpf': xajax.js.wrapFunction,
+          'DSR': xjx.domResponse.startResponse,
+          'DCE': xjx.domResponse.createElement,
+          'DSA': xjx.domResponse.setAttribute,
+          'DAC': xjx.domResponse.appendChild,
+          'DIB': xjx.domResponse.insertBefore,
+          'DIA': xjx.domResponse.insertAfter,
+          'DAT': xjx.domResponse.appendText,
+          'DRC': xjx.domResponse.removeChildren,
+          'DER': xjx.domResponse.endResponse,
+          'attr:ad': xjx.addAttrib,
+          'attr:re': xjx.removeAttr,
+          'cls:add': function (args) {
+              xjx.addClass(args.id, args.data);
+          }, 'cls:rem': function (args) {
+              xjx.removeClass(args.id, args.data);
+          },
+          'c:as': xjx.dom.contextAssign,
+          'c:ap': xjx.dom.contextAppend,
+          'c:pp': xjx.dom.contextPrepend,
+          's': xjx.js.sleep,
+          'ino': xjx.js.includeScriptOnce,
+          'in': xjx.js.includeScript,
+          'rjs': xjx.js.removeScript,
+          'wf': xjx.js.waitFor,
+          'js': xjx.js.execute,
+          'jc': xjx.js.call,
+          'sf': xjx.js.setFunction,
+          'wpf': xjx.js.wrapFunction,
           'al': function (args) {
               args.fullName = 'alert';
               alert(args.data);
               return true;
           },
-          'cc': xajax.js.confirmCommands,
-          'ci': xajax.forms.createInput,
-          'ii': xajax.forms.insertInput,
-          'iia': xajax.forms.insertInputAfter,
-          'ev': xajax.events.setEvent,
-          'ah': xajax.events.addHandler,
-          'rh': xajax.events.removeHandler,
+          'cc': xjx.js.confirmCommands,
+          'ci': xjx.forms.createInput,
+          'ii': xjx.forms.insertInput,
+          'iia': xjx.forms.insertInputAfter,
+          'ev': xjx.events.setEvent,
+          'ah': xjx.events.addHandler,
+          'rh': xjx.events.removeHandler,
           'html': function (args) {
               try {
                   return xajax.html(args.id, args.data);

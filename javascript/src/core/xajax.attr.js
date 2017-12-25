@@ -1,15 +1,20 @@
 /** xajax attr **/
 (function (xjx) {
-    /*
-   * remove all useless stuff
-   * @property str string
-   * @return string
-   * **/
+    /**
+     * remove all useless stuff
+     *
+     * @param {string} str
+     *
+     * @return {string}
+     * **/
     var remS = function (str) {
         return (xjx.isStr(str)) ? str.replace(/\s\s+/g, ' ') : '';
     };
     /**
      * internal proxy to remove the old xajax.tools.$ class
+     * @param {string|Element} elem Element or id=""
+     *
+     * @return {null|Element}
      * */
     var getEle = function (elem) {
         return xjx.tools.$(elem);
@@ -17,13 +22,13 @@
     /**
      * Adds an class string
      *
-     * @property ele element or element-id
-     * @property val class to add
+     * @param {string|Element} elem Element or id=""
+     * @param {string} val class to add
      */
     xjx.addClass = function (elem, val) {
         var ident = 'class';
         if (xjx.isAttribValue(val) && null !== (elem = getEle(elem))) {
-            if (true === xajax.hasAttrib(elem, ident)) {
+            if (xjx.hasAttrib(elem, ident)) {
                 elem.setAttribute(ident, elem.getAttribute(ident) + ' ' + val);
             } else {
                 elem.setAttribute(ident, val);
@@ -33,8 +38,8 @@
     /**
      * Removes an class from element
      *
-     * @property ele element or element-id
-     * @property val value to removes from
+     * @param {string|Element} elem Element or id=""
+     * @param {string} val class to remove
      */
     xjx.removeClass = function (elem, val) {
         var ident = 'class';
@@ -52,8 +57,8 @@
     /**
      * Checks an Class exists
      *
-     * @property ele element or element-id
-     * @property val class to add
+     * @param {string|Element} elem Element or id=""
+     * @param {string} val class to check
      */
     xjx.hasClass = function (elem, val) {
         var res = false;
@@ -70,6 +75,14 @@
         }
         return res;
     };
+    /**
+     * Checks an Class exists
+     *
+     * @param {string|Element} elem Element or id=""
+     * @param {string} prop attribute to check
+     *
+     * @return {boolean}
+     */
     xjx.hasAttrib = function (elem, prop) {
         if (xjx.isStr(prop) && (elem = getEle(elem))) {
             return elem.hasAttribute(prop);
@@ -79,14 +92,14 @@
     /**
      * Adding an Attribute if it not exists
      *
-     * @property ele element or element-id
-     * @property prop attribute to set
-     * @property val value to set
+     * @param {string|Element} elem Element or id=""
+     * @param {string} prop attribute to check
+     * @param {string} val content to add in Attribute
      **/
     xjx.addAttrib = function (elem, prop, val) {
         elem = getEle(elem);
         if (xjx.isAttribValue(val) && xjx.isStr(prop))
-            if (false === xajax.hasAttrib(elem, prop))
+            if (!xjx.hasAttrib(elem, prop))
                 elem.setAttribute(prop, val);
             else
                 elem.setAttribute(prop, elem.getAttribute(prop) + val);
@@ -94,11 +107,11 @@
     /**
      * Remove an Attribute if exists
      *
-     * @property ele element or element-id
-     * @property prop attribute to remove
+     * @param {string|Element} elem Element or id=""
+     * @param {string} prop attribute to remove
      */
     xjx.removeAttr = function (elem, prop) {
-        if (xjx.isStr(prop) && true === xajax.attr.has(prop))
+        if (xjx.isStr(prop) && true === xjx.hasAttrib(elem, prop))
             elem.removeAttribute(prop);
     };
 }(xajax));
