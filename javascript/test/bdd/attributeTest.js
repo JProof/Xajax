@@ -36,41 +36,71 @@ describe('Attribute and ClassName Tests', function () {
     afterEach(function () {
         fixture.cleanup();
     });
-    it('adding an new  ClassName', function () {
-        xajax.addClass('classNameTest', 'myTestClass');
-        controls.currentClass.should.equal('myTestClass');
+    describe('ClassName Tests', function () {
+        it('adding an new  ClassName', function () {
+            xajax.addClass('classNameTest', 'myTestClass');
+            controls.currentClass.should.equal('myTestClass');
+        });
+        it('adding an Additional ClassName', function () {
+            xajax.addClass('classNameTest', 'myTestClass');
+            xajax.addClass('classNameTest', 'extraClass');
+            controls.currentClass.should.equal('myTestClass extraClass');
+        });
+        it('adding more Classes in one string', function () {
+            xajax.addClass('classNameTest', 'myTestClass with extra');
+            controls.currentClass.should.equal('myTestClass with extra');
+        });
+        it('adding Class same class again', function () {
+            xajax.addClass('classNameTest', 'myTestClass');
+            xajax.addClass('classNameTest', 'myTestClass');
+            controls.currentClass.should.equal('myTestClass');
+        });
+        it('Replace class between to others', function () {
+            xajax.addClass('classNameTest', 'firstClass ');
+            xajax.addClass('classNameTest', ' middleClass ');
+            xajax.addClass('classNameTest', ' lastClass ');
+            xajax.removeClass('classNameTest', ' middleClass ');
+            controls.currentClass.should.equal('firstClass lastClass');
+        });
+        it('Remove class between two others', function () {
+            xajax.addClass('classNameTest', 'firstClass ');
+            xajax.addClass('classNameTest', ' middleClass ');
+            xajax.addClass('classNameTest', ' lastClass ');
+            xajax.removeClass('classNameTest', ' lastClass ');
+            controls.currentClass.should.equal('firstClass middleClass');
+        });
+        it('Remove class-string between two others', function () {
+            xajax.addClass('classNameTest', 'firstClass middleClass lastClass fourthClass');
+            
+            xajax.removeClass('classNameTest', ' middleClass lastClass ');
+            controls.currentClass.should.equal('firstClass fourthClass');
+        });
+        
+        it('remove non existing Class', function () {
+            xajax.addClass('classNameTest', 'myTestClass');
+            xajax.removeClass('classNameTest', 'extraClass');
+            controls.currentClass.should.equal('myTestClass');
+        });
+        it('Checks an Class Exists in ClassName', function () {
+            xajax.addClass('classNameTest', 'myTestClass');
+            var hasClass = xajax.hasClass('classNameTest', 'myTestClass');
+            assert.equal(hasClass, true);
+        });
+        it('Checks an Class does not Exists in ClassName', function () {
+            xajax.addClass('classNameTest', 'myTestClass');
+            var hasClass = xajax.hasClass('classNameTest', 'myTestClasssa');
+            assert.equal(hasClass, false);
+        });
     });
-    it('adding an Additional ClassName', function () {
-        xajax.addClass('classNameTest', 'myTestClass');
-        xajax.addClass('classNameTest', 'extraClass');
-        controls.currentClass.should.equal('myTestClass extraClass');
-    });
-    it('adding more Classes in one string', function () {
-        xajax.addClass('classNameTest', 'myTestClass with extra');
-        controls.currentClass.should.equal('myTestClass with extra');
-    });
-    it('remove non existing Class', function () {
-        xajax.addClass('classNameTest', 'myTestClass');
-        xajax.removeClass('classNameTest', 'extraClass');
-        controls.currentClass.should.equal('myTestClass');
-    });
-    it('Checks an Class Exists in ClassName', function () {
-        xajax.addClass('classNameTest', 'myTestClass');
-        var hasClass = xajax.hasClass('classNameTest', 'myTestClass');
-        assert.equal(hasClass, true);
-    });
-    it('Checks an Class does not Exists in ClassName', function () {
-        xajax.addClass('classNameTest', 'myTestClass');
-        var hasClass = xajax.hasClass('classNameTest', 'myTestClasssa');
-        assert.equal(hasClass, false);
-    });
-    it('add Attribute to existing Html Element', function () {
-        xajax.addAttrib('attribTester', 'myTestAttrib', 'myAttribValue');
-        controls.currentAttrib.should.equal('myAttribValue');
-    });
-    it('adding 2 AttributeValues on an existing attribute Html Element', function () {
-        xajax.addAttrib('attribTester', 'myTestAttrib', 'myOld');
-        xajax.addAttrib('attribTester', 'myTestAttrib', ' myAttribValue');
-        controls.currentAttrib.should.equal('myOld myAttribValue');
+    describe('Attribute Tests', function () {
+        it('add Attribute to existing Html Element', function () {
+            xajax.addAttrib('attribTester', 'myTestAttrib', 'myAttribValue');
+            controls.currentAttrib.should.equal('myAttribValue');
+        });
+        it('adding 2 AttributeValues on an existing attribute Html Element', function () {
+            xajax.addAttrib('attribTester', 'myTestAttrib', 'myOld');
+            xajax.addAttrib('attribTester', 'myTestAttrib', ' myAttribValue');
+            controls.currentAttrib.should.equal('myOld myAttribValue');
+        });
     });
 });

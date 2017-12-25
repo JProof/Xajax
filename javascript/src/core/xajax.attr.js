@@ -26,13 +26,13 @@
      * @param {string} val class to add
      */
     xjx.addClass = function (elem, val) {
-        var ident = 'class';
-        if (xjx.isAttribValue(val) && null !== (elem = getEle(elem))) {
-            if (xjx.hasAttrib(elem, ident)) {
-                elem.setAttribute(ident, elem.getAttribute(ident) + ' ' + val);
-            } else {
-                elem.setAttribute(ident, val);
+        if (xjx.isAttribValue(val) && (elem = getEle(elem))) {
+            val = val.trim();
+            if (!xjx.hasClass(elem, val)) {
+                var nC = elem.className + ' ' + val;
+                elem.className = nC.trim();
             }
+            
         }
     };
     /**
@@ -42,12 +42,13 @@
      * @param {string} val class to remove
      */
     xjx.removeClass = function (elem, val) {
-        var ident = 'class';
-        elem = getEle(elem);
-        if (xjx.isAttribValue(val) && true === xjx.hasAttrib(elem, ident)) {
+        
+        if (xjx.isAttribValue(val) && (elem = getEle(elem)) && elem.className) {
+            val = val.trim();
             try {
-                var nS = remS(elem.getAttribute(ident).replace(val, ''));
-                elem.setAttribute(ident, nS.trim());
+                
+                var nS = remS(elem.className.replace(val, ' '));
+                elem.className = nS.trim();
             } catch (error) {
                 throw error;
             }
@@ -61,19 +62,12 @@
      * @param {string} val class to check
      */
     xjx.hasClass = function (elem, val) {
-        var res = false;
-        var ident = 'class';
-        if (xjx.isAttribValue(val) && null !== (elem = getEle(elem))) {
-            if (true === xajax.hasAttrib(elem, ident)) {
-                var parts = elem.getAttribute(ident).split(' ');
-                parts.forEach(function (value) {
-                    if (value === val) {
-                        return res = true;
-                    }
-                });
-            }
+        
+        if (xjx.isAttribValue(val) && (elem = getEle(elem))) {
+            val = val.trim();
+            return elem.className && new RegExp('(^|\\s)' + val + '(\\s|$)').test(elem.className);
         }
-        return res;
+        return false;
     };
     /**
      * Checks an Class exists
