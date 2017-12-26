@@ -711,7 +711,7 @@ if ('undefined' === typeof xajax) {
             if (oRequest.request.responseXML) {
                 var responseXML = oRequest.request.responseXML;
                 if (responseXML.documentElement) {
-                 //   oRequest.status.onProcessing();
+                    //   oRequest.status.onProcessing();
                     var child = responseXML.documentElement.firstChild;
                     oRet = xt.xml.processFragment(child, seq, oRet, oRequest);
                 }
@@ -792,10 +792,10 @@ if ('undefined' === typeof xajax) {
 	
 	true - The reference was added.
 */
-        includeScript: function (command,context) {
+        includeScript: function (command, context) {
             // todo check object command
             command.fullName = 'includeScript';
-            var baseDoc = xjx.getContext(context||command.context);
+            var baseDoc = xjx.getContext(context || command.context);
             var objHead = baseDoc.getElementsByTagName('head');
             var objScript = baseDoc.createElement('script');
             objScript.src = command.data;
@@ -819,12 +819,12 @@ if ('undefined' === typeof xajax) {
             
             true - The script was not found or was removed.
         */
-        removeScript: function (command,context) {
+        removeScript: function (command, context) {
             command.fullName = 'removeScript';
             // todo check object command
             var fileName = command.data;
             var unload = command.unld;
-            var baseDoc = xjx.getContext(context||command.context);
+            var baseDoc = xjx.getContext(context || command.context);
             var loadedScripts = baseDoc.getElementsByTagName('script');
             var iLen = loadedScripts.length;
             for (var i = 0; i < iLen; ++i) {
@@ -3085,6 +3085,12 @@ xajax.initializeRequest = function (oRequest) {
     if ('undefined' === typeof oRequest.URI)
         throw {code: 10005};
 };
+
+function recurser() {
+    
+}
+
+
 /*
 	Function: xajax.processParameters
 	
@@ -3101,7 +3107,6 @@ xajax.initializeRequest = function (oRequest) {
 	will not be called for additional retries.
 */
 xajax.processParameters = function (oRequest) {
- 
     
     var rd = [];
     var separator = '';
@@ -3124,6 +3129,7 @@ xajax.processParameters = function (oRequest) {
         while (i < iLen) {
             var oVal = oRequest.parameters[i];
             if ('object' === typeof oVal && null !== oVal) {
+    
                 try {
                     
                     oVal = JSON.stringify(oVal);

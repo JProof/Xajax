@@ -25,6 +25,14 @@ Files without "min" are the annotated files.
 $xajax->getConfig()->setUseUncompressedScripts(true);
 ```
 
+In old Xajax the submitted Post and Get vars was as json-string encoded! This is removed
+Each POST or GET Parameter will be send such in regular Request(without ajax).
+
+Reason:
+xjxargs[]="a lot of parameters" can not handle directly from cms's because there routers or other cms functionality does not know xjxargs
+
+  
+
 
 todo
 * update modern js

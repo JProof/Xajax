@@ -426,6 +426,65 @@ xajax.initializeRequest = function (oRequest) {
     if ('undefined' === typeof oRequest.URI)
         throw {code: 10005};
 };
+
+function objectToParamsString(obj, sVarName, flat) {
+    
+    var tOf = typeof obj;
+    flat = flat ? flat : [];
+    
+    if ('object' === tOf) {
+        // recurse
+        var baseVarName = sVarName ? sVarName : null;
+        for (var key in obj) {
+            if (obj.hasOwnProperty(key)) {
+                
+                flat = objectToParamsString(obj[key], !baseVarName ?
+                  key :
+                  baseVarName + '[' + key + ']', flat);
+            }
+        }
+        
+    } else {
+        flat[sVarName] = obj;
+        
+        //   if ('string' === tOf || 'float' === tOf || 'int' === tOf || 'bool' === tOf) {
+        // todo check name
+        
+    }
+    return flat;
+}
+/**
+ * Create from array {formFieldName:1} 'formFieldName=1' which is need for Post/Get directly
+ *
+ * @param {array|object} arr
+ * @return {Array}
+ */
+function stringifyKeyValuePairs(arr) {
+    var retArray = [];
+    for (var key in arr) {
+        if (arr.hasOwnProperty(key)) {
+            retArray.push(key + '=' + encodeURI(arr[key]));
+        }
+    }
+    return retArray;
+    
+}
+/**
+ * Merging the found Parameters in one Object
+ *
+ * @param {array} baseArr
+ * @param {array} pArray
+ * @return {array}
+ */
+function mergeParams(baseArr, pArray) {
+    
+    for (var k in pArray) {
+        if (pArray.hasOwnProperty(k))
+            baseArr[k] = pArray[k];
+    }
+    
+    return baseArr;
+}
 /*
 	Function: xajax.processParameters
 	
@@ -441,24 +500,21 @@ xajax.initializeRequest = function (oRequest) {
 	This is called once per request; upon a request failure, this
 	will not be called for additional retries.
 */
+
 xajax.processParameters = function (oRequest) {
- 
     
-    var rd = [];
-    var separator = '';
+    var commandParam = [];
+    var clearParams = [];
+    
     for (var sCommand in oRequest.functionName) {
-        if ('constructor' !== sCommand) {
-            rd.push(separator);
-            rd.push(sCommand);
-            rd.push('=');
-            rd.push(encodeURIComponent(oRequest.functionName[sCommand]));
-            separator = '&';
-        }
+        if (oRequest.functionName.hasOwnProperty(sCommand))
+            if ('constructor' !== sCommand) {
+                commandParam[sCommand] = encodeURIComponent(oRequest.functionName[sCommand]);
+            }
     }
-    var dNow = new Date();
-    rd.push('&xjxr=');
-    rd.push(dNow.getTime());
-    delete dNow;
+    var d = new Date();
+    commandParam['xjxr'] = d.getTime();
+    
     if (oRequest.parameters) {
         var i = 0;
         var iLen = oRequest.parameters.length;
@@ -466,45 +522,36 @@ xajax.processParameters = function (oRequest) {
             var oVal = oRequest.parameters[i];
             if ('object' === typeof oVal && null !== oVal) {
                 try {
+                    // merge params if nee if there are same fields twice
+                    clearParams = mergeParams(clearParams, objectToParamsString(oVal));
                     
-                    oVal = JSON.stringify(oVal);
                 } catch (e) {
-                    oVal = '';
+                    //   oVal = '';
                     // do nothing, if the debug module is installed
                     // it will catch the exception and handle it
                 }
-                rd.push('&xjxargs[]=');
-                oVal = encodeURIComponent(oVal);
-                rd.push(oVal);
-                ++i;
+    
             } else {
-                rd.push('&xjxargs[]=');
-                if ('undefined' === typeof oVal || null == oVal) {
-                    rd.push('*');
-                } else {
-                    var sType = typeof oVal;
-                    if ('string' === sType)
-                        rd.push('S');
-                    else if ('boolean' === sType)
-                        rd.push('B');
-                    else if ('number' === sType)
-                        rd.push('N');
-                    oVal = encodeURIComponent(oVal);
-                    rd.push(oVal);
-                }
-                ++i;
+                throw new Error('You can not use the old way to handle parameters @see');
+    
             }
+            ++i;
         }
     }
+    
+    commandParam = mergeParams(commandParam, clearParams);
+    commandParam = stringifyKeyValuePairs(commandParam);
+    var cmdParamString = commandParam.join('&');
+    
     oRequest.requestURI = oRequest.URI;
     if ('GET' === oRequest.method) {
-        oRequest.requestURI += oRequest.requestURI.indexOf('?') == -1 ?
+        oRequest.requestURI += oRequest.requestURI.indexOf('?') === -1 ?
           '?' :
-          '&';
-        oRequest.requestURI += rd.join('');
-        rd = [];
+          '&' + cmdParamString;
+    
+        cmdParamString = '';
     }
-    oRequest.requestData = rd.join('');
+    oRequest.requestData = cmdParamString;
 };
 /*
 	Function: xajax.prepareRequest

@@ -13,24 +13,31 @@ describe('Testing Form-Values', function () {
     afterEach(function () {
         fixture.cleanup();
     });
-    
-    it('No Form-Node Found by Null', function () {
-        xajax.forms.getFormValues(null);
-        assert.equal(xajax.forms.getFormValues(null), null);
+    describe('Testing new Params for Transportation', function () {
+        it('Simple Formcheck that vars will be collected to object', function () {
+            var chckObject = {hiddenOne: 12, textOne: '124', dateOne: '2017-12-30', textareaOne: '<div>teststring</div>', radioOne: 'valOne', chckbx: {caseOne: 'valOne', caseTwo: 'valTwo'}};
+            
+            var res = objectToParamsString(chckObject);
+            var exp = ['hiddenOne', 'textOne'];
+            assert.deepEqual(res, exp);
+        });
     });
-    
-    it('No Form-Node Found by none existing id', function () {
-        assert.equal(xajax.forms.getFormValues('iamNotExists'), null);
+    describe('Getting Form', function () {
+        it('No Form-Node Found by Null', function () {
+            xajax.forms.getFormValues(null);
+            assert.equal(xajax.forms.getFormValues(null), null);
+        });
+        it('No Form-Node Found by none existing id', function () {
+            assert.equal(xajax.forms.getFormValues('iamNotExists'), null);
+        });
+        // todo check zero Values
+        it('Simple Formcheck that vars will be collected to object', function () {
+            fixture.load('form_regular.html');
+            var vars = xajax.forms.getFormValues('concreteId');
+            var chckObject = {hiddenOne: '12', textOne: '124', dateOne: '2017-12-30', textareaOne: '<div>teststring</div>', radioOne: 'valOne', chckbx: {caseOne: 'valOne', caseTwo: 'valTwo'}};
+            assert.deepEqual(JSON.stringify(chckObject), JSON.stringify(vars));
+        });
     });
-    
-    // todo check zero Values
-    it('Simple Formcheck that vars will be collected to object', function () {
-        fixture.load('form_regular.html');
-        var vars = xajax.forms.getFormValues('concreteId');
-        var chckObject = {hiddenOne: '12', textOne: '124', dateOne: '2017-12-30', textareaOne: '<div>teststring</div>', radioOne: 'valOne', chckbx: {caseOne: 'valOne', caseTwo: 'valTwo'}};
-        assert.deepEqual(JSON.stringify(chckObject), JSON.stringify(vars));
-    });
-    
     describe('Html Select Test', function () {
         beforeEach(function () {
             fixture.load('form_multiple_select.html');
@@ -39,7 +46,6 @@ describe('Testing Form-Values', function () {
         afterEach(function () {
             fixture.cleanup();
         });
-        
         it('Nothing selected  ', function () {
             var vars = xajax.forms.getFormValues('regular');
             assert.deepEqual({}, vars);
@@ -50,7 +56,11 @@ describe('Testing Form-Values', function () {
         });
         it('Multiple-Select with 2 selected Option ', function () {
             var vars = xajax.forms.getFormValues('multiple-multiple-attr');
-            assert.deepEqual({selectOne: ['testOptionTwoValue','testOptionThreeValue']}, vars);
+            assert.deepEqual({
+                selectOne: [
+                    'testOptionTwoValue',
+                    'testOptionThreeValue']
+            }, vars);
         });
     });
 });

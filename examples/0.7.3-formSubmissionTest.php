@@ -13,14 +13,6 @@
 
 require_once __DIR__ . '/bootstrap.php';
 
-function testForm($formData)
-{
-	$objResponse = Factory::getResponseInstance();
-	$objResponse->alert("formData: " . print_r($formData, true));
-	$objResponse->assign("submittedDiv", "innerHTML", nl2br(print_r($formData, true)));
-	return $objResponse;
-}
-
 require_once __DIR__ . '/bootstrap.php';
 
 use Xajax\Factory;
@@ -34,8 +26,6 @@ $xConfig->setErrorHandler('\Xajax\Errors\Handler::addException')->setToHtml(true
 // Response will be handled only if it is an Xajax Request
 $objResponse = Factory::getResponseInstance();
 $objResponse->alert('responseReceived');
-
-
 
 /**JS Configuration**/
 $xScripts = Factory::getScripts();
@@ -73,7 +63,7 @@ Factory::processRequest();
 <h1>Form Submission Test</h1>
 
 <div>
-	<form id="testForm1" onsubmit="return false;">
+	<form method="post" id="testForm1">
 		<fieldset style="display:inline; background-color: rgb(230,230,230);">
 			<legend>
 				Test Form
@@ -131,18 +121,18 @@ Factory::processRequest();
 
 				<div>
 					<input type="checkbox" id="multi1"
-						   name="multi[0]['test']" value="1" checked="checked"/>
-					<label for="multi1">multi[0]['test']</label>
+						   name="multi[0][test]" value="1" checked="checked"/>
+					<label for="multi1">multi[0][test]</label>
 				</div>
 				<div>
 					<input type="checkbox" id="multi2"
-						   name="multi[1]['test1']" value="2" checked="checked"/>
-					<label for="multi2">multi[1]['test1']</label>
+						   name="multi[1][test1]" value="2" checked="checked"/>
+					<label for="multi2">multi[1][test1]</label>
 				</div>
 				<div>
 					<input type="checkbox" id="multi3"
-						   name="multi[1]['test2']" value="4" checked="checked"/>
-					<label for="multi3">multi[1]['test2']</label>
+						   name="multi[1][test2]" value="4" checked="checked"/>
+					<label for="multi3">multi[1][test1]</label>
 				</div>
 			</div>
 			<div style="margin: 3px;">
@@ -193,7 +183,8 @@ Factory::processRequest();
 						   onclick="<?php $xajaxCmsGet->printScript() ?>"/> </span>
 			<span style="margin: 3px;">
 			<input type="submit" value="submit through GET xajax"
-				   onclick="xajax_post(xajax.getFormValues('testForm1')); return false;"/> </span>
+				   onclick="xajax_post(xajax.getFormValues('testForm1'),xajax.getFormValues('testForm1')); return false;"/> </span>
+			<input type="submit" name="sendRegular"/>
 		</fieldset>
 	</form>
 </div>
