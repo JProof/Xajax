@@ -358,22 +358,13 @@ namespace Xajax\Plugin {
 			called when processing a request.
 		*/
 		/**
-		 *
+		 * Generating all Head Script-Tags they are necessary for xajax
 		 */
 		public function generateClientScript()
 		{
 
 			$scripts       = Scripts::getInstance();
 			$configScripts = $scripts->getConfiguration();
-
-			/**
-			 * already init by
-			 *
-			 * @see \Xajax\Scripts\Scripts::__construct()
-			 */
-			#	$xCoreConfig = new Core();
-			#	$xCoreConfig->setScriptName('xajax')->setFileName('xajax_core.js')->setPriority(0);
-			#	$scripts->addScript($xCoreConfig, 0);
 
 			if (!$configScripts->isDebug())
 			{
@@ -382,11 +373,8 @@ namespace Xajax\Plugin {
 
 			$scriptParts = [];
 
-			$scriptParts[] = $initScript = $this->generateInitScript();
-			$scriptParts[] = $checkScripts = $this->generateTimeOutScripts();
 			if ($configScripts->isDeferScriptGeneration())
 			{
-
 
 				$sHash = $this->generateHash();
 
@@ -438,13 +426,48 @@ namespace Xajax\Plugin {
 			else
 			{
 
-				$scriptParts[] = $fileScripts = $this->generateFileScripts();
+				// full files First
+				$scriptParts[] = $this->generateFileScripts();
 
-				$scriptParts[] = $pluginScripts = $this->generatePluginScripts();
+				// diverse init Scripts
+				$snippets      = [];
+				$snippets[]    = $this->generateInitScript();
+				$snippets[]    = $this->generateTimeOutScripts();
+				$snippets[]    = $this->generatePluginScripts();
+				$scriptParts[] = self::wrapScriptData(implode('', $snippets));
 			}
 
-			$finalScripts = implode($scriptParts);
-			return $finalScripts;
+			return implode($scriptParts);
+		}
+
+		/**
+		 * @param string $str
+		 *
+		 * @return string
+		 */
+		protected static function wrapScriptData(string $str): string
+		{
+			return self::wrapScriptTag(self::wrapCDATA($str));
+		}
+
+		/**
+		 * @param string $str
+		 *
+		 * @return string
+		 */
+		protected static function wrapScriptTag(string $str): string
+		{
+			return self::getOpenScript() . $str . self::getCloseScript();
+		}
+
+		/**
+		 * @param string $str
+		 *
+		 * @return string
+		 */
+		protected static function wrapCDATA(string $str): string
+		{
+			return self::getCDATAOpen() . $str . self::getCDATAClose();
 		}
 
 		/**
@@ -473,15 +496,11 @@ namespace Xajax\Plugin {
 		protected function generatePluginScripts(): string
 		{
 			// script Content
-			$configScripts = Scripts::getInstance()->getConfiguration();
-			$parts         = [];
-			$parts[]       = '<script type="text/javascript" charset="UTF-8" ' . ($configScripts->isDeferScriptGeneration() ? 'defer' : '') . '>';
-			$parts[]       = self::getCDATAOpen();
+
+			$parts = [];
 
 			$parts[] = $this->printPluginScripts();
 
-			$parts[] = self::getCDATAClose();
-			$parts[] = '</script>';
 			return implode('', $parts);
 		}
 
@@ -493,9 +512,6 @@ namespace Xajax\Plugin {
 			$configScripts = Scripts::getInstance()->getConfiguration();
 
 			$parts = [];
-
-			$parts[] = '<script type="text/javascript" ' . ($configScripts->isDeferScriptGeneration() ? 'defer ' : '') . 'charset="UTF-8">';
-			$parts[] = self::getCDATAOpen();
 
 			$parts[] = 'try { if (undefined == typeof xajax.config) xajax.config = {};  } catch (e) { xajax = {}; xajax.config = {};  };';
 
@@ -509,7 +525,7 @@ namespace Xajax\Plugin {
 			$parts[] = 'xajax.config.version = "' . $this->getConfig()->getVersion() . '";';
 			$parts[] = 'xajax.config.defaultMode = "' . $configScripts->getDefaultMode() . '";';
 			$parts[] = 'xajax.config.defaultMethod = "' . $configScripts->getDefaultMethod() . '";';
-			$parts[] = 'xajax.config.responseType = "' . $this->getConfig()->getResponseType() . '";';
+			//$parts[] = 'xajax.config.responseType = "' . $this->getConfig()->getResponseType() . '";';
 
 			if (false === (null === $this->nResponseQueueSize))
 			{
@@ -526,9 +542,6 @@ namespace Xajax\Plugin {
 				}
 			}
 
-			$parts[] = self::getCDATAClose();
-			$parts[] = '</script>';
-
 			return implode('', $parts);
 		}
 
@@ -538,8 +551,9 @@ namespace Xajax\Plugin {
 		 *
 		 * @return string
 		 */
-		protected function generateTimeOutScripts()
+		protected function generateTimeOutScripts(): string
 		{
+
 			$parts    = [];
 			$xScripts = Scripts::getInstance()->getScriptUrls();
 			if (0 < $this->nScriptLoadTimeout)
@@ -556,6 +570,7 @@ namespace Xajax\Plugin {
 					alert("Error: the Javascript component could not be included. Perhaps the URL is incorrect?\nURL:' . $xScript . '");} },' . $this->nScriptLoadTimeout . ');';
 				}
 			}
+
 			return implode('\n', $parts);
 		}
 
@@ -564,7 +579,7 @@ namespace Xajax\Plugin {
 		 */
 		protected static function getCDATAOpen(): string
 		{
-			return '/*<![CDATA[*/ ';
+			return '/*<![CDATA[*/' . PHP_EOL;
 		}
 
 		/**
@@ -572,7 +587,24 @@ namespace Xajax\Plugin {
 		 */
 		protected static function getCDATAClose(): string
 		{
-			return ' /*]]>*/';
+			return PHP_EOL . '/*]]>*/ ';
+		}
+
+		/**
+		 * @return string
+		 */
+		protected static function getOpenScript(): string
+		{
+			return '<script type="text/javascript" charset="UTF-8" ' . (Scripts::getInstance()
+			                                                                   ->getConfiguration() ? 'defer ' : '') . '>';
+		}
+
+		/**
+		 * @return string
+		 */
+		protected static function getCloseScript()
+		{
+			return '</script>';
 		}
 
 		/**
