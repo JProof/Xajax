@@ -564,7 +564,7 @@ namespace Xajax\Plugin {
 		 */
 		protected static function getCDATAOpen(): string
 		{
-			return '/*<![CDATA[*/';
+			return '/*<![CDATA[*/ ';
 		}
 
 		/**
@@ -572,7 +572,7 @@ namespace Xajax\Plugin {
 		 */
 		protected static function getCDATAClose(): string
 		{
-			return '/*]]>*/';
+			return ' /*]]>*/';
 		}
 
 		/**
