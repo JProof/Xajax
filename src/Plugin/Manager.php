@@ -25,6 +25,9 @@ namespace Xajax\Plugin {
 	use Xajax\Plugin\Request\RequestPluginIface;
 	use Xajax\Scripts\Scripts;
 
+	/**
+	 * Class Manager
+	 */
 	class Manager
 	{
 		use Config;
@@ -355,7 +358,7 @@ namespace Xajax\Plugin {
 			called when processing a request.
 		*/
 		/**
-		 *
+		 * Generating all Head Script-Tags they are necessary for xajax
 		 */
 		public function generateClientScript()
 		{
@@ -363,154 +366,15 @@ namespace Xajax\Plugin {
 			$scripts       = Scripts::getInstance();
 			$configScripts = $scripts->getConfiguration();
 
-			/**
-			 * already init by
-			 *
-			 * @see \Xajax\Scripts\Scripts::__construct()
-			 */
-			#	$xCoreConfig = new Core();
-			#	$xCoreConfig->setScriptName('xajax')->setFileName('xajax_core.js')->setPriority(0);
-			#	$scripts->addScript($xCoreConfig, 0);
-
 			if (!$configScripts->isDebug())
 			{
 				$scripts->setLockScript('xajax.debug');
 			}
 
-			// getting all Script Urls
-			$xScripts = Scripts::getInstance()->getScriptUrls();
-
-			$sCrLf = "\n";
-			ob_start();
-
-			echo $sCrLf;
-			echo '<';
-			echo 'script type="text/javascript" ';
-			echo $configScripts->isDeferScriptGeneration() ? 'defer ' : '';
-			echo 'charset="UTF-8">';
-			echo $sCrLf;
-			echo '/* <![CDATA[ */';
-			echo $sCrLf;
-			echo 'try { if (undefined == typeof xajax.config) xajax.config = {};  } catch (e) { xajax = {}; xajax.config = {};  };';
-			echo $sCrLf;
-			echo 'xajax.config.requestURI = "';
-			echo $this->getConfig()->getRequestURI();
-			echo '";';
-			echo $sCrLf;
-			echo 'xajax.config.statusMessages = ';
-			echo $configScripts->isStatusMessages() ? 'true' : 'false';
-			echo ';';
-			echo $sCrLf;
-			echo 'xajax.config.waitCursor = ';
-			echo $configScripts->isWaitCursor() ? 'true' : 'false';
-			echo ';';
-			echo $sCrLf;
-			echo 'xajax.config.version = "';
-			echo $this->getConfig()->getVersion();
-			echo '";';
-			echo $sCrLf;
-			echo 'xajax.config.defaultMode = "';
-			echo $configScripts->getDefaultMode();
-			echo '";';
-			echo $sCrLf;
-			echo 'xajax.config.defaultMethod = "';
-			echo $configScripts->getDefaultMethod();
-			echo '";';
-			echo $sCrLf;
-			echo 'xajax.config.responseType = "';
-			echo $this->getConfig()->getResponseType();
-			echo '";';
-
-			$jsContent = ob_get_contents();
-
-			ob_end_clean();
-
-			echo $jsContent;
-
-			if (false === (null === $this->nResponseQueueSize))
-			{
-				echo $sCrLf;
-				echo 'xajax.config.responseQueueSize = ';
-				echo $this->nResponseQueueSize;
-				echo ';';
-			}
-
-			if (true === $configScripts->isDebug())
-			{
-				if (false === (null === $this->sDebugOutputID))
-				{
-					echo $sCrLf;
-					echo 'xajax.debug = {};';
-					echo $sCrLf;
-					echo 'xajax.debug.outputID = "';
-					echo $this->sDebugOutputID;
-					echo '";';
-				}
-			}
-			if (0 < $this->nScriptLoadTimeout)
-			{
-
-				foreach ($xScripts as $name => $xScript)
-				{
-					// only Xajax scripts can timeOuted
-					if (false === strpos($name, 'xajax'))
-					{
-						continue;
-					}
-
-					//				echo '<';
-					//				echo 'script type="text/javascript" ';
-					//				echo $this->sDefer;
-					//				echo 'charset="UTF-8">';
-					echo $sCrLf;
-					echo '/* <';
-					echo '![CDATA[ */';
-					echo $sCrLf;
-					echo 'window.setTimeout(';
-					echo $sCrLf;
-					echo ' function() {';
-					echo $sCrLf;
-					echo '  var scriptExists = false;';
-					echo $sCrLf;
-					echo '  try { if (';
-					echo $name;
-					echo '.isLoaded) scriptExists = true; }';
-					echo $sCrLf;
-					echo '  catch (e) {}';
-					echo $sCrLf;
-					echo '  if (!scriptExists) {';
-					echo $sCrLf;
-					echo '   alert("Error: the ';
-					echo $xScript;
-					echo ' Javascript component could not be included. Perhaps the URL is incorrect?\nURL: ';
-
-					echo $xScript;
-					echo '");';
-					echo $sCrLf;
-					echo '  }';
-					echo $sCrLf;
-					echo ' }, ';
-					echo $this->nScriptLoadTimeout;
-					echo ');';
-					echo $sCrLf;
-					//				echo '/* ]]> */';
-					//				echo $sCrLf;
-					//				echo '<';
-					//				echo '/script>';
-					//				echo $sCrLf;
-				}
-			}
-
-			echo $sCrLf;
-			echo '/* ]]> */';
-			echo $sCrLf;
-			echo '<';
-			echo '/script>';
-			echo $sCrLf;
+			$scriptParts = [];
 
 			if ($configScripts->isDeferScriptGeneration())
 			{
-
 
 				$sHash = $this->generateHash();
 
@@ -562,39 +426,185 @@ namespace Xajax\Plugin {
 			else
 			{
 
-				foreach ($xScripts as $xScript)
-				{
-					echo '<';
-					echo 'script type="text/javascript" src="';
+				// full files First
+				$scriptParts[] = $this->generateFileScripts();
 
-					echo $xScript;
-					echo '" ';
-					echo $configScripts->isDeferScriptGeneration() ? 'defer ' : '';
-					echo 'charset="UTF-8"><';
-					echo '/script>';
-					echo $sCrLf;
-				}
-
-				// script Content
-				echo $sCrLf;
-				echo '<';
-				echo 'script type="text/javascript" ';
-				echo $configScripts->isDeferScriptGeneration() ? 'defer ' : '';
-				echo 'charset="UTF-8">';
-				echo $sCrLf;
-				echo '/* <';
-				echo '![CDATA[ */';
-				echo $sCrLf;
-
-				echo $this->printPluginScripts();
-
-				echo $sCrLf;
-				echo '/* ]]> */';
-				echo $sCrLf;
-				echo '<';
-				echo '/script>';
-				echo $sCrLf;
+				// diverse init Scripts
+				$snippets      = [];
+				$snippets[]    = $this->generateInitScript();
+				$snippets[]    = $this->generateTimeOutScripts();
+				$snippets[]    = $this->generatePluginScripts();
+				$scriptParts[] = self::wrapScriptData(implode('', $snippets));
 			}
+
+			return implode($scriptParts);
+		}
+
+		/**
+		 * @param string $str
+		 *
+		 * @return string
+		 */
+		protected static function wrapScriptData(string $str): string
+		{
+			return self::wrapScriptTag(self::wrapCDATA($str));
+		}
+
+		/**
+		 * @param string $str
+		 *
+		 * @return string
+		 */
+		protected static function wrapScriptTag(string $str): string
+		{
+			return self::getOpenScript() . $str . self::getCloseScript();
+		}
+
+		/**
+		 * @param string $str
+		 *
+		 * @return string
+		 */
+		protected static function wrapCDATA(string $str): string
+		{
+			return self::getCDATAOpen() . $str . self::getCDATAClose();
+		}
+
+		/**
+		 * Rendering the src-scripts with files
+		 *
+		 * @return string
+		 */
+		protected function generateFileScripts(): string
+		{
+			$xScripts      = Scripts::getInstance()->getScriptUrls();
+			$configScripts = Scripts::getInstance()->getConfiguration();
+			$parts         = [];
+
+			foreach ($xScripts as $xScript)
+			{
+				$parts[] = '<script type="text/javascript" charset="UTF-8" src="' . $xScript . '" ' . ($configScripts->isDeferScriptGeneration() ? 'defer ' : ' ') . '></script>';
+			}
+			return implode('', $parts);
+		}
+
+		/**
+		 * Generating all Plugin Scripts
+		 *
+		 * @return string
+		 */
+		protected function generatePluginScripts(): string
+		{
+			// script Content
+
+			$parts = [];
+
+			$parts[] = $this->printPluginScripts();
+
+			return implode('', $parts);
+		}
+
+		/**
+		 * @return string
+		 */
+		protected function generateInitScript(): string
+		{
+			$configScripts = Scripts::getInstance()->getConfiguration();
+
+			$parts = [];
+
+			$parts[] = 'try { if (undefined == typeof xajax.config) xajax.config = {};  } catch (e) { xajax = {}; xajax.config = {};  };';
+
+			// only if configured
+			if ('' !== ($requestUri = $this->getConfig()->getRequestURI()))
+			{
+				$parts[] = 'xajax.config.requestURI = "' . $requestUri . '";';
+			}
+
+			$parts[] = 'xajax.config.waitCursor = ' . ($configScripts->isWaitCursor() ? 'true' : 'false') . ';';
+			$parts[] = 'xajax.config.version = "' . $this->getConfig()->getVersion() . '";';
+			$parts[] = 'xajax.config.defaultMode = "' . $configScripts->getDefaultMode() . '";';
+			$parts[] = 'xajax.config.defaultMethod = "' . $configScripts->getDefaultMethod() . '";';
+			//$parts[] = 'xajax.config.responseType = "' . $this->getConfig()->getResponseType() . '";';
+
+			if (false === (null === $this->nResponseQueueSize))
+			{
+				$parts[] = 'xajax.config.responseQueueSize = ' . $this->nResponseQueueSize . ';';
+			}
+
+			if (true === $configScripts->isDebug())
+			{
+				if (false === (null === $this->sDebugOutputID))
+				{
+
+					$parts[] = 'xajax.debug = {};';
+					$parts[] = 'xajax.debug.outputID = "' . $this->sDebugOutputID . '";';
+				}
+			}
+
+			return implode('', $parts);
+		}
+
+		/**
+		 * Time-Out Scripts
+		 * maybe only on development
+		 *
+		 * @return string
+		 */
+		protected function generateTimeOutScripts(): string
+		{
+
+			$parts    = [];
+			$xScripts = Scripts::getInstance()->getScriptUrls();
+			if (0 < $this->nScriptLoadTimeout)
+			{
+				foreach ($xScripts as $name => $xScript)
+				{
+					// only Xajax scripts can timeOuted
+					if (false === strpos($name, 'xajax'))
+					{
+						continue;
+					}
+
+					$parts  [] = 'window.setTimeout( function() {  var scriptExists = false;  try { if (' . $name . '.isLoaded) scriptExists = true; }catch (e) {};if (!scriptExists) {
+					alert("Error: the Javascript component could not be included. Perhaps the URL is incorrect?\nURL:' . $xScript . '");} },' . $this->nScriptLoadTimeout . ');';
+				}
+			}
+
+			return implode('\n', $parts);
+		}
+
+		/**
+		 * @return string
+		 */
+		protected static function getCDATAOpen(): string
+		{
+			return '/*<![CDATA[*/' . PHP_EOL;
+		}
+
+		/**
+		 * @return string
+		 */
+		protected static function getCDATAClose(): string
+		{
+			return PHP_EOL . '/*]]>*/ ';
+		}
+
+		/**
+		 * @return string
+		 */
+		protected static function getOpenScript(): string
+		{
+			return '<script type="text/javascript" charset="UTF-8" ' . (Scripts::getInstance()
+			                                                                   ->getConfiguration() ? 'defer ' : '') . '>';
+		}
+
+		/**
+		 * @return string
+		 */
+		protected static function getCloseScript()
+		{
+			return '</script>';
 		}
 
 		/**
