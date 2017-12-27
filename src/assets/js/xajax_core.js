@@ -33,6 +33,76 @@ if ('undefined' === typeof xajax) {
 }
 
 /**
+ * @since 0.7.3
+ */
+(function (xjx) {
+    
+    /**
+     * Creating an POST or GET parameter Array
+     *
+     * @example {myChkBxArea:{chkBx:1} -> {'myChkBxArea[chkBx]':1} which is usable
+      *
+     * @param {Array} obj
+     * @param {string} sVarName
+     * @param {Array} flat
+     *
+     * @return {Array|*}
+     */
+    var objectToParamsString = function (obj, sVarName, flat) {
+        
+        var tOf = typeof obj;
+        flat = flat ? flat : [];
+        
+        if ('object' === tOf) {
+            // recurse
+            var baseVarName = sVarName ? sVarName : null;
+            for (var key in obj) {
+                if (obj.hasOwnProperty(key)) {
+                    flat = objectToParamsString(obj[key], !baseVarName ?
+                      key :
+                      baseVarName + '[' + key + ']', flat);
+                }
+            }
+        } else {
+            //  only the value left, lets push it
+            flat[sVarName] = obj;
+            
+        }
+        return flat;
+    };
+    
+    /**
+     * Create from array {formFieldName:1} 'formFieldName=1' which is need for Post/Get directly
+     *
+     * @param {array|object} arr
+     * @return {Array}
+     */
+    var stringifyKeyValuePairs = function (arr) {
+        var retArray = [];
+        for (var key in arr)
+            if (arr.hasOwnProperty(key))
+                retArray.push(key + '=' + encodeURI(arr[key]));
+        return retArray;
+        
+    };
+    
+    /**
+     * Merging the found Parameters in one Object
+     *
+     * @param {array} baseArr
+     * @param {array} pArray
+     * @return {array}
+     */
+    var mergeParams = function (baseArr, pArray) {
+        for (var k in pArray)
+            if (pArray.hasOwnProperty(k))
+                baseArr[k] = pArray[k];
+        return baseArr;
+    };
+    xjx.helper = {objectToParamsString: objectToParamsString, stringifyKeyValuePairs: stringifyKeyValuePairs, mergeParams: mergeParams};
+    
+}(xajax));
+/**
  * Diverse Core-Helper Helpers
  * **/
 (function (xjx) {
@@ -711,7 +781,7 @@ if ('undefined' === typeof xajax) {
             if (oRequest.request.responseXML) {
                 var responseXML = oRequest.request.responseXML;
                 if (responseXML.documentElement) {
-                    //   oRequest.status.onProcessing();
+                 //   oRequest.status.onProcessing();
                     var child = responseXML.documentElement.firstChild;
                     oRet = xt.xml.processFragment(child, seq, oRet, oRequest);
                 }
@@ -792,10 +862,10 @@ if ('undefined' === typeof xajax) {
 	
 	true - The reference was added.
 */
-        includeScript: function (command, context) {
+        includeScript: function (command,context) {
             // todo check object command
             command.fullName = 'includeScript';
-            var baseDoc = xjx.getContext(context || command.context);
+            var baseDoc = xjx.getContext(context||command.context);
             var objHead = baseDoc.getElementsByTagName('head');
             var objScript = baseDoc.createElement('script');
             objScript.src = command.data;
@@ -819,12 +889,12 @@ if ('undefined' === typeof xajax) {
             
             true - The script was not found or was removed.
         */
-        removeScript: function (command, context) {
+        removeScript: function (command,context) {
             command.fullName = 'removeScript';
             // todo check object command
             var fileName = command.data;
             var unload = command.unld;
-            var baseDoc = xjx.getContext(context || command.context);
+            var baseDoc = xjx.getContext(context||command.context);
             var loadedScripts = baseDoc.getElementsByTagName('script');
             var iLen = loadedScripts.length;
             for (var i = 0; i < iLen; ++i) {
@@ -3086,64 +3156,6 @@ xajax.initializeRequest = function (oRequest) {
         throw {code: 10005};
 };
 
-function objectToParamsString(obj, sVarName, flat) {
-    
-    var tOf = typeof obj;
-    flat = flat ? flat : [];
-    
-    if ('object' === tOf) {
-        // recurse
-        var baseVarName = sVarName ? sVarName : null;
-        for (var key in obj) {
-            if (obj.hasOwnProperty(key)) {
-                
-                flat = objectToParamsString(obj[key], !baseVarName ?
-                  key :
-                  baseVarName + '[' + key + ']', flat);
-            }
-        }
-        
-    } else {
-        flat[sVarName] = obj;
-        
-        //   if ('string' === tOf || 'float' === tOf || 'int' === tOf || 'bool' === tOf) {
-        // todo check name
-        
-    }
-    return flat;
-}
-/**
- * Create from array {formFieldName:1} 'formFieldName=1' which is need for Post/Get directly
- *
- * @param {array|object} arr
- * @return {Array}
- */
-function stringifyKeyValuePairs(arr) {
-    var retArray = [];
-    for (var key in arr) {
-        if (arr.hasOwnProperty(key)) {
-            retArray.push(key + '=' + encodeURI(arr[key]));
-        }
-    }
-    return retArray;
-    
-}
-/**
- * Merging the found Parameters in one Object
- *
- * @param {array} baseArr
- * @param {array} pArray
- * @return {array}
- */
-function mergeParams(baseArr, pArray) {
-    
-    for (var k in pArray) {
-        if (pArray.hasOwnProperty(k))
-            baseArr[k] = pArray[k];
-    }
-    
-    return baseArr;
-}
 /*
 	Function: xajax.processParameters
 	
@@ -3161,7 +3173,9 @@ function mergeParams(baseArr, pArray) {
 */
 
 xajax.processParameters = function (oRequest) {
-    
+  
+  
+  
     var commandParam = [];
     var clearParams = [];
     
@@ -3182,24 +3196,24 @@ xajax.processParameters = function (oRequest) {
             if ('object' === typeof oVal && null !== oVal) {
                 try {
                     // merge params if nee if there are same fields twice
-                    clearParams = mergeParams(clearParams, objectToParamsString(oVal));
+                    clearParams = xajax.helper.mergeParams(clearParams, xajax.helper.objectToParamsString(oVal));
                     
                 } catch (e) {
                     //   oVal = '';
                     // do nothing, if the debug module is installed
                     // it will catch the exception and handle it
                 }
-    
+                
             } else {
                 throw new Error('You can not use the old way to handle parameters @see');
-    
+                
             }
             ++i;
         }
     }
     
-    commandParam = mergeParams(commandParam, clearParams);
-    commandParam = stringifyKeyValuePairs(commandParam);
+    commandParam = xajax.helper.mergeParams(commandParam, clearParams);
+    commandParam =  xajax.helper.stringifyKeyValuePairs(commandParam);
     var cmdParamString = commandParam.join('&');
     
     oRequest.requestURI = oRequest.URI;
@@ -3207,7 +3221,7 @@ xajax.processParameters = function (oRequest) {
         oRequest.requestURI += oRequest.requestURI.indexOf('?') === -1 ?
           '?' :
           '&' + cmdParamString;
-    
+        
         cmdParamString = '';
     }
     oRequest.requestData = cmdParamString;
@@ -3329,8 +3343,10 @@ xajax.request = function () {
         oRequest = arguments[1];
     oRequest.functionName = arguments[0];
     var xx = xajax;
+    
     xx.initializeRequest(oRequest);
     xx.processParameters(oRequest);
+    
     while (0 < oRequest.requestRetry) {
         try {
             --oRequest.requestRetry;
