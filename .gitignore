@@ -21,3 +21,4 @@ xajax_plugins
 /.gitignore
 Would skip repository examples/demo/assets/kube
 /composer.lock
+_stuff

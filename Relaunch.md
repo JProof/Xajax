@@ -7,6 +7,7 @@ Current development xajax 0.7.3
 * UTF-8
 * remove procedurally "php-echo" inside Scripts
 
+* js removed windows.status  // @see https://www.w3schools.com/jsref/prop_win_status.asp 
 * removed the JSON-Extralibrary
 
 Changes
@@ -23,6 +24,14 @@ Files without "min" are the annotated files.
 **/
 $xajax->getConfig()->setUseUncompressedScripts(true);
 ```
+
+In old Xajax the submitted Post and Get vars was as json-string encoded! This is removed
+Each POST or GET Parameter will be send such in regular Request(without ajax).
+
+Reason:
+xjxargs[]="a lot of parameters" can not handle directly from cms's because there routers or other cms functionality does not know xjxargs
+
+  
 
 
 todo

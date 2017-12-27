@@ -371,23 +371,24 @@ class Response
 		);
 	}
 
-	/*
-		Function: assign
-		
-		Response command indicating that the specified value should be 
-		assigned to the given element's attribute.
-		
-		Parameters:
-		
-		sTarget - (string):  The id of the html element on the browser.
-		sAttribute - (string):  The property to be assigned.
-		sData - (string):  The value to be assigned to the property.
-		
-		Returns:
-		
-		object : The <xajaxResponse> object.
-		
-	*/
+	/**
+	 * Function: assign
+	 * Response command indicating that the specified value should be
+	 * assigned to the given element's attribute.
+	 * Parameters:
+	 * sTarget - (string):  The id of the html element on the browser.
+	 * sAttribute - (string):  The property to be assigned.
+	 * sData - (string):  The value to be assigned to the property.
+	 * Returns:
+	 * object : The <xajaxResponse> object.
+	 *
+	 * @param $sTarget
+	 * @param $sAttribute
+	 * @param $sData
+	 *
+	 * @return \Xajax\Response\Response
+	 * @deprecated 0.7.5
+	 */
 	public function assign($sTarget, $sAttribute, $sData): Response
 	{
 		return $this->addCommand(
@@ -397,6 +398,27 @@ class Response
 			'prop' => $sAttribute,
 		    ],
 		    $sData
+		);
+	}
+
+	/**
+	 * Setting in Html Content
+	 *
+	 * @since 0.7.3
+	 *
+	 * @param string      $sTarget html Element id
+	 * @param null|string $content leave empty got get the content from the html element
+	 *
+	 * @return \Xajax\Response\Response
+	 */
+	public function html(string $sTarget, ?string $content = null): Response
+	{
+		return $this->addCommand(
+		    [
+			'cmd' => 'html',
+			'id'  => $sTarget,
+		    ],
+		    $content
 		);
 	}
 
@@ -505,6 +527,40 @@ class Response
 		    $sTarget,
 		    $sAttribute,
 		    ''
+		);
+	}
+
+	/**
+	 * Adding Attribute Class
+	 *
+	 * @param string      $sTarget
+	 * @param null|string $cssClassName
+	 *
+	 * @return \Xajax\Response\Response
+	 */
+	public function addClass(string $sTarget, ?string $cssClassName = null): Response
+	{
+		return $this->addCommand(
+		    ['cmd' => 'cls:add',
+		     'id'  => $sTarget,
+		    ], $cssClassName
+		);
+	}
+
+	/**
+	 * Remove css Class if exists
+	 *
+	 * @param string      $sTarget
+	 * @param null|string $cssClassName
+	 *
+	 * @return \Xajax\Response\Response
+	 */
+	public function removeClass(string $sTarget, ?string $cssClassName = null): Response
+	{
+		return $this->addCommand(
+		    ['cmd' => 'cls:rem',
+		     'id'  => $sTarget,
+		    ], $cssClassName
 		);
 	}
 

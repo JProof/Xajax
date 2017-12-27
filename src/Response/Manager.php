@@ -180,7 +180,7 @@ namespace Xajax\Response {
 				{
 					$this->objResponse = $mResponse;
 				}
-				else if ($this->objResponse instanceof self)
+				else if ($this->objResponse instanceof \Xajax\Response\Response)
 				{
 					if ($this->objResponse !== $mResponse)
 					{
