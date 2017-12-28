@@ -19,8 +19,6 @@ namespace Xajax\Scripts;
 use Xajax\Plugin\Manager;
 use Xajax\Plugin\Request\Data;
 
-\defined('_JEXEC') or die('Restricted access');
-
 /**
  * Javascript OutputParser
  * Class Generator
