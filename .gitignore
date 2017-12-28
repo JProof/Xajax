@@ -22,3 +22,5 @@ xajax_plugins
 Would skip repository examples/demo/assets/kube
 /composer.lock
 _stuff
+/examples/
+
