@@ -297,6 +297,39 @@ class Generator
 	}
 
 	/**
+	 * @return string
+	 */
+	protected static function getCDATAOpen(): string
+	{
+		return '/*<![CDATA[*/';
+	}
+
+	/**
+	 * @return string
+	 */
+	protected static function getCDATAClose(): string
+	{
+		return '/*]]>*/';
+	}
+
+	/**
+	 * @return string
+	 */
+	protected static function getOpenScript(): string
+	{
+		return '<script type="text/javascript" charset="UTF-8" ' . (Scripts::getInstance()
+		                                                                   ->getConfiguration() ? 'defer ' : '') . '>';
+	}
+
+	/**
+	 * @return string
+	 */
+	protected static function getCloseScript()
+	{
+		return '</script>';
+	}
+
+	/**
 	 * Because of old bindings
 	 *
 	 * @return \Xajax\Plugin\Manager
