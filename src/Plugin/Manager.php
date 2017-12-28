@@ -40,13 +40,6 @@ namespace Xajax\Plugin {
 		 */
 		private $responsePlugins;
 		/*
-			Array: aClientScriptGenerators
-		*/
-		/**
-		 * @var array
-		 */
-		private $aClientScriptGenerators;
-		/*
 			Function: xajaxPluginManager
 
 			Construct and initialize the one and only xajax plugin manager.
@@ -60,8 +53,6 @@ namespace Xajax\Plugin {
 
 			$this->requestPlugins  = new \Xajax\Plugin\Request\Datas();
 			$this->responsePlugins = new \Xajax\Plugin\Response\Datas;
-
-			$this->aClientScriptGenerators = [];
 		}
 
 		/*
@@ -308,63 +299,6 @@ namespace Xajax\Plugin {
 		public function configure()
 		{
 			$args = func_get_args();
-		}
-
-		/**
-		 * @todo move to the Generator
-		 * @return string
-		 */
-		private function generateHash(): string
-		{
-			$aKeys = array_keys($this->aClientScriptGenerators);
-			sort($aKeys);
-			$sHash = '';
-			foreach ($aKeys as $sKey)
-			{
-				$sHash .= $this->aClientScriptGenerators[$sKey]->generateHash();
-			}
-
-			return md5($sHash);
-		}
-
-
-
-
-
-		// deprecated -----------
-
-		/**
-		 * @deprecated hook with an other Plugin mechanism
-		 * @todo       use spl priority queue
-		 *
-		 * @param $aFolders
-		 */
-		public function loadPlugins(?array $aFolders = null)
-		{
-			if (is_array($aFolders) && 0 < count($aFolders))
-			{
-				foreach ($aFolders as $sFolder)
-				{
-					if (is_dir($sFolder) && $handle = opendir($sFolder))
-					{
-						while (!(false === ($sName = readdir($handle))))
-						{
-							$nLength = strlen($sName);
-							if (8 < $nLength)
-							{
-								$sFileName  = substr($sName, 0, $nLength - 8);
-								$sExtension = substr($sName, $nLength - 8, 8);
-								if ('.inc.php' === $sExtension)
-								{
-									require $sFolder . '/' . $sFileName . $sExtension;
-								}
-							}
-						}
-
-						closedir($handle);
-					}
-				}
-			}
 		}
 	}
 }
