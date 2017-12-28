@@ -62,6 +62,8 @@ class Generator
 		}
 
 		$scriptParts = [];
+		// todo check global defer
+		// @todo make other parts defer-configurable
 		if ($configScripts->isDeferScriptGeneration())
 		{
 
@@ -322,7 +324,7 @@ class Generator
 	/**
 	 * @return string
 	 */
-	protected static function getCloseScript()
+	protected static function getCloseScript(): string
 	{
 		return '</script>';
 	}
