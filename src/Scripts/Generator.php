@@ -31,6 +31,12 @@ class Generator
 	 * @var bool
 	 */
 	static private $hasProcessed = false;
+	/**
+	 * During the Script-Generating-Process all Parts will be stacked (is need to detect cache an direct files and snippets)
+	 *
+	 * @var array
+	 */
+	static private $generatedParts = [];
 
 	/**
 	 * Prepare the Script generation to handle cache/defer scripts
@@ -43,16 +49,6 @@ class Generator
 		{
 			return false;
 		}
-		self::setHasProcessed(true);
-
-		return true;
-	}
-
-	/**
-	 * Generate all relevant Scripts they was set by Scripts and set by Plugins()
-	 */
-	public static function generateClientScript()
-	{
 		$scripts       = Scripts::getInstance();
 		$configScripts = $scripts->getConfiguration();
 
@@ -61,74 +57,101 @@ class Generator
 			$scripts->setLockScript('xajax.debug');
 		}
 
+		self::generateScriptUrls();
+		self::generateInitScript();
+		self::generateTimeoutScript();
+		self::generatePluginScripts();
+
+		// at least because the caching in next version will probably add extra cache Files
+		self::generateFileScripts();
+
+		self::setHasProcessed(true);
+
+		return true;
+	}
+
+	/**
+	 * Getting all Script-Files with Tag
+	 *
+	 * @return string
+	 */
+	public static function getClientScripts(): string
+	{
+		self::processScripts();
+		return implode('', self::getGeneratedPart('scriptTags'));
+	}
+
+	/**
+	 * Getting all Snippets in ScriptTag
+	 *
+	 * @param bool|null $wrapCDATA
+	 * @param bool|null $wrapScriptTag
+	 *
+	 * @return string
+	 */
+	public static function getClientSnippets(?bool $wrapCDATA = null, ?bool $wrapScriptTag = null): string
+	{
+		self::processScripts();
+
+		$snippets = [];
+
+		if ($init = self::getGeneratedPart('init'))
+		{
+			$snippets[] = implode('', $init);
+		}
+		if ($timeout = self::getGeneratedPart('timeout'))
+		{
+			$snippets[] = implode('', $timeout);
+		}
+
+		if ($plugins = self::getGeneratedPart('plugins'))
+		{
+			$snippets[] = implode('', $plugins);
+		}
+
+		$str = implode('', $snippets);
+		if ($wrapCDATA ?? false)
+		{
+			$str = self::wrapCDATA($str);
+		}
+		if ($wrapScriptTag ?? false)
+		{
+			$str = self::wrapScriptTag($str);
+		}
+
+		return $str;
+	}
+
+	/**
+	 * Generate all relevant Scripts they was set by Scripts and set by Plugins()
+	 */
+	public static function generateClientScript()
+	{
 		$scriptParts = [];
-		// todo check global defer
-		// @todo make other parts defer-configurable
-		if ($configScripts->isDeferScriptGeneration())
-		{
 
-			/*$sHash = $this->generateHash();
+		// full files First
+		$scriptParts[] = self::getClientScripts();
 
-			$sOutFile = $sHash . '.js';
-			// @todo set/get deferred folder
-			$sOutPath = dirname(__DIR__) . '/xajax_js/deferred/';
-
-			if (!is_file($sOutPath . $sOutFile))
-			{
-				ob_start();
-
-				$sInPath = dirname(__DIR__) . 'Manager.php/';
-
-				foreach ($aJsFiles as $aJsFile)
-				{
-					print file_get_contents($sInPath . $aJsFile[0]);
-				}
-				print $sCrLf;
-
-				print $this->printPluginScripts();
-
-				$sScriptCode = stripslashes(ob_get_clean());
-
-				$sScriptCode = Javascripts::xajaxCompressFile($sScriptCode);
-
-				if (!is_dir($sOutPath))
-				{
-					if (!mkdir($sOutPath) && !is_dir($sOutPath))
-					{
-						throw new RuntimeException('Can not create deferred out dir: ' . $sOutPath);
-					}
-				}
-
-				file_put_contents($sOutPath . $sOutFile, $sScriptCode);
-			}
-
-			echo '<';
-			echo 'script type="text/javascript" src="';
-			echo $sJsURI;
-			// @todo set/get deferred folder
-			echo 'deferred/';
-			echo $sOutFile;
-			echo '" ';
-			echo $configScripts->isDeferScriptGeneration() ? 'defer ' : '';
-			echo 'charset="UTF-8"><';
-			echo '/script>';
-			echo $sCrLf;*/
-		}
-		else
-		{
-
-			// full files First
-			$scriptParts[] = implode(self::generateFileScripts());
-
-			// diverse init Scripts
-			$snippets      = [];
-			$snippets[]    = self::generateInitScript();
-			$snippets[]    = self::generateTimeoutScript();
-			$snippets[]    = self::generatePluginScripts();
-			$scriptParts[] = self::wrapScriptData(implode('', $snippets));
-		}
+		// diverse init Scripts
+		$scriptParts[] = self::getClientSnippets(true, true);
 
 		return implode($scriptParts);
+	}
+
+	/**
+	 * Collecting all Script-Src in array
+	 */
+	protected static function generateScriptUrls()
+	{
+		$xScripts = Scripts::getInstance()->getScriptUrls();
+
+		$parts = [];
+		foreach ($xScripts as $xScript)
+		{
+			$parts[] = $xScript;
+		}
+		// todo add Cache Files also!!!!
+		self::setGeneratedPart('scripts', $parts);
 	}
 
 	/**
@@ -136,27 +159,37 @@ class Generator
 	 *
 	 * @return array
 	 */
-	protected static function generateFileScripts(): array
+	private static function generateFileScripts(): array
 	{
-		$xScripts      = Scripts::getInstance()->getScriptUrls();
+		if (!$scriptUrls = self::getGeneratedPart('scripts'))
+		{
+			self::generateScriptUrls();
+		}
+		if (!$scriptUrls = self::getGeneratedPart('scripts'))
+		{
+			return [];
+		}
+
 		$configScripts = Scripts::getInstance()->getConfiguration();
 		$parts         = [];
 
-		foreach ($xScripts as $xScript)
+		foreach ($scriptUrls as $scriptUrl)
 		{
-			$parts[] = '<script type="text/javascript" charset="UTF-8" src="' . $xScript . '" ' . ($configScripts->isDeferScriptGeneration() ? 'defer ' : ' ') . '></script>';
+			$parts[] = '<script type="text/javascript" charset="UTF-8" src="' . $scriptUrl . '" ' . ($configScripts->isDeferScriptGeneration() ? 'defer ' : ' ') . '></script>';
 		}
+		self::setGeneratedPart('scriptTags', $parts);
+
 		return $parts;
 	}
 
 	/**
 	 * All Scripts from Plugins they must be rendered to Browser
 	 *
-	 * @return string
+	 * @return array
 	 */
-	public static function generatePluginScripts(): string
+	protected static function generatePluginScripts(): array
 	{
-		$scripts = [];
+		$parts   = [];
 		$method  = 'generateClientScript';
 		$plugins = self::getPluginManager()->getRequestPlugins();
 		/** @var Data $plugin */
@@ -167,20 +200,22 @@ class Generator
 				$string = $plugin->getPluginInstance()->{$method}();
 				if ('' !== $string)
 				{
-					$scripts[] = $string;
+					$parts[] = $string;
 				}
 			}
 		}
 
-		return implode("\n", $scripts);
+		self::setGeneratedPart('plugins', $parts);
+
+		return $parts;
 	}
 
 	/**
 	 * Init-JSScript which is constructing the "mainFeatures" in browser
 	 *
-	 * @return string
+	 * @return array
 	 */
-	public static function generateInitScript(): string
+	protected static function generateInitScript(): array
 	{
 
 		$xajaxConfig   = \Xajax\Configuration::getInstance();
@@ -217,15 +252,16 @@ class Generator
 			}
 		}
 
-		return implode('', $parts);
+		self::setGeneratedPart('init', $parts);
+		return $parts;
 	}
 
 	/**
 	 * Load Check-Scripts if set
 	 *
-	 * @return string
+	 * @return array
 	 */
-	public static function generateTimeoutScript(): string
+	protected static function generateTimeoutScript(): array
 	{
 		$parts       = [];
 		$xajaxConfig = \Xajax\Configuration::getInstance();
@@ -245,7 +281,8 @@ class Generator
 			}
 		}
 
-		return implode('\n', $parts);
+		self::setGeneratedPart('timeout', $parts);
+		return $parts;
 	}
 
 	/**
@@ -337,5 +374,48 @@ class Generator
 	protected static function getPluginManager(): Manager
 	{
 		return Manager::getInstance();
+	}
+
+	/**
+	 * @param string $name
+	 *
+	 * @return array|null
+	 */
+	private static function getGeneratedPart(string $name): ?array
+	{
+		return self::getGeneratedParts()[$name] ?? null;
+	}
+
+	/**
+	 * Stack
+	 *
+	 * @param string $name
+	 * @param array  $piece
+	 *
+	 * @return array
+	 */
+	private static function setGeneratedPart(string $name, array $piece = null): array
+	{
+		$parts        = self::getGeneratedParts();
+		$parts[$name] = $piece;
+		self::setGeneratedParts($parts);
+
+		return $piece;
+	}
+
+	/**
+	 * @return array
+	 */
+	private static function getGeneratedParts(): array
+	{
+		return self::$generatedParts;
+	}
+
+	/**
+	 * @param array $generatedParts
+	 */
+	private static function setGeneratedParts(array $generatedParts): void
+	{
+		self::$generatedParts = $generatedParts;
 	}
 }

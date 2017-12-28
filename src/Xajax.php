@@ -40,6 +40,7 @@ use Xajax\Errors\Handler;
 use Xajax\Plugin\Manager;
 use Xajax\Plugin\Plugin;
 use Xajax\Response\Response;
+use Xajax\Scripts\Generator;
 
 if (!defined('XAJAX_DEFAULT_CHAR_ENCODING'))
 {
@@ -1033,24 +1034,21 @@ class Xajax
 
 	*/
 	/**
+	 * @deprecated use directly the Generator or the Factory
 	 */
 	public function printJavascript()
 	{
-		echo $this->getObjPluginManager()->generateClientScript();
+		echo Generator::generateClientScript();
 	}
 
 	/**
 	 * Function: getJavascript
-	 * See <xajax->printJavascript> for more information.
 	 *
 	 * @return string
 	 */
 	public function getJavascript()
 	{
-		ob_start();
-		$this->printJavascript();
-
-		return ob_get_clean();
+		return Generator::generateClientScript();
 	}
 
 	/*

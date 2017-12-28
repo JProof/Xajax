@@ -80,7 +80,7 @@ Xajax\Factory::getScripts()->addScriptDir(dirname(__DIR__,2)'/myAssets');
 
 In each newly added ScriptDirectory the scripts requested by Xajax are searched first (priority)
 
-##### Adding an JavasScript
+##### Adding an JavaScript
 
 Depending on the application, it may be useful to deliver other Javascripts to the browser with xajax. This saves work in the Html header.
 jQuery should serve as an example.

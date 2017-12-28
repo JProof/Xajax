@@ -9,7 +9,7 @@ New Demo
 [Filebrowser](examples/demo/Filebrowser/filebrowser.md)
 
 Handling JavaScripts 
-[JavasScript](docs/scripts.md)
+[JavasScript](docs/ScriptFiles.md)
 
 New Response-Types:
 

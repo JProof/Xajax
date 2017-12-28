@@ -20,7 +20,6 @@ namespace Xajax\Plugin {
 	use Xajax\Language;
 	use Xajax\Plugin\Request\Data;
 	use Xajax\Plugin\Request\RequestPluginIface;
-	use Xajax\Scripts\Generator;
 
 	/**
 	 * Class Manager
@@ -305,13 +304,6 @@ namespace Xajax\Plugin {
 			is called only when the page is being loaded initially.  This is not
 			called when processing a request.
 		*/
-		/**
-		 * Generating all Head Script-Tags they are necessary for xajax
-		 */
-		public function generateClientScript()
-		{
-			return Generator::generateClientScript();
-		}
 
 		public function configure()
 		{
