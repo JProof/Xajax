@@ -313,6 +313,11 @@ namespace Xajax\Plugin {
 			return Generator::generateClientScript();
 		}
 
+		public function configure()
+		{
+			$args = func_get_args();
+		}
+
 		/**
 		 * @todo move to the Generator
 		 * @return string
