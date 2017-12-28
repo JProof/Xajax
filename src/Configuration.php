@@ -82,6 +82,22 @@ class Configuration extends Base
 	 */
 	protected $responseType;
 	/**
+	 * @todo check queue-size in js
+	 * @var int
+	 */
+	protected $responseQueueSize;
+	/**
+	 * from Manager
+	 *
+	 * @todo check connectivity
+	 * @var string
+	 */
+	protected $debugOutputID;
+	/**
+	 * @var int
+	 */
+	protected $scriptLoadTimeout;
+	/**
 	 * The MIME Type for Responses
 	 * http header
 	 *
@@ -262,6 +278,67 @@ class Configuration extends Base
 			$this->setContentType('application/json');
 		}
 
+		return $this;
+	}
+
+	/**
+	 * ex Manager
+	 *
+	 * @return null|int
+	 */
+	public function getResponseQueueSize(): ?int
+	{
+		return $this->responseQueueSize;
+	}
+
+	/**
+	 * Ex Manager
+	 *
+	 * @param int $responseQueueSize
+	 *
+	 * @return self
+	 */
+	public function setResponseQueueSize(?int $responseQueueSize = null): self
+	{
+		$this->responseQueueSize = $responseQueueSize;
+		return $this;
+	}
+
+	/**
+	 * @return null|string
+	 */
+	public function getDebugOutputID(): ?string
+	{
+		return $this->debugOutputID;
+	}
+
+	/**
+	 * @param string $debugOutputID
+	 *
+	 * @return self
+	 */
+	public function setDebugOutputID(?string $debugOutputID = null): self
+	{
+		$this->debugOutputID = $debugOutputID;
+		return $this;
+	}
+
+	/**
+	 * @return null|int
+	 */
+	public function getScriptLoadTimeout(): ?int
+	{
+		return $this->scriptLoadTimeout;
+	}
+
+	/**
+	 * @param int $scriptLoadTimeout
+	 *
+	 * @return self
+	 */
+	public function setScriptLoadTimeout(?int $scriptLoadTimeout = null): self
+	{
+		$this->scriptLoadTimeout = $scriptLoadTimeout;
 		return $this;
 	}
 
