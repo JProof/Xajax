@@ -50,9 +50,5 @@
     ]
   },
   "autoload-dev": {
-    "psr-4": {
-      "Xajax\\": "tests",
-      "Xajax\\Examples\\": "examples"
-    }
   }
 }
