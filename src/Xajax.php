@@ -1039,12 +1039,10 @@ class Xajax
 		echo $this->getObjPluginManager()->generateClientScript();
 	}
 
-	/*
-		Function: getJavascript
-
-		See <xajax->printJavascript> for more information.
-	*/
 	/**
+	 * Function: getJavascript
+	 * See <xajax->printJavascript> for more information.
+	 *
 	 * @return string
 	 */
 	public function getJavascript()

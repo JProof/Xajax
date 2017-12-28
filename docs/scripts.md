@@ -31,7 +31,7 @@ Old Xajax Debugging JavaScript
 $xajaxScripts->getConfiguration()->setDebug(true);
 ```
 
-##### Short for development
+##### Setters are chained!
 ```php
 $xajaxScripts->getConfiguration()->setUseUncompressedScripts(true)->setDebug(true)
 ```

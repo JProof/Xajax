@@ -21,7 +21,8 @@ namespace Xajax\Configuration {
 	/**
 	 * Trait Config
 	 *
-	 * @package Xajax\Config
+	 * @deprecated use directly  \Xajax\Configuration::getInstance();
+	 * @package    Xajax\Config
 	 */
 	trait Config
 	{
