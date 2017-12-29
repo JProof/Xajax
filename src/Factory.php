@@ -17,6 +17,7 @@ declare(strict_types=1);
 namespace Xajax;
 
 use Xajax\Response\Response;
+use Xajax\Scripts\Generator;
 use Xajax\Scripts\Scripts;
 
 /**
@@ -154,4 +155,16 @@ class Factory
 	{
 		return Response::getInstance($instanceNr);
 	}
+
+	/**
+	 * @param bool|null $forceNew
+	 *
+	 * @return string
+	 */
+	public static function getJavascript(?bool $forceNew = null): string
+	{
+		return Generator::generateClientScript($forceNew);
+	}
+
+
 }

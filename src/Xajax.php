@@ -378,7 +378,8 @@ class Xajax
 
 		// Setup plugin manager
 		//$this->objPluginManager = xajaxPluginManager::getInstance();
-		$this->getObjPluginManager()->loadPlugins($aPluginFolders);
+		// load Plugins will automatically load if need
+		//	$this->getObjPluginManager()->loadPlugins($aPluginFolders);
 
 		$this->objLanguageManager = Language::getInstance();
 		$this->objArgumentManager = Argument::getInstance();
@@ -671,7 +672,7 @@ class Xajax
 	/**
 	 * @param null|string $plgName
 	 */
-	protected function autoregisterResponsePlugin(?string $plgName = null)
+	protected function autoregisterResponsePlugin(?string $plgName = null): void
 	{
 		$plgObject = $this->loadPlugin($plgName, Plugin::getResponseType());
 	}
@@ -763,7 +764,7 @@ class Xajax
 	 * @param $sessionKey
 	 * @param $challenges
 	 */
-	private function saveChallenges($sessionKey, $challenges)
+	private function saveChallenges($sessionKey, $challenges): void
 	{
 		if (count($challenges) > 10)
 		{
