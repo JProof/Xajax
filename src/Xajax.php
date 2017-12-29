@@ -1034,9 +1034,10 @@ class Xajax
 
 	*/
 	/**
-	 * @deprecated use directly the Generator or the Factory
+	 * @deprecated use directly the Generator
+	 * @example    echo Generator::generateClientScript();
 	 */
-	public function printJavascript()
+	public function printJavascript(): void
 	{
 		echo Generator::generateClientScript();
 	}
@@ -1045,8 +1046,10 @@ class Xajax
 	 * Function: getJavascript
 	 *
 	 * @return string
+	 * @deprecated use directly the Generator
+	 * @example    Generator::generateClientScript();
 	 */
-	public function getJavascript()
+	public function getJavascript(): string
 	{
 		return Generator::generateClientScript();
 	}

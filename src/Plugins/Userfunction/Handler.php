@@ -251,6 +251,7 @@ class Handler
 
 		$objResponseManager = Manager::getInstance();
 
+		// @todo remove it!
 		if (null !== $this->sInclude)
 		{
 			ob_start();
