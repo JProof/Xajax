@@ -55,9 +55,7 @@ namespace Xajax\Plugin {
 			$this->responsePlugins = new \Xajax\Plugin\Response\Datas;
 		}
 
-		/*
 
-		*/
 		/**
 		 * Function: getInstance
 		 * Implementation of the singleton pattern: returns the one and only instance of the
@@ -96,6 +94,7 @@ namespace Xajax\Plugin {
 				throw new InvalidArgumentException('Request Plugin can not be registered because of missing RequestPluginIface');
 			}
 
+			// todo the Plugin is already exists!!
 			$plugins = $this->getRequestPlugins();
 
 			$pluginData = new Request\Data();

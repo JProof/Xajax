@@ -161,7 +161,7 @@ class Factory
 	 *
 	 * @return string
 	 */
-	public static function getJavascript(?bool $forceNew = null): string
+	public static function getClientScript(?bool $forceNew = null): string
 	{
 		return Generator::generateClientScript($forceNew);
 	}

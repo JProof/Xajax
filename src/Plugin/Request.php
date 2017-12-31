@@ -30,11 +30,24 @@ abstract class Request extends Plugin
 {
 	use \Xajax\Errors\Call;
 	/**
+	 * @var
+	 */
+	static protected $instance;
+
+	/**
+	 * @param string $jsName
+	 * @param null   $configure
+	 *
+	 * @return mixed
+	 */
+	abstract public static function getRequest(string $jsName, $configure = null);
+
+	/**
 	 * Request constructor.
 	 *
 	 * @param string $pluginType
 	 */
-	public function __construct($pluginType = self::TYPE_REQUEST)
+	protected function __construct($pluginType = self::TYPE_REQUEST)
 	{
 		parent::__construct($pluginType);
 	}
@@ -50,7 +63,7 @@ abstract class Request extends Plugin
 	 * @param $sName
 	 * @param $mValue
 	 */
-	function configure($sName, $mValue)
+	public function configure($sName, $mValue)
 	{
 	}
 

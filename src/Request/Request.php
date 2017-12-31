@@ -347,10 +347,16 @@ abstract class Request
 	 * <a onclick="<?php echo $anXajaxUserFunction->printScript() ?>">anButton</a>
 	 * Parsed in Browser to:
 	 * <a onclick="xajax_listDirectory('anAutoQuotedValue')">anButton</a>
-	 * @see \Xajax\Request\Request::printScript()
+	 * @see        \Xajax\Request\Request::printScript()
 	 * @return string
+	 * @deprecated use magic method __toString()
 	 */
 	public function getScript(): string
+	{
+		return (string) $this;
+	}
+
+	public function __toString()
 	{
 		$lines   = [];
 		$lines[] = $this->sName;
@@ -371,26 +377,5 @@ abstract class Request
 		$lines[] = ');';
 
 		return implode($lines);
-	}
-
-	/*
-		Function: printScript
-
-		Generates a block of javascript code that can be used to invoke
-		the specified xajax request.
-	*/
-	/**
-	 * Echos the Script
-	 * Generates a block of javascript code that can be used to invoke
-	 * the specified xajax request.
-	 *
-	 * @see \Xajax\Request\Request::getScript()
-	 * @return bool
-	 */
-	public function printScript(): bool
-	{
-		echo $this->getScript();
-
-		return true;
 	}
 }

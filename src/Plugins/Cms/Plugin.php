@@ -18,7 +18,7 @@ namespace Xajax\Plugins\Cms;
 
 use InvalidArgumentException;
 use Xajax\Factory;
-use Xajax\Plugin\Request;
+
 use Xajax\Plugin\Request\RequestPluginIface;
 use Xajax\RequestIface;
 use Xajax\Response\Manager;
@@ -29,7 +29,7 @@ use Xajax\Response\Manager;
  *
  * @package Xajax\Plugins\Cms
  */
-class Plugin extends Request implements RequestPluginIface
+class Plugin extends \Xajax\Plugin\Request implements RequestPluginIface
 {
 	/*
 		Array: aFunctions
@@ -37,6 +37,9 @@ class Plugin extends Request implements RequestPluginIface
 		An array of <xajaxCms> object that are registered and
 		available via a <xajax.request> call.
 	*/
+	/**
+	 * @var array
+	 */
 	protected $aFunctions;
 	/*
 		String: sXajaxPrefix
@@ -44,6 +47,9 @@ class Plugin extends Request implements RequestPluginIface
 		A configuration setting that is stored locally and used during
 		the client script generation phase.
 	*/
+	/**
+	 * @var
+	 */
 	protected $sXajaxPrefix;
 	/*
 		String: sDefer
@@ -51,7 +57,13 @@ class Plugin extends Request implements RequestPluginIface
 		Configuration option that can be used to request that the
 		javascript file is loaded after the page has been fully loaded.
 	*/
+	/**
+	 * @var
+	 */
 	protected $sDefer;
+	/**
+	 * @var
+	 */
 	protected $bDeferScriptGeneration;
 	/*
 		String: sRequestedFunction
@@ -62,9 +74,14 @@ class Plugin extends Request implements RequestPluginIface
 		Since canProcessRequest loads this value from the get or post
 		data, it is unnecessary to load it again.
 	*/
+	/**
+	 * @var
+	 */
 	protected $sRequestedFunction;
+	/**
+	 * @var bool
+	 */
 	protected $isXajaxRequest = false;
-
 	/*
 		Function: xajaxFunctionPlugin
 
@@ -73,52 +90,47 @@ class Plugin extends Request implements RequestPluginIface
 		be used to determine if the request is for a registered function in
 		<xajaxFunctionPlugin->canProcessRequest>
 	*/
-	public function __construct()
+	/**
+	 * Plugin constructor.
+	 */
+	protected function __construct()
 	{
-
-
 		// populate which type the current plugin is
 		parent::__construct(Plugin::getRequestType());
 		$this->aFunctions = [];
 
 		$this->isXajaxRequest = (bool) ($_GET['xjxcms'] ?? $_POST['xjxcms'] ?? false);
+
+		// Autoregister this Plugin on construction
+		\Xajax\Plugin\Manager::getInstance()->registerPlugin($this);
 	}
 
+	/**
+	 * @return \Xajax\Plugins\Cms\Plugin
+	 */
+	public static function getInstance(): Plugin
+	{
+		return self::$instance ?? self::$instance = new self();
+	}
 	/*
 		Function: configure
 
 		Sets/stores configuration options used by this plugin.
 	*/
+	/**
+	 * @param $sName
+	 * @param $mValue
+	 *
+	 * @deprecated
+	 */
 	public function configure($sName, $mValue)
 	{
-		if ('wrapperPrefix' === $sName)
-		{
-			$this->sXajaxPrefix = $mValue;
-		}
-		else if ('scriptDefferal' === $sName)
-		{
-			if (true === $mValue)
-			{
-				$this->sDefer = 'defer ';
-			}
-			else
-			{
-				$this->sDefer = '';
-			}
-		}
-		else if ('deferScriptGeneration' === $sName)
-		{
-			if (true === $mValue || false === $mValue)
-			{
-				$this->bDeferScriptGeneration = $mValue;
-			}
-			else if ('deferred' === $mValue)
-			{
-				$this->bDeferScriptGeneration = $mValue;
-			}
-		}
+
 	}
 
+	/**
+	 * @return string
+	 */
 	public function generateHash()
 	{
 		$sHash = '';
@@ -137,6 +149,9 @@ class Plugin extends Request implements RequestPluginIface
 		the page via the javascript <xajax.request> call.
 	*/
 
+	/**
+	 * @return string
+	 */
 	public function generateClientScript(): string
 	{
 		$script = '';
@@ -144,12 +159,14 @@ class Plugin extends Request implements RequestPluginIface
 		{
 			foreach (array_keys($this->aFunctions) as $sKey)
 			{
-				$script .= $this->getMethodByIndex($sKey)->generateClientScript($this->sXajaxPrefix);
+				$script .= $this->getMethodByIndex($sKey)->getClientScript($this->sXajaxPrefix);
 			}
 		}
 
 		return $script;
 	}
+
+
 
 	/*
 		Function: generateClientScript
@@ -160,11 +177,17 @@ class Plugin extends Request implements RequestPluginIface
 		javascript to initiate xajax requests.
 	*/
 
+	/**
+	 * @return bool
+	 */
 	public function canProcessRequest(): bool
 	{
 		return Factory::isCmsRequest();
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	public function processRequest()
 	{
 		if (false === $this->canProcessRequest())
@@ -177,6 +200,33 @@ class Plugin extends Request implements RequestPluginIface
 		$objResponseManager->append(Factory::getResponseInstance());
 
 		return true;
+	}
+
+	/**
+	 * Getting an registered Request Object or create it if not exists
+	 *
+	 * @param string $jsName
+	 * @param        $configure
+	 *
+	 * @return \Xajax\Plugins\Cms\Request
+	 * @since 0.7.3
+	 */
+	public static function getRequest(string $jsName, $configure = null): Request
+	{
+		$instance = self::getInstance();
+		// todo check modify $jsName
+		return $instance->aFunctions[$jsName] ?? $instance->createRequest($jsName, $configure);
+	}
+
+	/**
+	 * @param string $jsName
+	 * @param        $configure
+	 *
+	 * @return \Xajax\Plugins\Cms\Request
+	 */
+	protected function createRequest(string $jsName, $configure = null): Request
+	{
+		return $this->aFunctions[$jsName] = new Request($jsName, $configure);
 	}
 
 	/*
@@ -195,6 +245,7 @@ class Plugin extends Request implements RequestPluginIface
 	 * @param array $aArgs
 	 *
 	 * @return RequestIface
+	 * @deprecated use the methods above
 	 */
 	public function registerRequest(array $aArgs = null): RequestIface
 	{
@@ -204,9 +255,9 @@ class Plugin extends Request implements RequestPluginIface
 
 			$xuf = $aArgs[0];
 
-			if (false === ($xuf instanceof Handler))
+			if (false === ($xuf instanceof Request))
 			{
-				$xuf = new Handler($xuf);
+				$xuf = new Request($xuf);
 			}
 
 			if (2 < $cntArgs)
@@ -243,9 +294,14 @@ class Plugin extends Request implements RequestPluginIface
 			An error message when an error has occurred.
 	*/
 
-	protected function getMethodByIndex(?int $idx = null): Handler
+	/**
+	 * @param null|string $idx
+	 *
+	 * @return \Xajax\Plugins\Cms\Request
+	 */
+	protected function getMethodByIndex(?string $idx = null): Request
 	{
-		if (\is_int($idx) && array_key_exists($idx, $this->aFunctions) && $this->aFunctions[$idx] instanceof Handler)
+		if (\is_string($idx) && array_key_exists($idx, $this->aFunctions) && $this->aFunctions[$idx] instanceof Request)
 		{
 			return $this->aFunctions[$idx];
 		}
