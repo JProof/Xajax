@@ -85,21 +85,28 @@ if ('undefined' === typeof xajax) {
         return retArray;
         
     };
-    
     /**
-     * Merging the found Parameters in one Object
-     *
-     * @param {array} baseArr
-     * @param {array} pArray
-     * @return {array}
+     * https://jsfiddle.net/1vrkw1pc/
+     * @return {any}
      */
-    var mergeParams = function (baseArr, pArray) {
-        for (var k in pArray)
-            if (pArray.hasOwnProperty(k))
-                baseArr[k] = pArray[k];
-        return baseArr;
+    var extend = function () {
+        for (var i = 1; i < arguments.length; i++)
+            for (var key in arguments[i])
+                if (arguments[i].hasOwnProperty(key)) {
+                    if (typeof arguments[0][key] === 'object' && typeof arguments[i][key] === 'object')
+                        extend(arguments[0][key], arguments[i][key]);
+                    else
+                        arguments[0][key] = arguments[i][key];
+                }
+        return arguments[0];
     };
-    xjx.helper = {objectToParamsString: objectToParamsString, stringifyKeyValuePairs: stringifyKeyValuePairs, mergeParams: mergeParams};
+    
+   
+    
+    xjx.objectToParamsString = objectToParamsString;
+    xjx.stringifyKeyValuePairs = stringifyKeyValuePairs;
+    
+    xjx.extend = extend;
     
 }(xajax));
 /**
@@ -206,43 +213,51 @@ if ('undefined' === typeof xajax) {
         'commonHeaders': {
             'If-Modified-Since': 'Sat, 1 Jan 2000 00:00:00 GMT'
         },
-        /*
-	Object: postHeaders
-	
-	An array of header entries where the array key is the header
-	option name and the associated value is the value that will
-	set when the request object is initialized.
-*/
-        'postHeaders': {},
-        /*
-	Object: getHeaders
-	
-	An array of header entries where the array key is the header
-	option name and the associated value is the value that will
-	set when the request object is initialized.
-*/
+        /**
+         Object: postHeaders
+         
+         An array of header entries where the array key is the header
+         option name and the associated value is the value that will
+         set when the request object is initialized.
+         */
+        'postHeaders': {
+            /**
+             *  String: defaultContentType
+             *
+             * The content type designated in the header of the request.
+             * @todo extra headers for upload
+             */
+            'content-type': 'application/x-www-form-urlencoded'
+        },
+        /**
+         Object: getHeaders
+         
+         An array of header entries where the array key is the header
+         option name and the associated value is the value that will
+         set when the request object is initialized.
+         */
         'getHeaders': {},
-        /*
-	Boolean: waitCursor
-	
-	true - xajax should display a wait cursor when making a request
-	false - xajax should not show a wait cursor during a request
-*/
+        /**
+         Boolean: waitCursor
+         
+         true - xajax should display a wait cursor when making a request
+         false - xajax should not show a wait cursor during a request
+         */
         'waitCursor': false,
-        /*
-	Boolean: statusMessages
-	
-	true - xajax should update the status bar during a request
-	false - xajax should not display the status of the request
-*/
+        /**
+         Boolean: statusMessages
+         
+         true - xajax should update the status bar during a request
+         false - xajax should not display the status of the request
+         */
         'statusMessages': false,
-        /*
-	Object: baseDocument
-	
-	The base document that will be used throughout the code for
-	locating elements by ID.
-	@todo more explanations
-*/
+        /**
+         Object: baseDocument
+         
+         The base document that will be used throughout the code for
+         locating elements by ID.
+         @todo more explanations
+         */
         'baseDocument': window.document,
         /*
             String: requestURI
@@ -250,41 +265,34 @@ if ('undefined' === typeof xajax) {
             The URI that requests will be sent to.
             @todo buggy internal loop
         */
-        'requestURI': '',
-        /*
-	String: defaultMode
-	
-	The request mode.
-	
-	'asynchronous' - The request will immediately return, the
-		response will be processed when (and if) it is received.
-		
-	'synchronous' - The request will block, waiting for the
-		response.  This option allows the server to return
-		a value directly to the caller.
-*/
-        'defaultMode': 'asynchronous',
+        'URI': '',
+        /**
+         * String: defaultMode
+         * The request mode.
+         *
+         *'asynchronous' - The request will immediately return, the
+         * response will be processed when (and if) it is received.
+         *
+         * 'synchronous' - The request will block, waiting for the
+         * response.  This option allows the server to return
+         * a value directly to the caller.
+         **/
+        'mode': 'asynchronous',
         /*
 	String: defaultHttpVersion
 	
 	The Hyper Text Transport Protocol version designated in the
 	header of the request.
 */
-        'defaultHttpVersion': 'HTTP/1.1',
-        /*
-	String: defaultContentType
-	
-	The content type designated in the header of the request.
-	@todo extra headers for upload
-*/
-        'defaultContentType': 'application/x-www-form-urlencoded',
+        'httpVersion': 'HTTP/1.1',
+        
         /*
             Integer: defaultResponseDelayTime
             
             The delay time, in milliseconds, associated with the
             <xajax.callback.global.onRequestDelay> event.
         */
-        'defaultResponseDelayTime': 1000,
+        'responseDelayTime': 1000,
         /*
 
 	Integer: defaultExpirationTime
@@ -293,7 +301,7 @@ if ('undefined' === typeof xajax) {
 	is considered expired.  This is used to trigger the
 	<xajax.callback.global.onExpiration event.
 */
-        'defaultExpirationTime': 10000,
+        'expirationTime': 10000,
         /*
 	String: defaultMethod
 	
@@ -304,14 +312,14 @@ if ('undefined' === typeof xajax) {
 		to the <xajax.config.requestURI> to form a URL.
 		 W3C: Method is case sensitive
 */
-        'defaultMethod': 'POST',
+        'method': 'POST',
         /*
 	Integer: defaultRetry
 	
 	The number of times a request should be retried
 	if it expires.
 */
-        'defaultRetry': 5,
+        'requestRetry': 5,
         /*
 	Object: defaultReturnValue
 	
@@ -319,7 +327,7 @@ if ('undefined' === typeof xajax) {
 	mode, or when a synchronous call does not specify the
 	return value.
 */
-        'defaultReturnValue': false,
+        'returnValue': false,
         /*
 	Integer: maxObjectDepth
 	
@@ -338,9 +346,14 @@ if ('undefined' === typeof xajax) {
          *
          * @desc How many items can be hold in queue. It is an prevention from overload the queue(on errors or buggy loops)
          * **/
-        'responseQueueSize': 1000
+        'responseQueueSize': 1000,
+        /**
+         * Where the Response will be executed
+         * */
+        'context': window
     };
     setOptions(defaults);
+    xjx.config.defaults = defaults;
 }(xajax));
 // config end
 /*
@@ -561,23 +574,23 @@ if ('undefined' === typeof xajax) {
             else
                 theQ.start = theQ.size;
         },
-        /*
-            Function: xajax.queue.setWakeup
-            
-            Set or reset a timeout that is used to restart processing
-            of the queue.  This allows the queue to asynchronously wait
-            for an event to occur (giving the browser time to process
-            pending events, like loading files)
-            
-            Parameters:
-            
-            theQ - (object):
-                The queue to process upon timeout.
-                
-            when - (integer):
-                The number of milliseconds to wait before starting/
-                restarting the processing of the queue.
-        */
+        /**
+         Function: xajax.queue.setWakeup
+         
+         Set or reset a timeout that is used to restart processing
+         of the queue.  This allows the queue to asynchronously wait
+         for an event to occur (giving the browser time to process
+         pending events, like loading files)
+         
+         Parameters:
+         
+         theQ - (object):
+         The queue to process upon timeout.
+         
+         when - (integer):
+         The number of milliseconds to wait before starting/
+         restarting the processing of the queue.
+         */
         setWakeup: function (theQ, when) {
             if (null != theQ.timeout) {
                 clearTimeout(theQ.timeout);
@@ -587,42 +600,42 @@ if ('undefined' === typeof xajax) {
                 xajax.queue.process(theQ);
             }, when);
         },
-        /*
-            Function: xajax.queue.process
-            
-            While entries exist in the queue, pull and entry out and
-            process it's command.  When a command returns false, the
-            processing is halted.
-            
-            Parameters:
-            
-            theQ - (object): The queue object to process.  This should
-                have been crated by calling <xajax.queue.create>.
-            
-            Returns:
-        
-            true - The queue was fully processed and is now empty.
-            false - The queue processing was halted before the
-                queue was fully processed.
-                
-            Note:
-            
-            - Use <xajax.queue.setWakeup> or call this function to
-            cause the queue processing to continue.
-        
-            - This will clear the associated timeout, this function is not
-            designed to be reentrant.
-            
-            - When an exception is caught, do nothing; if the debug module
-            is installed, it will catch the exception and handle it.
-        */
+        /**
+         Function: xajax.queue.process
+         
+         While entries exist in the queue, pull and entry out and
+         process it's command.  When a command returns false, the
+         processing is halted.
+         
+         Parameters:
+         
+         theQ - (object): The queue object to process.  This should
+         have been crated by calling <xajax.queue.create>.
+         
+         Returns:
+         
+         true - The queue was fully processed and is now empty.
+         false - The queue processing was halted before the
+         queue was fully processed.
+         
+         Note:
+         
+         - Use <xajax.queue.setWakeup> or call this function to
+         cause the queue processing to continue.
+         
+         - This will clear the associated timeout, this function is not
+         designed to be reentrant.
+         
+         - When an exception is caught, do nothing; if the debug module
+         is installed, it will catch the exception and handle it.
+         */
         process: function (theQ) {
-            if (null != theQ.timeout) {
+            if (null !== theQ.timeout) {
                 clearTimeout(theQ.timeout);
                 theQ.timeout = null;
             }
             var obj = xajax.queue.pop(theQ);
-            while (null != obj) {
+            while (null !== obj) {
                 try {
                     if (false === xajax.executeCommand(obj))
                         return false;
@@ -633,20 +646,20 @@ if ('undefined' === typeof xajax) {
             }
             return true;
         },
-        /*
-            Function: xajax.queue.push
-            
-            Push a new object into the tail of the buffer maintained by the
-            specified queue object.
-            
-            Parameters:
-            
-            theQ - (object):
-                The queue in which you would like the object stored.
-                
-            obj - (object):
-                The object you would like stored in the queue.
-        */
+        /**
+         Function: xajax.queue.push
+         
+         Push a new object into the tail of the buffer maintained by the
+         specified queue object.
+         
+         Parameters:
+         
+         theQ - (object):
+         The queue in which you would like the object stored.
+         
+         obj - (object):
+         The object you would like stored in the queue.
+         */
         push: function (theQ, obj) {
             var next = theQ.end + 1;
             if (next > theQ.size)
@@ -657,40 +670,40 @@ if ('undefined' === typeof xajax) {
             } else
                 throw {code: 10003};
         },
-        /*
-            Function: xajax.queue.pushFront
-            
-            Push a new object into the head of the buffer maintained by
-            the specified queue object.  This effectively pushes an object
-            to the front of the queue... it will be processed first.
-            
-            Parameters:
-            
-            theQ - (object):
-                The queue in which you would like the object stored.
-                
-            obj - (object):
-                The object you would like stored in the queue.
-        */
+        /**
+         Function: xajax.queue.pushFront
+         
+         Push a new object into the head of the buffer maintained by
+         the specified queue object.  This effectively pushes an object
+         to the front of the queue... it will be processed first.
+         
+         Parameters:
+         
+         theQ - (object):
+         The queue in which you would like the object stored.
+         
+         obj - (object):
+         The object you would like stored in the queue.
+         */
         pushFront: function (theQ, obj) {
             xjx.queue.rewind(theQ);
             theQ.commands[theQ.start] = obj;
         },
-        /*
-            Function: xajax.queue.pop
-            
-            Attempt to pop an object off the head of the queue.
-            
-            Parameters:
-            
-            theQ - (object):
-                The queue object you would like to modify.
-                
-            Returns:
-            
-            object - The object that was at the head of the queue or
-                null if the queue was empty.
-        */
+        /**
+         Function: xajax.queue.pop
+         
+         Attempt to pop an object off the head of the queue.
+         
+         Parameters:
+         
+         theQ - (object):
+         The queue object you would like to modify.
+         
+         Returns:
+         
+         object - The object that was at the head of the queue or
+         null if the queue was empty.
+         */
         pop: function (theQ) {
             var next = theQ.start;
             if (next === theQ.end)
@@ -720,7 +733,7 @@ if ('undefined' === typeof xajax) {
         var gcb = xcb.global;
         var lcb = oRequest.callback;
         var oRet = oRequest.returnValue;
-        if (xt.in_array(xx.responseSuccessCodes, oRequest.request.status)) {
+        if (xt.in_array(xx.codes.success, oRequest.request.status)) {
             xcb.execute([gcb, lcb], 'onSuccess', oRequest);
             var seq = 0;
             if (oRequest.request.responseText) {
@@ -745,11 +758,11 @@ if ('undefined' === typeof xajax) {
             // do not re-start the queue if a timeout is set
             if (null == xx.response.timeout)
                 xjx.queue.process(xx.response);
-        } else if (xt.in_array(xx.responseRedirectCodes, oRequest.request.status)) {
+        } else if (xt.in_array(xx.codes.redirect, oRequest.request.status)) {
             xcb.execute([gcb, lcb], 'onRedirect', oRequest);
             window.location = oRequest.request.getResponseHeader('location');
             xx.completeResponse(oRequest);
-        } else if (xt.in_array(xx.responseErrorsForAlert, oRequest.request.status)) {
+        } else if (xt.in_array(xx.codes.alertErrors, oRequest.request.status)) {
             xcb.execute([gcb, lcb], 'onFailure', oRequest);
             xx.completeResponse(oRequest);
         }
@@ -775,7 +788,7 @@ if ('undefined' === typeof xajax) {
         var gcb = xcb.global;
         var lcb = oRequest.callback;
         var oRet = oRequest.returnValue;
-        if (xt.in_array(xx.responseSuccessCodes, oRequest.request.status)) {
+        if (xt.in_array(xx.codes.success, oRequest.request.status)) {
             xcb.execute([gcb, lcb], 'onSuccess', oRequest);
             var seq = 0;
             if (oRequest.request.responseXML) {
@@ -796,11 +809,11 @@ if ('undefined' === typeof xajax) {
             // do not re-start the queue if a timeout is set
             if (null == xx.response.timeout)
                 xjx.queue.process(xx.response);
-        } else if (xt.in_array(xx.responseRedirectCodes, oRequest.request.status)) {
+        } else if (xt.in_array(xx.codes.redirect, oRequest.request.status)) {
             xcb.execute([gcb, lcb], 'onRedirect', oRequest);
             window.location = oRequest.request.getResponseHeader('location');
             xx.completeResponse(oRequest);
-        } else if (xt.in_array(xx.responseErrorsForAlert, oRequest.request.status)) {
+        } else if (xt.in_array(xx.codes.alertErrors, oRequest.request.status)) {
             xcb.execute([gcb, lcb], 'onFailure', oRequest);
             xx.completeResponse(oRequest);
         }
@@ -2414,6 +2427,30 @@ if ('undefined' === typeof xajax) {
     };
     xajax.callback.global = xajax.callback.create();
 }(xajax));
+/**
+ * Handle Xajax Requests in Scope
+ * **/
+(function (x) {
+    
+    var stack = [];
+    var reg = function (name, script) {
+        stack[name] = script;
+    };
+    var exe = function () {
+        var name;
+        if (arguments && 0 < arguments.length) {
+            name = arguments[0];
+            delete arguments[0];
+        }
+        if (stack.hasOwnProperty(name) && 'function' === typeof stack[name]) {
+            stack[name](arguments);
+        } else {
+            throw Error('Xajax Request is not Callable because the callMethod was never registered');
+        }
+    };
+    x.Reg = reg;
+    x.Exe = exe;
+}(xajax));
 /** xajax attr **/
 (function (xjx) {
     /**
@@ -2751,7 +2788,7 @@ xajax.tools.in_array = function (array, valueToCheck) {
     var i = 0;
     var l = array.length;
     while (i < l) {
-        if (array[i] == valueToCheck)
+        if (array[i] === valueToCheck)
             return true;
         ++i;
     }
@@ -2938,23 +2975,26 @@ xajax.tools.json = {};
 xajax.tools.json.processFragment = function (nodes, seq, oRet, oRequest) {
     var xx = xajax;
     for (var nodeName in nodes) {
-        if ('xjxobj' === nodeName) {
-            for (var a in nodes[nodeName]) {
-                
-                /*
-                prevents from using not numbered indexes of 'xjxobj'
-                nodes[nodeName][a]= "0" is an valid xajax response stack item
-                nodes[nodeName][a]= "pop" is an method from somewhere but not from xjxobj
-                */
-                if (parseInt(a) != a) continue;
-                var obj = nodes[nodeName][a];
-                obj.fullName = '*unknown*';
-                obj.sequence = seq;
-                obj.request = oRequest;
-                obj.context = oRequest.context;
-                xx.queue.push(xx.response, obj);
-                ++seq;
-            }
+        
+        if (nodes.hasOwnProperty(nodeName) && 'xjxobj' === nodeName) {
+            for (var a in nodes[nodeName])
+                if (nodes[nodeName].hasOwnProperty(a)) {
+                    // todo msg if not is has own property
+                    /**
+                     prevents from using not numbered indexes of 'xjxobj'
+                     nodes[nodeName][a]= "0" is an valid xajax response stack item
+                     nodes[nodeName][a]= "pop" is an method from somewhere but not from xjxobj
+                     */
+                    if (parseInt(a) !== a) continue;
+                    var obj = nodes[nodeName][a];
+                    obj.fullName = '*unknown*';
+                    obj.sequence = seq;
+                    obj.request = oRequest;
+                    obj.context = oRequest.context;
+                    xx.queue.push(xx.response, obj);
+                    ++seq;
+                }
+            
         } else if ('xjxrv' === nodeName) {
             oRet = nodes[nodeName];
         } else if ('debugmsg' === nodeName) {
@@ -2996,77 +3036,72 @@ Function: xajax.responseProcessor.json
 	from the server, until they are processed.
 */
 xajax.response = xajax.queue.create(xajax.config.responseQueueSize);
-/*
-	Object: responseSuccessCodes
-	
-	This array contains a list of codes which will be returned from the
-	server upon successful completion of the server portion of the
-	request.
-	
-	These values should match those specified in the HTTP standard.
-*/
-xajax.responseSuccessCodes = ['0', '200'];
-// 10.4.1 400 Bad Request
-// 10.4.2 401 Unauthorized
-// 10.4.3 402 Payment Required
-// 10.4.4 403 Forbidden
-// 10.4.5 404 Not Found
-// 10.4.6 405 Method Not Allowed
-// 10.4.7 406 Not Acceptable
-// 10.4.8 407 Proxy Authentication Required
-// 10.4.9 408 Request Timeout
-// 10.4.10 409 Conflict
-// 10.4.11 410 Gone
-// 10.4.12 411 Length Required
-// 10.4.13 412 Precondition Failed
-// 10.4.14 413 Request Entity Too Large
-// 10.4.15 414 Request-URI Too Long
-// 10.4.16 415 Unsupported Media Type
-// 10.4.17 416 Requested Range Not Satisfiable
-// 10.4.18 417 Expectation Failed
-// 10.5 Server Error 5xx
-// 10.5.1 500 Internal Server Error
-// 10.5.2 501 Not Implemented
-// 10.5.3 502 Bad Gateway
-// 10.5.4 503 Service Unavailable
-// 10.5.5 504 Gateway Timeout
-// 10.5.6 505 HTTP Version Not Supported
-/*
-	Object: responseErrorsForAlert
-	
-	This array contains a list of status codes returned by
-	the server to indicate that the request failed for some
-	reason.
-*/
-xajax.responseErrorsForAlert = [
-    '400',
-    '401',
-    '402',
-    '403',
-    '404',
-    '500',
-    '501',
-    '502',
-    '503'];
-// 10.3.1 300 Multiple Choices
-// 10.3.2 301 Moved Permanently
-// 10.3.3 302 Found
-// 10.3.4 303 See Other
-// 10.3.5 304 Not Modified
-// 10.3.6 305 Use Proxy
-// 10.3.7 306 (Unused)
-// 10.3.8 307 Temporary Redirect
-/*
-	Object: responseRedirectCodes
-	
-	An array of status codes returned from the server to
-	indicate a request for redirect to another URL.
-	
-	Typically, this is used by the server to send the browser
-	to another URL.  This does not typically indicate that
-	the xajax request should be sent to another URL.
-*/
-xajax.responseRedirectCodes = ['301', '302', '307'];
+
+xajax.codes = {
+    /**
+     * Object: responseSuccessCodes
+     *
+     * This array contains a list of codes which will be returned from the
+     * server upon successful completion of the server portion of the
+     * request.
+     *
+     * These values should match those specified in the HTTP standard.
+     */
+    success: [0, 200],
+    /**
+     * Object: responseErrorsForAlert
+     *
+     * This array contains a list of status codes returned by
+     * the server to indicate that the request failed for some
+     * reason.
+     *  10.4.1 400 Bad Request
+     *  10.4.2 401 Unauthorized
+     *  10.4.3 402 Payment Required
+     *  10.4.4 403 Forbidden
+     *  10.4.5 404 Not Found
+     *  10.4.6 405 Method Not Allowed
+     *  10.4.7 406 Not Acceptable
+     *  10.4.8 407 Proxy Authentication Required
+     *  10.4.9 408 Request Timeout
+     *  10.4.10 409 Conflict
+     *  10.4.11 410 Gone
+     *  10.4.12 411 Length Required
+     *  10.4.13 412 Precondition Failed
+     *  10.4.14 413 Request Entity Too Large
+     *  10.4.15 414 Request-URI Too Long
+     *  10.4.16 415 Unsupported Media Type
+     *  10.4.17 416 Requested Range Not Satisfiable
+     *  10.4.18 417 Expectation Failed
+     *  10.5 Server Error 5xx
+     *  10.5.1 500 Internal Server Error
+     *  10.5.2 501 Not Implemented
+     *  10.5.3 502 Bad Gateway
+     *  10.5.4 503 Service Unavailable
+     *  10.5.5 504 Gateway Timeout
+     *  10.5.6 505 HTTP Version Not Supported
+     */
+    alertErrors: [400, 401, 402, 403, 404, 500, 501, 502, 503],
+    /**
+     * Object: responseRedirectCodes
+     *
+     * An array of status codes returned from the server to
+     * indicate a request for redirect to another URL.
+     
+     * Typically, this is used by the server to send the browser
+     * to another URL.  This does not typically indicate that
+     * the xajax request should be sent to another URL.
+     * 10.3.1 300 Multiple Choices
+     * 10.3.2 301 Moved Permanently
+     * 10.3.3 302 Found
+     * 10.3.4 303 See Other
+     * 10.3.5 304 Not Modified
+     * 10.3.6 305 Use Proxy
+     * 10.3.7 306 (Unused)
+     * 10.3.8 307 Temporary Redirect
+     * */
+    redirect: [301, 302, 307]
+};
+
 /*
 	Class: xajax.command
 	
@@ -3090,32 +3125,42 @@ xajax.responseRedirectCodes = ['301', '302', '307'];
 xajax.initializeRequest = function (oRequest) {
     var xx = xajax;
     var xc = xx.config;
-    oRequest.append = function (opt, def) {
-        if ('undefined' !== typeof this[opt]) {
-            for (var itmName in def)
-                if ('undefined' === typeof this[opt][itmName])
-                    this[opt][itmName] = def[itmName];
-        } else this[opt] = def;
-    };
-    oRequest.append('commonHeaders', xc.getOption('commonHeaders'));
-    oRequest.append('postHeaders', xc.getOption('postHeaders'));
-    oRequest.append('getHeaders', xc.getOption('getHeaders'));
-    oRequest.set = function (option, defaultValue) {
-        if ('undefined' === typeof this[option])
-            this[option] = defaultValue;
-    };
-    oRequest.set('statusMessages', xc.getOption('statusMessages'));
-    oRequest.set('waitCursor', xc.getOption('waitCursor'));
-    oRequest.set('mode', xc.getOption('defaultMode'));
-    oRequest.set('method', xc.getOption('defaultMethod'));
-    oRequest.set('URI', xc.getOption('requestURI'));
-    oRequest.set('httpVersion', xc.getOption('defaultHttpVersion'));
-    oRequest.set('contentType', xc.getOption('defaultContentType'));
-    oRequest.set('retry', xc.getOption('defaultRetry'));
-    oRequest.set('returnValue', xc.getOption('defaultReturnValue'));
-    oRequest.set('maxObjectDepth', xc.getOption('maxObjectDepth'));
-    oRequest.set('maxObjectSize', xc.getOption('maxObjectSize'));
-    oRequest.set('context', window);
+    
+    /*  oRequest.append = function (opt, def) {
+          if ('undefined' !== typeof this[opt]) {
+              for (var itmName in def)
+                  if ('undefined' === typeof this[opt][itmName])
+                      this[opt][itmName] = def[itmName];
+          } else this[opt] = def;
+          
+      };*/
+    
+    oRequest = xajax.extend(xc.defaults, oRequest);
+    
+    /**
+     can be removed because is extend
+     oRequest.append('commonHeaders', xc.getOption('commonHeaders'));
+     oRequest.append('postHeaders', xc.getOption('postHeaders'));
+     oRequest.append('getHeaders', xc.getOption('getHeaders'));
+     oRequest.set = function (option, defaultValue) {
+          if ('undefined' === typeof this[option])
+              this[option] = defaultValue;
+      };
+     
+     oRequest.set('statusMessages', xc.getOption('statusMessages'));
+     oRequest.set('waitCursor', xc.getOption('waitCursor'));
+     oRequest.set('mode', xc.getOption('defaultMode'));
+     oRequest.set('method', xc.getOption('defaultMethod'));
+     oRequest.set('URI', xc.getOption('requestURI'));
+     oRequest.set('httpVersion', xc.getOption('defaultHttpVersion'));
+     oRequest.set('contentType', xc.getOption('defaultContentType'));
+     oRequest.set('retry', xc.getOption('defaultRetry'));
+     oRequest.set('returnValue', xc.getOption('defaultReturnValue'));
+     oRequest.set('maxObjectDepth', xc.getOption('maxObjectDepth'));
+     oRequest.set('maxObjectSize', xc.getOption('maxObjectSize'));
+     oRequest.set('context', window);
+     */
+    
     var xcb = xx.callback;
     var gcb = xcb.global;
     var lcb = xcb.create();
@@ -3134,6 +3179,7 @@ xajax.initializeRequest = function (oRequest) {
     lcb.take(oRequest, 'onRedirect');
     lcb.take(oRequest, 'onSuccess');
     lcb.take(oRequest, 'onComplete');
+    
     if ('undefined' !== typeof oRequest.callback) {
         if (lcb.hasEvents)
             oRequest.callback = [oRequest.callback, lcb];
@@ -3145,15 +3191,18 @@ xajax.initializeRequest = function (oRequest) {
     oRequest.method = oRequest.method.toUpperCase();
     if ('GET' !== oRequest.method)
         oRequest.method = 'POST';	// W3C: Method is case sensitive
-    oRequest.requestRetry = oRequest.retry;
-    oRequest.append('postHeaders', {
-        'content-type': oRequest.contentType
-    });
+    
+    // is now default in config
+    //  oRequest = xajax.extend(oRequest, {'postHeaders': {'content-type': oRequest.contentType}});
+    /*  oRequest.append('postHeaders', {
+          'content-type': oRequest.contentType
+      });*/
     delete oRequest['append'];
     delete oRequest['set'];
     delete oRequest['take'];
     if ('undefined' === typeof oRequest.URI)
         throw {code: 10005};
+    return oRequest;
 };
 
 /*
@@ -3173,9 +3222,7 @@ xajax.initializeRequest = function (oRequest) {
 */
 
 xajax.processParameters = function (oRequest) {
-  
-  
-  
+    
     var commandParam = [];
     var clearParams = [];
     
@@ -3189,31 +3236,39 @@ xajax.processParameters = function (oRequest) {
     commandParam['xjxr'] = d.getTime();
     
     if (oRequest.parameters) {
-        var i = 0;
-        var iLen = oRequest.parameters.length;
-        while (i < iLen) {
-            var oVal = oRequest.parameters[i];
-            if ('object' === typeof oVal && null !== oVal) {
-                try {
-                    // merge params if nee if there are same fields twice
-                    clearParams = xajax.helper.mergeParams(clearParams, xajax.helper.objectToParamsString(oVal));
+        var part;
+        var len = oRequest.parameters.length;
+        for (var i = 0; i < len; i++) {
+            for (part in oRequest.parameters[i]) {
+                
+                if (oRequest.parameters[i].hasOwnProperty(part)) {
+                    var oVal = oRequest.parameters[i][part];
+                    if ('undefined' === typeof oVal) continue;
+                    if ('object' === typeof oVal && null !== oVal) {
+                        try {
+                            // merge params if nee if there are same fields twice
+                            clearParams = xajax.extend(clearParams, xajax.objectToParamsString(oVal));
+                            
+                        } catch (e) {
+                            //   oVal = '';
+                            // do nothing, if the debug module is installed
+                            // it will catch the exception and handle it
+                        }
+                        
+                    } else {
+                        var tArray = [];
+                        tArray[part] = oVal;
+                        // throw new Error('You can not use the old way to handle parameters @see');
+                        clearParams = xajax.extend(clearParams, xajax.objectToParamsString(tArray));
+                    }
                     
-                } catch (e) {
-                    //   oVal = '';
-                    // do nothing, if the debug module is installed
-                    // it will catch the exception and handle it
                 }
-                
-            } else {
-                throw new Error('You can not use the old way to handle parameters @see');
-                
             }
-            ++i;
         }
     }
     
-    commandParam = xajax.helper.mergeParams(commandParam, clearParams);
-    commandParam =  xajax.helper.stringifyKeyValuePairs(commandParam);
+    commandParam = xajax.extend(commandParam, clearParams);
+    commandParam = xajax.stringifyKeyValuePairs(commandParam);
     var cmdParamString = commandParam.join('&');
     
     oRequest.requestURI = oRequest.URI;
@@ -3245,6 +3300,7 @@ xajax.processParameters = function (oRequest) {
 xajax.prepareRequest = function (oRequest) {
     var xx = xajax;
     var xt = xx.tools;
+    
     oRequest.request = xt.getRequestObject();
     oRequest.setRequestHeaders = function (headers) {
         if ('object' === typeof headers) {
@@ -3253,14 +3309,17 @@ xajax.prepareRequest = function (oRequest) {
                     this.request.setRequestHeader(optionName, headers[optionName]);
         }
     };
+    // Extra Headers
     oRequest.setCommonRequestHeaders = function () {
         this.setRequestHeaders(this.commonHeaders);
         if (this.challengeResponse)
             this.request.setRequestHeader('challenge-response', this.challengeResponse);
     };
+    // POST Headers
     oRequest.setPostRequestHeaders = function () {
         this.setRequestHeaders(this.postHeaders);
     };
+    // GET Headers
     oRequest.setGetRequestHeaders = function () {
         this.setRequestHeaders(this.getHeaders);
     };
@@ -3276,10 +3335,12 @@ xajax.prepareRequest = function (oRequest) {
             return this.returnValue;
         };
     } else {
+        // obsolete
         oRequest.finishRequest = function () {
             return xajax.responseReceived(oRequest);
         };
     }
+    // With htaccess Password
     if ('undefined' !== typeof oRequest.userName && 'undefined' !== typeof oRequest.password) {
         oRequest.open = function () {
             this.request.open(this.method, this.requestURI, 'asynchronous' === this.mode,
@@ -3287,6 +3348,7 @@ xajax.prepareRequest = function (oRequest) {
               oRequest.password);
         };
     } else {
+        // Regular
         oRequest.open = function () {
             this.request.open(
               this.method,
@@ -3294,6 +3356,7 @@ xajax.prepareRequest = function (oRequest) {
               'asynchronous' === this.mode);
         };
     }
+    
     if ('POST' === oRequest.method) {	// W3C: Method is case sensitive
         oRequest.applyRequestHeaders = function () {
             this.setCommonRequestHeaders();
@@ -3301,16 +3364,15 @@ xajax.prepareRequest = function (oRequest) {
                 this.setPostRequestHeaders();
             } catch (e) {
                 this.method = 'GET';
-                this.requestURI += this.requestURI.indexOf('?') == -1 ?
-                  '?' :
-                  '&';
-                this.requestURI += this.requestData;
+                var s = this.requestURI.indexOf('?') === -1 ? '?' : '&';
+                this.requestURI += s + this.requestData;
                 this.requestData = '';
                 if (0 === this.requestRetry) this.requestRetry = 1;
                 throw e;
             }
         };
     } else {
+        // GET
         oRequest.applyRequestHeaders = function () {
             this.setCommonRequestHeaders();
             this.setGetRequestHeaders();
@@ -3344,7 +3406,7 @@ xajax.request = function () {
     oRequest.functionName = arguments[0];
     var xx = xajax;
     
-    xx.initializeRequest(oRequest);
+    oRequest = xx.initializeRequest(oRequest);
     xx.processParameters(oRequest);
     
     while (0 < oRequest.requestRetry) {
@@ -3353,10 +3415,9 @@ xajax.request = function () {
             xx.prepareRequest(oRequest);
             return xx.submitRequest(oRequest);
         } catch (e) {
-            xajax.callback.execute(
-              [xajax.callback.global, oRequest.callback],
-              'onFailure',
-              oRequest
+            xajax.callback.execute([
+                xajax.callback.global,
+                oRequest.callback], 'onFailure', oRequest
             );
             if (0 === oRequest.requestRetry)
                 throw e;
@@ -3535,10 +3596,11 @@ xajax.executeCommand = function (command) {
 xajax.completeResponse = function (oRequest) {
     xajax.callback.execute(
       [xajax.callback.global, oRequest.callback], 'onComplete', oRequest);
+    // todo emit event onComplete
     oRequest.cursor.onComplete();
     //oRequest.status.onComplete();
     // clean up -- these items are restored when the request is initiated
-    var resets = [
+    [
         'functionName',
         'requestURI',
         'requestData',
@@ -3555,8 +3617,7 @@ xajax.completeResponse = function (oRequest) {
         'status',
         'cursor',
         'challengeResponse'
-    ];
-    resets.forEach(function (value) {
+    ].forEach(function (value) {
         delete oRequest[value];
     });
 };
