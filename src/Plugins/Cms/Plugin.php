@@ -18,9 +18,7 @@ namespace Xajax\Plugins\Cms;
 
 use InvalidArgumentException;
 use Xajax\Factory;
-
 use Xajax\Plugin\Request\RequestPluginIface;
-use Xajax\RequestIface;
 use Xajax\Response\Manager;
 
 /**
@@ -47,10 +45,7 @@ class Plugin extends \Xajax\Plugin\Request implements RequestPluginIface
 		A configuration setting that is stored locally and used during
 		the client script generation phase.
 	*/
-	/**
-	 * @var
-	 */
-	protected $sXajaxPrefix;
+
 	/*
 		String: sDefer
 
@@ -96,10 +91,8 @@ class Plugin extends \Xajax\Plugin\Request implements RequestPluginIface
 	protected function __construct()
 	{
 		// populate which type the current plugin is
-		parent::__construct(Plugin::getRequestType());
+		parent::__construct(self::getRequestType());
 		$this->aFunctions = [];
-
-		$this->isXajaxRequest = (bool) ($_GET['xjxcms'] ?? $_POST['xjxcms'] ?? false);
 
 		// Autoregister this Plugin on construction
 		\Xajax\Plugin\Manager::getInstance()->registerPlugin($this);
@@ -150,6 +143,12 @@ class Plugin extends \Xajax\Plugin\Request implements RequestPluginIface
 	*/
 
 	/**
+	 * Function: generateClientScript
+	 * Called by the <xajaxPluginManager> during the client script generation
+	 * phase.  This is used to generate a block of javascript code that will
+	 * contain function declarations that can be used on the browser through
+	 * javascript to initiate xajax requests.
+	 *
 	 * @return string
 	 */
 	public function generateClientScript(): string
@@ -159,25 +158,49 @@ class Plugin extends \Xajax\Plugin\Request implements RequestPluginIface
 		{
 			foreach (array_keys($this->aFunctions) as $sKey)
 			{
-				$script .= $this->getMethodByIndex($sKey)->getClientScript($this->sXajaxPrefix);
+				$script .= $this->getMethodByIndex($sKey)->generateClientScript();
 			}
 		}
 
 		return $script;
 	}
 
+	/**
+	 * Getting an registered Request Object or create it if not exists
+	 *
+	 * @param string $jsName
+	 * @param        $configure
+	 *
+	 * @return \Xajax\Plugins\Cms\Request
+	 * @since 0.7.3
+	 */
+	public static function getRequest(string $jsName, ?iterable $configure = null): Request
+	{
 
-
-	/*
-		Function: generateClientScript
-
-		Called by the <xajaxPluginManager> during the client script generation
-		phase.  This is used to generate a block of javascript code that will
-		contain function declarations that can be used on the browser through
-		javascript to initiate xajax requests.
-	*/
+		$instance = self::getInstance();
+		// todo check modify $jsName
+		return $instance->aFunctions[$jsName] ?? $instance->createRequest($jsName, $configure);
+	}
 
 	/**
+	 * @param string $jsName
+	 * @param        $configure
+	 *
+	 * @return \Xajax\Plugins\Cms\Request
+	 */
+	protected function createRequest(string $jsName, $configure = null): Request
+	{
+		return $this->aFunctions[$jsName] = new Request($jsName, $configure);
+	}
+
+	/**
+	 * Function: canProcessRequest
+	 * Determines whether or not the current request can be processed
+	 * by this plugin.
+	 * Returns:
+	 * boolean - True if the current request can be handled by this plugin;
+	 * false otherwise.
+	 *
 	 * @return bool
 	 */
 	public function canProcessRequest(): bool
@@ -186,6 +209,13 @@ class Plugin extends \Xajax\Plugin\Request implements RequestPluginIface
 	}
 
 	/**
+	 * Function: processRequest
+	 * Called by the <xajaxPluginManager> when a request needs to be
+	 * processed.
+	 * Returns:
+	 * mixed - True when the request has been processed successfully.
+	 * An error message when an error has occurred.
+	 *
 	 * @return bool|mixed
 	 */
 	public function processRequest()
@@ -203,100 +233,9 @@ class Plugin extends \Xajax\Plugin\Request implements RequestPluginIface
 	}
 
 	/**
-	 * Getting an registered Request Object or create it if not exists
-	 *
-	 * @param string $jsName
-	 * @param        $configure
-	 *
-	 * @return \Xajax\Plugins\Cms\Request
-	 * @since 0.7.3
-	 */
-	public static function getRequest(string $jsName, $configure = null): Request
-	{
-		$instance = self::getInstance();
-		// todo check modify $jsName
-		return $instance->aFunctions[$jsName] ?? $instance->createRequest($jsName, $configure);
-	}
-
-	/**
-	 * @param string $jsName
-	 * @param        $configure
-	 *
-	 * @return \Xajax\Plugins\Cms\Request
-	 */
-	protected function createRequest(string $jsName, $configure = null): Request
-	{
-		return $this->aFunctions[$jsName] = new Request($jsName, $configure);
-	}
-
-	/*
-		Function: canProcessRequest
-
-		Determines whether or not the current request can be processed
-		by this plugin.
-
-		Returns:
-
-		boolean - True if the current request can be handled by this plugin;
-			false otherwise.
-	*/
-
-	/**
-	 * @param array $aArgs
-	 *
-	 * @return RequestIface
-	 * @deprecated use the methods above
-	 */
-	public function registerRequest(array $aArgs = null): RequestIface
-	{
-		$cntArgs = \count($aArgs);
-		if (0 < $cntArgs)
-		{
-
-			$xuf = $aArgs[0];
-
-			if (false === ($xuf instanceof Request))
-			{
-				$xuf = new Request($xuf);
-			}
-
-			if (2 < $cntArgs)
-			{
-				if (\is_array($aArgs[2]))
-				{
-					foreach ($aArgs[2] as $sName => $sValue)
-					{
-						$xuf->configure($sName, $sValue);
-					}
-				}
-				else
-				{
-					$xuf->configure('include', $aArgs[2]);
-				}
-			}
-			$this->aFunctions[] = $xuf;
-
-			return $xuf->generateRequest($this->sXajaxPrefix);
-		}
-
-		throw new InvalidArgumentException('Wrong ParameterCount to register an Cms');
-	}
-
-	/*
-		Function: processRequest
-
-		Called by the <xajaxPluginManager> when a request needs to be
-		processed.
-
-		Returns:
-
-		mixed - True when the request has been processed successfully.
-			An error message when an error has occurred.
-	*/
-
-	/**
 	 * @param null|string $idx
 	 *
+	 * @todo check if possible in parent class
 	 * @return \Xajax\Plugins\Cms\Request
 	 */
 	protected function getMethodByIndex(?string $idx = null): Request
@@ -305,7 +244,7 @@ class Plugin extends \Xajax\Plugin\Request implements RequestPluginIface
 		{
 			return $this->aFunctions[$idx];
 		}
-		throw new InvalidArgumentException(self::class . '::getFunctionByIndex(?int $idx = null) The function was not registered or is invalid');
+		throw new InvalidArgumentException(self::class . '::getFunctionByIndex(?string $idx = null) The function was not registered or is invalid');
 	}
 
 	/**

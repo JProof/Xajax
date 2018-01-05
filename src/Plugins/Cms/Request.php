@@ -17,7 +17,6 @@ declare(strict_types=1);
 namespace Xajax\Plugins\Cms;
 
 use Xajax\Factory;
-use Xajax\RequestIface;
 use Xajax\Response\Manager;
 
 /**
@@ -34,12 +33,18 @@ class Request
 		to call the same xajax enabled function with a different set of
 		call options from what was already registered.
 	*/
+	/**
+	 * @var string
+	 */
 	private $sAlias;
 	/*
 		Object: uf
 
 		A string or array which defines the function to be registered.
 	*/
+	/**
+	 * @var array
+	 */
 	private $uf;
 	/*
 		Array: aConfiguration
@@ -47,13 +52,22 @@ class Request
 		An associative array containing call options that will be sent to the
 		browser curing client script generation.
 	*/
+	/**
+	 * @var iterable|null
+	 */
 	private $aConfiguration;
+	/**
+	 * Holds the Command Button
+	 *
+	 * @var \Xajax\Plugins\Cms\Button
+	 */
+	protected $buttonObject;
 
 	public function __construct(string $uf, ?iterable $clientscriptConfig = null)
 	{
-		$this->sXajaxPrefix   = 'xajax_';
-		$this->sAlias         = '';
-		$this->uf             = $uf;
+
+		$this->sAlias = $uf;
+
 		$this->aConfiguration = $clientscriptConfig;
 
 		if (\is_array($this->uf) && 2 < \count($this->uf))
@@ -80,10 +94,13 @@ class Request
 
 		string - the name of the function contained within this object.
 	*/
+	/**
+	 * @return string
+	 */
 	public function getName(): string
 	{
 		// Do not use sAlias here!
-		return \is_array($this->uf) ? (string) $this->uf[1] : (string) $this->uf;
+		return $this->sAlias;
 	}
 
 	/*
@@ -102,45 +119,20 @@ class Request
 
 	}
 
-	public function getClientScript(): string
+	/**
+	 * @param iterable|null $configure
+	 *
+	 * @return \Xajax\Plugins\Cms\Button
+	 */
+	public function getButtonScript(?iterable $configure = null): Button
 	{
-
-		$string = '';
-
-		$sFunction = $this->getName();
-		$sAlias    = $sFunction;
-		if (0 < \strlen($this->sAlias))
-		{
-			$sAlias = $this->sAlias;
-		}
-
-		$sSeparator = ', ';
-
-		$string .= "{$this->sXajaxPrefix}{$sAlias} = function() { ";
-		$string .= 'return xajax.request( ';
-		$string .= '{ xjxcms: 1 }, ';
-		$string .= '{ parameters: arguments';
-
-		$stringParts = [];
-		foreach ($this->getRequestConfiguration() as $sKey => $sValue)
-		{
-			$stringParts[] = "{$sKey}: {$sValue}";
-		}
-		if (0 < \count($stringParts))
-		{
-			$string .= $sSeparator . implode($sSeparator, $stringParts);
-		}
-		$string .= ' } ); ';
-		$string .= "};\n";
-
-		return $string;
+		return $this->buttonObject ?? $this->buttonObject = new Button($this->getName(), $configure);
 	}
 
-	public function getButtonScript()
-	{
-	}
-
-	protected function getRequestConfiguration()
+	/**
+	 * @return array
+	 */
+	protected function getRequestConfiguration(): array
 	{
 		return (array) $this->aConfiguration;
 	}
@@ -152,27 +144,6 @@ class Request
 		of generating the javascript call to invoke this xajax enabled
 		function.
 	*/
-	/**
-	 * @param string       $sXajaxPrefix
-	 * @param RequestIface $requestConfig
-	 *
-	 * @return RequestIface
-	 * @todo set possible configuration to the single request
-	 */
-	public function generateRequest(?string $sXajaxPrefix = null): RequestIface
-	{
-		$sAlias = $this->getName();
-		if (0 < \strlen($this->sAlias))
-		{
-			$sAlias = $this->sAlias;
-		}
-
-		/**
-		 * @var string $sXajaxPrefix
-		 * @deprecated use the plugin or instance configuration
-		 * */
-		return new \Xajax\Plugins\Cms\Request("{$sXajaxPrefix}{$sAlias}");
-	}
 
 	/*
 		Function: generateClientScript
@@ -185,13 +156,44 @@ class Request
 	/**
 	 * Refactured Generation
 	 *
-	 * @param $sXajaxPrefix
-	 *
 	 * @return string
-	 * @deprecated  use getClientScript
 	 */
-	public function generateClientScript(?string $sXajaxPrefix = null): string
+	public function generateClientScript(): string
 	{
+		$string = '';
+
+		$sFunction = $this->getName();
+		$sAlias    = $sFunction;
+		if (0 < \strlen($this->sAlias))
+		{
+			$sAlias = $this->sAlias;
+		}
+
+		$sSeparator = ', ';
+
+		$string .= "xajax.Reg('{$sAlias}', function() {";
+		$string .= 'return xajax.request( ';
+		$string .= '{ xjxreq: \'cms\' }, ';
+		$string .= '{ parameters:arguments';
+
+		$stringParts = [];
+		$configs     = $this->getRequestConfiguration();
+
+		// todo handle XajaxRequest Values and handle additional Post/Get Parameters
+
+		foreach ($configs as $sKey => $sValue)
+		{
+			$stringParts[] = "{$sKey}: '{$sValue}'";
+		}
+
+		if (0 < \count($stringParts))
+		{
+			$string .= $sSeparator . '' . implode($sSeparator, $stringParts) . '';
+		}
+		$string .= ' }); ';
+		$string .= '});';
+
+		return $string;
 	}
 
 	/*
@@ -202,7 +204,12 @@ class Request
 		function, including an external file if needed and passing along
 		the specified arguments.
 	*/
-	public function call(?array $aArgs = null): bool
+	/**
+	 * Generic "execution" Handler
+	 *
+	 * @return bool
+	 */
+	public function call(): bool
 	{
 
 
