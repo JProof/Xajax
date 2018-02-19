@@ -382,7 +382,7 @@ class Xajax
 		//	$this->getObjPluginManager()->loadPlugins($aPluginFolders);
 
 		$this->objLanguageManager = Language::getInstance();
-		$this->objArgumentManager = Argument::getInstance();
+
 		$this->objResponseManager = \Xajax\Response\Manager::getInstance();
 
 		$this->configureMany($this->aSettings);
@@ -529,7 +529,7 @@ class Xajax
 		}
 
 		$this->objLanguageManager->configure($sName, $mValue);
-		$this->objArgumentManager->configure($sName, $mValue);
+
 		$this->getObjPluginManager()->configure($sName, $mValue);
 		$this->getObjResponseManager()->configure($sName, $mValue);
 
@@ -691,7 +691,7 @@ class Xajax
 
 			$class = $ns . ucfirst($plgName) . '\\Plugin';
 
-			$pluginInstance = new $class;
+			$pluginInstance = $class::getInstance();
 		}
 		catch (RuntimeException $exception)
 		{

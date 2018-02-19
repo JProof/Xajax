@@ -14,55 +14,54 @@
 
 declare(strict_types=1);
 
-namespace Xajax\Request;
+namespace Xajax\Scripting;
 
 /**ability to configure each request particular with his own config*/
-use Xajax\Configuration\RequestConfigurationIface;
 
-if (!defined('XAJAX_FORM_VALUES'))
+if (!\defined('XAJAX_FORM_VALUES'))
 {
-	define('XAJAX_FORM_VALUES', 'get form values');
+	\define('XAJAX_FORM_VALUES', 'get form values');
 }
 /*
 	Constant: XAJAX_INPUT_VALUE
 		Specifies that the parameter will contain the value of an input control.
 */
-if (!defined('XAJAX_INPUT_VALUE'))
+if (!\defined('XAJAX_INPUT_VALUE'))
 {
-	define('XAJAX_INPUT_VALUE', 'get input value');
+	\define('XAJAX_INPUT_VALUE', 'get input value');
 }
 /*
 	Constant: XAJAX_CHECKED_VALUE
 		Specifies that the parameter will consist of a boolean value of a checkbox.
 */
-if (!defined('XAJAX_CHECKED_VALUE'))
+if (!\defined('XAJAX_CHECKED_VALUE'))
 {
-	define('XAJAX_CHECKED_VALUE', 'get checked value');
+	\define('XAJAX_CHECKED_VALUE', 'get checked value');
 }
 /*
 	Constant: XAJAX_ELEMENT_INNERHTML
 		Specifies that the parameter value will be the innerHTML value of the element.
 */
-if (!defined('XAJAX_ELEMENT_INNERHTML'))
+if (!\defined('XAJAX_ELEMENT_INNERHTML'))
 {
-	define('XAJAX_ELEMENT_INNERHTML', 'get element innerHTML');
+	\define('XAJAX_ELEMENT_INNERHTML', 'get element innerHTML');
 }
 /*
 	Constant: XAJAX_QUOTED_VALUE
 		Specifies that the parameter will be a quoted value (string).
 */
-if (!defined('XAJAX_QUOTED_VALUE'))
+if (!\defined('XAJAX_QUOTED_VALUE'))
 {
-	define('XAJAX_QUOTED_VALUE', 'quoted value');
+	\define('XAJAX_QUOTED_VALUE', 'quoted value');
 }
 /*
 	Constant: XAJAX_JS_VALUE
 		Specifies that the parameter will be a non-quoted value (evaluated by the
 		browsers javascript engine at run time.
 */
-if (!defined('XAJAX_JS_VALUE'))
+if (!\defined('XAJAX_JS_VALUE'))
 {
-	define('XAJAX_JS_VALUE', 'unquoted value');
+	\define('XAJAX_JS_VALUE', 'unquoted value');
 }
 
 /**
@@ -71,7 +70,7 @@ if (!defined('XAJAX_JS_VALUE'))
  *
  * @package Xajax
  */
-abstract class Request
+abstract class Button
 {
 	use \Xajax\Errors\Call;
 	/*
@@ -103,7 +102,7 @@ abstract class Request
 
 		sName - (string):  The name of this request.
 	*/
-	public function __construct($sName, RequestConfigurationIface $configurationIface = null)
+	public function __construct(string $sName, ?iterable $configurationIface = null)
 	{
 		$this->aParameters     = [];
 		$this->sQuoteCharacter = '"';
@@ -347,7 +346,7 @@ abstract class Request
 	 * <a onclick="<?php echo $anXajaxUserFunction->printScript() ?>">anButton</a>
 	 * Parsed in Browser to:
 	 * <a onclick="xajax_listDirectory('anAutoQuotedValue')">anButton</a>
-	 * @see        \Xajax\Request\Request::printScript()
+	 * @see        \Xajax\Scripting\Request::printScript()
 	 * @return string
 	 * @deprecated use magic method __toString()
 	 */
@@ -356,22 +355,30 @@ abstract class Request
 		return (string) $this;
 	}
 
+	// build processor
 	public function __toString()
 	{
 		$lines   = [];
-		$lines[] = $this->sName;
-		$lines[] = '(';
+		$lines[] = 'xajax.Exe(\'' . $this->sName . '\'';
 
 		$sSeparator = null;
-
-		foreach ($this->aParameters as $sParameter)
+		$params     = $this->aParameters;
+		if (0 < \count($params))
 		{
-			if ($sSeparator)
+			// separate the $this->sName above from the parameters
+			$lines[] = ',';
+			// starting parameters
+			$lines[] = '{';
+			foreach ($params as $sParameter)
 			{
-				$lines[] = $sSeparator;
+				if ($sSeparator)
+				{
+					$lines[] = $sSeparator;
+				}
+				$lines[]    = $sParameter;
+				$sSeparator = ':';
 			}
-			$lines[]    = $sParameter;
-			$sSeparator = ',';
+			$lines[] = '}';
 		}
 
 		$lines[] = ');';

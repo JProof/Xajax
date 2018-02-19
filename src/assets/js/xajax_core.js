@@ -2985,7 +2985,7 @@ xajax.tools.json.processFragment = function (nodes, seq, oRet, oRequest) {
                      nodes[nodeName][a]= "0" is an valid xajax response stack item
                      nodes[nodeName][a]= "pop" is an method from somewhere but not from xjxobj
                      */
-                    if (parseInt(a) !== a) continue;
+                    if (parseInt(a) === a) continue;
                     var obj = nodes[nodeName][a];
                     obj.fullName = '*unknown*';
                     obj.sequence = seq;
@@ -3135,7 +3135,8 @@ xajax.initializeRequest = function (oRequest) {
           
       };*/
     
-    oRequest = xajax.extend(xc.defaults, oRequest);
+    var tmpRequest = xajax.extend({}, xc.defaults);
+    oRequest = xajax.extend(tmpRequest, oRequest);
     
     /**
      can be removed because is extend

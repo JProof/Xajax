@@ -42,6 +42,7 @@ namespace Xajax\Response;
 */
 
 use Xajax\Argument;
+use Xajax\Factory;
 use Xajax\Language;
 use function Xajax\addError;
 
@@ -1763,8 +1764,8 @@ class Response
 	*/
 	public function _sendHeaders()
 	{
-		$objArgumentManager = Argument::getInstance();
-		if (XAJAX_METHOD_GET === $objArgumentManager->getRequestMethod())
+
+		if ('GET' === Factory::getInput('server')->getWord('REQUEST_METHOD'))
 		{
 			header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
 			header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT');
@@ -1773,7 +1774,7 @@ class Response
 		}
 
 		$sCharacterSet = '';
-		if ($this->sCharacterEncoding && 0 < strlen(trim($this->sCharacterEncoding)))
+		if ($this->sCharacterEncoding && 0 < \strlen(trim($this->sCharacterEncoding)))
 		{
 			$sCharacterSet = '; charset="' . trim($this->sCharacterEncoding) . '"';
 		}

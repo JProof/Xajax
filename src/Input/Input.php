@@ -126,7 +126,7 @@ class Input
 		return 'request';
 	}
 
-	protected function getGlobalFromVar(?string $method = null): ?array
+	protected static function getGlobalFromVar(?string $method = null): ?array
 	{
 		switch ($method)
 		{
@@ -148,18 +148,11 @@ class Input
 	}
 
 	/**
-	 *
-	 */
-	protected function getDetectInputParameters()
-	{
-	}
-
-	/**
 	 * @param string $name
 	 *
 	 * @return string
 	 */
-	protected static function sanitizeRequestName(string $name)
+	protected static function sanitizeRequestName(string $name): string
 	{
 		return strtolower(str_replace(['$', '_'], [], $name));
 	}

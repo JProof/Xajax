@@ -20,19 +20,11 @@ use Xajax\Datas\Data;
 
 /**
  * Class Parameters
+ *
+ * @property-read string method RequestMethod
  */
 class Parameter extends Data
 {
-	/**
-	 * Parameters constructor.
-	 *
-	 * @param iterable|null $parameters
-	 */
-	public function __construct(?iterable $parameters = null)
-	{
-		parent::__construct($parameters);
-	}
-
 	/**
 	 * @param string    $name
 	 * @param null|bool $default
