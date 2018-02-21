@@ -124,9 +124,19 @@ class Generator
 
 	/**
 	 * Generate all relevant Scripts they was set by Scripts and set by Plugins()
+	 *
+	 * @param bool|null $forceNew If one of an rendering was already processed and an script or snippet was after the generation process added,
+	 *                            then you can process again and re-generate all <script src=""> and <script></script>
+	 *
+	 * @return string complete script-src tags an script-content tags
 	 */
-	public static function generateClientScript()
+	public static function generateClientScript(?bool $forceNew = null): string
 	{
+		if ((bool) $forceNew && self::isHasProcessed())
+		{
+			self::setHasProcessed(false);
+		}
+
 		$scriptParts = [];
 
 		// full files First

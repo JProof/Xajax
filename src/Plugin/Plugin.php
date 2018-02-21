@@ -31,15 +31,16 @@ namespace Xajax\Plugin;
 abstract class Plugin
 {
 	use \Xajax\Errors\Call;
+
 	/**
 	 * Request-Plugin-Type
 	 */
-	const TYPE_REQUEST = 'request';
+	public const TYPE_REQUEST = 'request';
 
 	/**
 	 * Response-Plugin-Type
 	 */
-	const TYPE_RESPONSE = 'response';
+	public const TYPE_RESPONSE = 'response';
 
 	/**
 	 * The child-Plugin i.e. Userfunction has an Request-Type (self::REQUEST or self::RESPONSE)
@@ -53,7 +54,7 @@ abstract class Plugin
 	 *
 	 * @param string $pluginType
 	 */
-	public function __construct(?string $pluginType = null)
+	protected function __construct(?string $pluginType = null)
 	{
 		$this->setPluginType($pluginType);
 	}

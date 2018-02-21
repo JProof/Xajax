@@ -20,6 +20,7 @@ use Xajax\Configuration\Base;
 use Xajax\Configuration\Deprecated;
 use Xajax\Configuration\Language;
 use Xajax\Configuration\Logging;
+use Xajax\Configuration\Security;
 use Xajax\Configuration\Uri;
 use Xajax\Errors\Call;
 use Xajax\Helper\Encoding;
@@ -36,7 +37,12 @@ class Configuration extends Base
 
 	/** Handling the Uri's**/
 	use Uri;
-
+	/**
+	 * some security features
+	 *
+	 * @since 0.7.3*
+	 */
+	use Security;
 	/** Language for errors an explanations **/
 	use Language;
 
@@ -107,6 +113,7 @@ class Configuration extends Base
 	/**
 	 * JS-Method they was rendered during Xajax have there own method Prefix
 	 *
+	 * @deprecated remove! no flat method calls will be generated per default
 	 * @var string
 	 */
 	protected $wrapperPrefix = 'xajax_';

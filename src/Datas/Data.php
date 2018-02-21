@@ -95,7 +95,11 @@ class Data implements IteratorAggregate, \Countable
 	 */
 	protected function set($name, $value)
 	{
-		if (false === strpos($name, "\0"))
+		if (\is_int($name) || \is_float($name))
+		{
+			$name = (string) $name;
+		}
+		if (\is_string($name) && false === strpos("$name", "\0"))
 		{
 			$this->datas[$name] = $value;
 
@@ -144,6 +148,8 @@ class Data implements IteratorAggregate, \Countable
 
 	/**
 	 * @param iterable|null $datas
+	 *
+	 * @todo test recursion
 	 */
 	public function bind(?iterable $datas = null)
 	{

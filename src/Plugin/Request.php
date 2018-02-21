@@ -21,6 +21,9 @@ namespace Xajax\Plugin;
  *
  * @package Xajax\Plugin
  */
+
+use Xajax\Factory;
+
 /**
  * Class Request
  *
@@ -30,27 +33,40 @@ abstract class Request extends Plugin
 {
 	use \Xajax\Errors\Call;
 	/**
+	 * @var
+	 */
+	static protected $instance;
+
+	/**
 	 * Request constructor.
 	 *
 	 * @param string $pluginType
 	 */
-	public function __construct($pluginType = self::TYPE_REQUEST)
+	protected function __construct($pluginType = self::TYPE_REQUEST)
 	{
 		parent::__construct($pluginType);
 	}
 
-	/*
-		Function: configure
-
-		Called by the <xajaxPluginManager> when a configuration setting is changing.
-		Plugins should store a local copy of the settings they wish to use during
-		registration, client script generation or request processing.
-	*/
 	/**
+	 * Request Plugin can check the request was against it
+	 *
+	 * @return bool
+	 */
+	public function isRequestAgainstPlugin(): bool
+	{
+		return Factory::getInput()->getWord('xjxreq', '') === $this->getName();
+	}
+
+	/**
+	 * Function: configure
+	 * Called by the <xajaxPluginManager> when a configuration setting is changing.
+	 * Plugins should store a local copy of the settings they wish to use during
+	 * registration, client script generation or request processing.
+	 *
 	 * @param $sName
 	 * @param $mValue
 	 */
-	function configure($sName, $mValue)
+	public function configure($sName, $mValue)
 	{
 	}
 
@@ -116,4 +132,12 @@ abstract class Request extends Plugin
 	 * @return mixed
 	 */
 	abstract public function processRequest();
+
+	/**
+	 * Getting the Internal/External Name of the Plugin
+	 * which is need for detecting Requests against an Plugin
+	 *
+	 * @return string
+	 */
+	abstract public function getName(): string;
 }

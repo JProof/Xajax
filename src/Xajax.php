@@ -378,10 +378,11 @@ class Xajax
 
 		// Setup plugin manager
 		//$this->objPluginManager = xajaxPluginManager::getInstance();
-		$this->getObjPluginManager()->loadPlugins($aPluginFolders);
+		// load Plugins will automatically load if need
+		//	$this->getObjPluginManager()->loadPlugins($aPluginFolders);
 
 		$this->objLanguageManager = Language::getInstance();
-		$this->objArgumentManager = Argument::getInstance();
+
 		$this->objResponseManager = \Xajax\Response\Manager::getInstance();
 
 		$this->configureMany($this->aSettings);
@@ -528,7 +529,7 @@ class Xajax
 		}
 
 		$this->objLanguageManager->configure($sName, $mValue);
-		$this->objArgumentManager->configure($sName, $mValue);
+
 		$this->getObjPluginManager()->configure($sName, $mValue);
 		$this->getObjResponseManager()->configure($sName, $mValue);
 
@@ -671,7 +672,7 @@ class Xajax
 	/**
 	 * @param null|string $plgName
 	 */
-	protected function autoregisterResponsePlugin(?string $plgName = null)
+	protected function autoregisterResponsePlugin(?string $plgName = null): void
 	{
 		$plgObject = $this->loadPlugin($plgName, Plugin::getResponseType());
 	}
@@ -690,7 +691,7 @@ class Xajax
 
 			$class = $ns . ucfirst($plgName) . '\\Plugin';
 
-			$pluginInstance = new $class;
+			$pluginInstance = $class::getInstance();
 		}
 		catch (RuntimeException $exception)
 		{
@@ -763,7 +764,7 @@ class Xajax
 	 * @param $sessionKey
 	 * @param $challenges
 	 */
-	private function saveChallenges($sessionKey, $challenges)
+	private function saveChallenges($sessionKey, $challenges): void
 	{
 		if (count($challenges) > 10)
 		{
@@ -1034,9 +1035,10 @@ class Xajax
 
 	*/
 	/**
-	 * @deprecated use directly the Generator or the Factory
+	 * @deprecated use directly the Generator
+	 * @example    echo Generator::generateClientScript();
 	 */
-	public function printJavascript()
+	public function printJavascript(): void
 	{
 		echo Generator::generateClientScript();
 	}
@@ -1045,8 +1047,10 @@ class Xajax
 	 * Function: getJavascript
 	 *
 	 * @return string
+	 * @deprecated use directly the Generator
+	 * @example    Generator::generateClientScript();
 	 */
-	public function getJavascript()
+	public function getJavascript(): string
 	{
 		return Generator::generateClientScript();
 	}
