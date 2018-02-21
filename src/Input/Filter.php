@@ -29,7 +29,7 @@ class Filter
 	 */
 	public static function getWord($val = null, ?string $default = null)
 	{
-// todo regex;
+		// todo regex;
 		return (string) $val;
 	}
 

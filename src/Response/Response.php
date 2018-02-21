@@ -1815,7 +1815,7 @@ class Response
 	 * @param Response|array $mCommands
 	 * @param bool           $bBefore
 	 */
-	public function appendResponse($mCommands = null, $bBefore = false)
+	public function appendResponse($mCommands = null, $bBefore = null)
 	{
 		if ($mCommands instanceof self)
 		{
@@ -1830,7 +1830,7 @@ class Response
 				$this->aCommands = array_merge($this->aCommands, $mCommands->aCommands);
 			}
 		}
-		else if (is_array($mCommands))
+		else if (\is_array($mCommands))
 		{
 			if ($bBefore)
 			{
@@ -2064,12 +2064,12 @@ class Response
 	*/
 	private function _printArray_XML($mArray)
 	{
-		if ('object' == gettype($mArray))
+		if (is_object($mArray))
 		{
 			$mArray = get_object_vars($mArray);
 		}
 
-		if (false == is_array($mArray))
+		if (false === \is_array($mArray))
 		{
 			$this->_printEscapedString_XML($mArray);
 
@@ -2081,7 +2081,7 @@ class Response
 
 		foreach (array_keys($mArray) as $sKey)
 		{
-			if (is_array($mArray[$sKey]))
+			if (\is_array($mArray[$sKey]))
 			{
 				echo '<';
 				echo 'e>';
@@ -2099,7 +2099,7 @@ class Response
 					}
 					//EndSkipDebug
 
-					if ('k' == $sInnerKey || 'v' == $sInnerKey)
+					if ('k' === $sInnerKey || 'v' === $sInnerKey)
 					{
 						echo '<';
 						echo $sInnerKey;
