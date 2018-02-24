@@ -2060,8 +2060,9 @@ if ('undefined' === typeof xajax) {
             if (true === child.disabled)
                 if (false === submitDisabledElements)
                     return;
-        
-        if (prefix !== child.name.substring(0, prefix.length))
+    
+        //prefix = !prefix ? '' : prefix;
+        if (prefix && prefix !== child.name.substring(0, prefix.length))
             return;
         var cT = child.type;
         if (cT) {
@@ -2072,10 +2073,10 @@ if ('undefined' === typeof xajax) {
             }
             
             if (cT === 'select-one') {
-                if (child.selectedIndex)
+                if ('undefined' !== typeof(child.selectedIndex))
                     values = child.options[child.selectedIndex].value;
                 else
-                // nothing selected
+                // nothing selected (is not possible if there is an option)
                     return;
             }
             
@@ -2113,7 +2114,6 @@ if ('undefined' === typeof xajax) {
      *
      * @return null|object  Null on not found Parent form  An associative array of form element id and value.
      */
-    
     var getFormValues = function (parent) {
         
         if (null === (parent = xjx.tools.$(parent))) return null;
@@ -2135,13 +2135,21 @@ if ('undefined' === typeof xajax) {
         return aFormValues;
     };
     // old Hook
+    /*
+    *
+     */
+    var getFieldValue = function (ele) {
+        if (null === (ele = xjx.tools.$(ele))) return null;
+        return _getFormValue({}, ele);
+    };
     
     xjx.forms = {
         getFormValues: getFormValues,
+        getValue: getFieldValue,
         // currently for unitTesting
         valueHandler: {merge: merge, extractFieldName: extractFieldName, listAsObject: listAsObject}
     };
-    
+    xjx.getValue = xjx.forms.getValue;
 }(xajax));
 /*
 	Class: xajax.events
