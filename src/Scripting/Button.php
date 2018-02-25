@@ -166,12 +166,19 @@ abstract class Button
 	 * @todo    nested iteratable
 	 * @todo    unittest
 	 */
-	public function addParameterArray(?iterable $object = null, ?string $sQuote = null): self
+	public function addParameterArray(?iterable $object = null, ?string $key = null, ?string $sQuote = null): self
 	{
 		$string = $this->iterateKeyValuePairs($object);
 		if ($string)
 		{
-			$this->aParameters[] = $string;
+			if ($key)
+			{
+				$this->aParameters[$key] = $string;
+			}
+			else
+			{
+				$this->aParameters[] = $string;
+			}
 		}
 
 		return $this;
@@ -214,56 +221,74 @@ abstract class Button
 	}
 
 	/**
-	 * Adding an Key-Value-Pair
-	 * Function: addParameter
-	 * Adds a parameter value to the parameter list for this request.
-	 * sType - (string): The type of the value to be used.
-	 * sValue - (string: The value to be used.
-	 * See Also:
-	 * See <xajaxRequest->setParameter> for details.
+	 * Adding the xajaxFormValues('formId') method to the  click-button-script
 	 *
-	 * @param  $key
-	 * @param  $value
+	 * @param string      $elementId
+	 * @param null|string $key optional Key
+	 * @param null|string $qt
 	 *
 	 * @return $this
 	 */
-	public function addParameter($key = null, $value = null): self
+	public function setGetFormValues(string $elementId, ?string $key = null, ?string $qt = null): self
 	{
-		if ((\is_string($key) || \is_int($key)) && (null === $value || is_scalar($value)))
+		$str = 'xajax.getFormValues(' . $this->getQuotedString($elementId, $qt) . ')';
+		if ($key)
 		{
-			$this->setParameter(
-			    \count($this->aParameters),
-			    $key,
-			    $value);
+			$this->aParameters[$key] = $str;
+		}
+		else
+		{
+			$this->aParameters[] = $str;
+		}
+		return $this;
+	}
+
+	/**
+	 * Simply get "value" of an html field
+	 *
+	 * @param string      $elementId
+	 * @param null|string $key
+	 * @param null|string $qt
+	 *
+	 * @return $this
+	 */
+	public function setGetValue(string $elementId, ?string $key = null, ?string $qt = null): self
+	{
+		$str = 'xajax.getValue(' . $this->getQuotedString($elementId, $qt) . ')';
+		if ($key)
+		{
+			$this->aParameters[$key] = $str;
+		}
+		else
+		{
+			$this->aParameters[] = $str;
 		}
 
 		return $this;
 	}
 
-	public function setGetFormValues(string $formId, ?string $qt = null)
+	/**
+	 * @param string      $elementId
+	 * @param null|string $key
+	 * @param null|string $qt
+	 *
+	 * @return $this
+	 */
+	public function getInnerHtml(string $elementId, ?string $key = null, ?string $qt = null)
 	{
-		$this->aParameters[] = 'xajax.getFormValues(' . $this->getQuotedString($formId, $qt) . ')';
+		$str = 'xajax.$(' . $this->getQuotedString($elementId, $qt) . ').innerHTML';
+		$key ? $this->aParameters[$key] = $str : $this->aParameters[] = $str;
 		return $this;
 	}
 
-	public function setGetInputValue(string $elementId, ?string $qt = null)
-	{
-		$this->aParameters[] = 'xajax.$(' . $this->getQuotedString($elementId, $qt) . ').value';
-		return $this;
-	}
-
-	public function setGetCheckedValue(string $elementId, ?string $qt = null)
-	{
-		$this->aParameters[] = 'xajax.$(' . $this->getQuotedString($elementId, $qt) . ').checked';
-		return $this;
-	}
-
-	public function getInnerHtml(string $elementId, ?string $qt = null)
-	{
-		$this->aParameters[] = 'xajax.$(' . $this->getQuotedString($elementId, $qt) . ').innerHTML';
-		return $this;
-	}
-
+	/**
+	 * Internal Helper to wrap Quoutes around an js expression
+	 *
+	 * @param string      $str
+	 * @param null|string $qt
+	 *
+	 * @return string
+	 */
 	protected function getQuotedString(string $str, ?string $qt = null): string
 	{
 		$qt = $qt && \in_array($qt, self::$allowedQuotes, true) ? $qt : $this->sQuoteCharacter;
@@ -271,81 +296,19 @@ abstract class Button
 	}
 
 	/**
-	 * Function: setParameter
-	 * Sets a specific parameter value.
-	 * Parameters:
-	 * nParameter - (number): The index of the parameter to set
-	 * sType - (string): The type of value
-	 * sValue - (string): The value as it relates to the specified type
-	 * Note:
-	 * Types should be one of the following
-	 * <XAJAX_FORM_VALUES>,
-	 * <XAJAX_QUOTED_VALUE>,
-	 * <XAJAX_JS_VALUE>,
-	 * <XAJAX_INPUT_VALUE>,
-	 * <XAJAX_CHECKED_VALUE>.
-	 * The value should be as follows:
-	 * <XAJAX_FORM_VALUES> - Use the ID of the form you want to process.
-	 * <XAJAX_QUOTED_VALUE> - The string data to be passed.
-	 * <XAJAX_JS_VALUE> - A string containing valid javascript (either a javascript
-	 * variable name that will be in scope at the time of the call or a
-	 * javascript function call whose return value will become the parameter.
-	 **/
-	/**
-	 * @return $this|\Xajax\Scripting\Button
-	 * @deprecated use the particular methods
+	 * Simply create json Object
+	 *
+	 * @param string      $key
+	 * @param             $value
+	 * @param null|string $qt
+	 *
+	 * @return string
 	 */
-	public function setParameter()
+	protected function objectivateKeyValue(string $key, $value, ?string $qt = null): string
 	{
-		$aArgs   = func_get_args();
-		$cntArgs = \count($aArgs);
-		if (1 < $cntArgs)
-		{
-			[$nParameter, $sType] = $aArgs;
-			if (2 === $cntArgs)
-			{
-				$this->aParameters[$nParameter] = $this->sQuoteCharacter . $sType . $this->sQuoteCharacter;
-			}
-			else if (2 < $cntArgs)
-			{
-				if (XAJAX_FORM_VALUES === $sType)
-				{
-					return $this->setGetFormValues((string) $aArgs[2]);
-				}
-				if (XAJAX_INPUT_VALUE === $sType)
-				{
-					return $this->setGetInputValue((string) $aArgs[2]);
-				}
-				if (XAJAX_CHECKED_VALUE === $sType)
-				{
-					return $this->setGetCheckedValue((string) $aArgs[2]);
-				}
-				if (XAJAX_ELEMENT_INNERHTML === $sType)
-				{
-					return $this->getInnerHtml((string) $aArgs[2]);
-				}
-				if (XAJAX_QUOTED_VALUE === $sType)
-				{
-					$sValue                         = $aArgs[2];
-					$this->aParameters[$nParameter] =
-					    $this->sQuoteCharacter
-					    . $sValue
-					    . $this->sQuoteCharacter;
-				}
-				else if (XAJAX_JS_VALUE === $sType)
-				{
-					$sValue                         = $aArgs[2];
-					$this->aParameters[$nParameter] = $sValue;
-				}
-				else
-				{
-					$sValue                         = $aArgs[2];
-					$this->aParameters[$nParameter] = $sValue;
-				}
-			}
-		}
-
-		return $this;
+		$str = '';
+		$str .= '{' . $key . ':' . $value . '}';
+		return $str;
 	}
 
 	/**

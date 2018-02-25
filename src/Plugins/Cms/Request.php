@@ -63,39 +63,27 @@ class Request
 	 */
 	protected $buttonObject;
 
-	public function __construct(string $uf, ?iterable $clientscriptConfig = null)
+	/**
+	 * Request constructor.
+	 *
+	 * @param string        $alias
+	 * @param iterable|null $clientscriptConfig
+	 */
+	public function __construct(string $alias, ?iterable $clientscriptConfig = null)
 	{
 
-		$this->sAlias = $uf;
+		// todo check name against valid method name
+		$this->sAlias = $alias;
 
+		// todo modify config params such as "uri" as uppercase
 		$this->aConfiguration = $clientscriptConfig;
-
-		if (\is_array($this->uf) && 2 < \count($this->uf))
-		{
-			$this->sAlias = $this->uf[0];
-			$this->uf     = \array_slice($this->uf, 1);
-		}
-
-		if (\is_array($this->uf) && 2 !== \count($this->uf))
-		{
-			trigger_error(
-			    'Invalid function declaration for xajaxCms.',
-			    E_USER_ERROR
-			);
-		}
 	}
 
-	/*
-		Function: getName
-
-		Get the name of the function being referenced.
-
-		Returns:
-
-		string - the name of the function contained within this object.
-	*/
 	/**
-	 * @return string
+	 * Function: getName
+	 * Get the name of the function being referenced.
+	 *
+	 * @return string the name of the function
 	 */
 	public function getName(): string
 	{
@@ -145,16 +133,12 @@ class Request
 		function.
 	*/
 
-	/*
-		Function: generateClientScript
-
-		Called by the <xajaxPlugin> that is referencing this function
-		reference during the client script generation phase.  This function
-		will generate the javascript function stub that is sent to the
-		browser on initial page load.
-	*/
 	/**
 	 * Refactured Generation
+	 * Called by the <xajaxPlugin> that is referencing this function
+	 * reference during the client script generation phase.  This function
+	 * will generate the javascript function stub that is sent to the
+	 * browser on initial page load.
 	 *
 	 * @return string
 	 */
@@ -196,22 +180,18 @@ class Request
 		return $string;
 	}
 
-	/*
-		Function: call
-
-		Called by the <xajaxPlugin> that references this function during the
-		request processing phase.  This function will call the specified
-		function, including an external file if needed and passing along
-		the specified arguments.
-	*/
 	/**
 	 * Generic "execution" Handler
+	 * Function: call
+	 * Called by the <xajaxPlugin> that references this function during the
+	 * request processing phase.  This function will call the specified
+	 * function, including an external file if needed and passing along
+	 * the specified arguments.
 	 *
 	 * @return bool
 	 */
 	public function call(): bool
 	{
-
 
 		$objResponseManager = Manager::getInstance();
 
