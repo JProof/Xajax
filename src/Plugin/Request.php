@@ -31,7 +31,7 @@ use Xajax\Factory;
  */
 abstract class Request extends Plugin
 {
-	use \Xajax\Errors\Call;
+	use \Xajax\Errors\TraitCall;
 	/**
 	 * @var
 	 */

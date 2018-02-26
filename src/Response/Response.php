@@ -55,7 +55,7 @@ use function Xajax\addError;
  */
 class Response
 {
-	use \Xajax\Errors\Call;
+	use \Xajax\Errors\TraitCall;
 	/**
 	 * Primary Response instance
 	 *

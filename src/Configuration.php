@@ -22,7 +22,7 @@ use Xajax\Configuration\Language;
 use Xajax\Configuration\Logging;
 use Xajax\Configuration\Security;
 use Xajax\Configuration\Uri;
-use Xajax\Errors\Call;
+use Xajax\Errors\TraitCall;
 use Xajax\Helper\Encoding;
 
 /**
@@ -50,7 +50,7 @@ class Configuration extends Base
 	use Logging;
 
 	/** error handling **/
-	use Call;
+	use TraitCall;
 	/**
 	 * String: XAJAX_DEFAULT_CHAR_ENCODING UTF-8
 	 * Default character encoding used by both the <xajax> and
@@ -110,13 +110,6 @@ class Configuration extends Base
 	 * @var string
 	 */
 	protected $contentType;
-	/**
-	 * JS-Method they was rendered during Xajax have there own method Prefix
-	 *
-	 * @deprecated remove! no flat method calls will be generated per default
-	 * @var string
-	 */
-	protected $wrapperPrefix = 'xajax_';
 	/**
 	 * A configuration option that is tracked by the main <xajax>object.  Setting this
 	 * to true allows <xajax> to exit immediately after processing a xajax request.  If
@@ -382,28 +375,7 @@ class Configuration extends Base
 		return $this;
 	}
 
-	/**
-	 * @return string
-	 */
-	public function getWrapperPrefix(): string
-	{
-		return (string) $this->wrapperPrefix;
-	}
 
-	/**
-	 * @todo  explain
-	 * @todo  check against prefixes
-	 *
-	 * @param string $wrapperPrefix
-	 *
-	 * @return \Xajax\Configuration
-	 */
-	public function setWrapperPrefix(?string $wrapperPrefix = null): Configuration
-	{
-		$this->wrapperPrefix = (string) $wrapperPrefix;
-
-		return $this;
-	}
 
 	/**
 	 * @return bool

@@ -25,7 +25,7 @@ use Xajax\Language;
  */
 abstract class Response extends Plugin
 {
-	use \Xajax\Errors\Call;
+	use \Xajax\Errors\TraitCall;
 
 	/*
 		Object: objResponse

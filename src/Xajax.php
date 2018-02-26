@@ -108,7 +108,7 @@ class Xajax
 {
 	// temporarily Helper Method
 	use Config;
-	use \Xajax\Errors\Call;
+	use \Xajax\Errors\TraitCall;
 
 	/*
 		Array: aSettings
@@ -267,11 +267,11 @@ class Xajax
 		// The default configuration settings.
 		$this->configureMany(
 		    [
-		        'characterEncoding'     => XAJAX_DEFAULT_CHAR_ENCODING,
-		        'decodeUTF8Input'       => false,
-		        'outputEntities'        => false,
-		        'responseType'          => 'JSON',
-		        'wrapperPrefix'         => 'xajax_',
+		        'characterEncoding' => XAJAX_DEFAULT_CHAR_ENCODING,
+		        'decodeUTF8Input'   => false,
+		        'outputEntities'    => false,
+		        'responseType'      => 'JSON',
+
 		        'exitAllowed'           => true,
 		        'errorHandler'          => null,
 		        'cleanBuffer'           => false,
