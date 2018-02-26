@@ -30,7 +30,7 @@ namespace Xajax\Plugin;
  */
 abstract class Plugin
 {
-	use \Xajax\Errors\Call;
+	use \Xajax\Errors\TraitCall;
 
 	/**
 	 * Request-Plugin-Type

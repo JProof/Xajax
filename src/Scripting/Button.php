@@ -16,70 +16,17 @@ declare(strict_types=1);
 
 namespace Xajax\Scripting;
 
-/**ability to configure each request particular with his own config*/
-
-if (!\defined('XAJAX_FORM_VALUES'))
-{
-	/**@deprecated XAJAX_FORM_VALUES */
-	\define('XAJAX_FORM_VALUES', 'get form values');
-}
-/*
-	Constant: XAJAX_INPUT_VALUE
-		Specifies that the parameter will contain the value of an input control.
-*/
-if (!\defined('XAJAX_INPUT_VALUE'))
-{
-	/**@deprecated XAJAX_INPUT_VALUE */
-	\define('XAJAX_INPUT_VALUE', 'get input value');
-}
-/*
-	Constant: XAJAX_CHECKED_VALUE
-		Specifies that the parameter will consist of a boolean value of a checkbox.
-*/
-if (!\defined('XAJAX_CHECKED_VALUE'))
-{
-	/**@deprecated XAJAX_CHECKED_VALUE */
-	\define('XAJAX_CHECKED_VALUE', 'get checked value');
-}
-/*
-	Constant: XAJAX_ELEMENT_INNERHTML
-		Specifies that the parameter value will be the innerHTML value of the element.
-*/
-if (!\defined('XAJAX_ELEMENT_INNERHTML'))
-{
-	/**@deprecated XAJAX_ELEMENT_INNERHTML */
-	\define('XAJAX_ELEMENT_INNERHTML', 'get element innerHTML');
-}
-/*
-	Constant: XAJAX_QUOTED_VALUE
-		Specifies that the parameter will be a quoted value (string).
-*/
-if (!\defined('XAJAX_QUOTED_VALUE'))
-{
-	/**@deprecated XAJAX_QUOTED_VALUE */
-	\define('XAJAX_QUOTED_VALUE', 'quoted value');
-}
-/*
-	Constant: XAJAX_JS_VALUE
-		Specifies that the parameter will be a non-quoted value (evaluated by the
-		browsers javascript engine at run time.
-*/
-if (!\defined('XAJAX_JS_VALUE'))
-{
-	/**@deprecated XAJAX_JS_VALUE */
-	\define('XAJAX_JS_VALUE', 'unquoted value');
-}
-
 /**
  * Class Request
  * refactor old xajaxRequest.inc.php
  *
  * @package Xajax
  */
-abstract class Button
+abstract class Button extends Base
 {
-	use \Xajax\Errors\Call;
-	static protected $allowedQuotes = ["'", '"'];
+	use \Xajax\Errors\TraitCall;
+
+
 	/*
 		String: sName
 
@@ -112,32 +59,54 @@ abstract class Button
 	public function __construct(string $sName, ?iterable $configurationIface = null, ?string $qt = null)
 	{
 		$this->aParameters     = [];
-		$this->sQuoteCharacter = '"';
+		$this->sQuoteCharacter = self::SQ;
 		$this->sName           = $sName;
 	}
 
-	/*
-		Function: useSingleQuote
-
-		Call this to instruct the request to use single quotes when generating
-		the javascript.
-	*/
+	/**
+	 * Function: useSingleQuote
+	 * Call this to instruct the request to use single quotes when generating
+	 * the javascript.
+	 */
 	public function useSingleQuote()
 	{
-		$this->sQuoteCharacter = "'";
+		$this->sQuoteCharacter = self::SQ;
 
 		return $this;
 	}
 
-	/*
-		Function: useDoubleQuote
+	/**
+	 * Function: useSingleQuote
+	 * Call this to instruct the request to use single quotes when generating
+	 * the javascript.
+	 */
+	public function useSingleQuoteEscape()
+	{
+		$this->sQuoteCharacter = self::SQE;
 
-		Call this to instruct the request to use double quotes while generating
-		the javascript.
-	*/
+		return $this;
+	}
+
+	/**
+	 * Function: useDoubleQuote
+	 * Call this to instruct the request to use double quotes while generating
+	 * the javascript.
+	 */
 	public function useDoubleQuote()
 	{
-		$this->sQuoteCharacter = '"';
+		$this->sQuoteCharacter = self::DQ;
+
+		return $this;
+	}
+
+	/**
+	 * Function: useDoubleQuote
+	 * Call this to instruct the request to use double quotes while generating
+	 * the javascript.
+	 */
+	public function useDoubleQuoteEscape()
+	{
+		$this->sQuoteCharacter = self::DQE;
 
 		return $this;
 	}
@@ -160,6 +129,7 @@ abstract class Button
 	 * @example ['my'=>'1','your'=>'3']; will be to js {my:'1',your:'3'}
 	 *
 	 * @param null|iterable $object
+	 * @param null|string   $key
 	 * @param null|string   $sQuote
 	 *
 	 * @return $this
@@ -168,7 +138,7 @@ abstract class Button
 	 */
 	public function addParameterArray(?iterable $object = null, ?string $key = null, ?string $sQuote = null): self
 	{
-		$string = $this->iterateKeyValuePairs($object);
+		$string = $this->iterateKeyValuePairs($object, $sQuote);
 		if ($string)
 		{
 			if ($key)
@@ -187,7 +157,7 @@ abstract class Button
 	/**
 	 * KeyValuePairIterator to get an valid js String
 	 *
-	 * @todo unittest
+	 * @todo unitTest
 	 *
 	 * @param iterable|null $object
 	 * @param null|string   $sQuote
@@ -199,12 +169,14 @@ abstract class Button
 	{
 		if (is_iterable($object) && 0 < \count($object))
 		{
+
 			$parts  = [];
 			$sQuote = $sQuote ?: $this->sQuoteCharacter;
+			$depth  = $depth ?? 1;
 			/** @var iterable $object */
 			foreach ($object as $k => $v)
 			{
-				if (is_iterable($v) && ($s = $this->iterateKeyValuePairs($v, $sQuote, 1)))
+				if (is_iterable($v) && ($s = $this->iterateKeyValuePairs($v, $sQuote, $depth)))
 				{
 					$parts[] = $k . ':' . $s;
 				}
@@ -274,7 +246,7 @@ abstract class Button
 	 *
 	 * @return $this
 	 */
-	public function getInnerHtml(string $elementId, ?string $key = null, ?string $qt = null)
+	public function getInnerHtml(string $elementId, ?string $key = null, ?string $qt = null): self
 	{
 		$str = 'xajax.$(' . $this->getQuotedString($elementId, $qt) . ').innerHTML';
 		$key ? $this->aParameters[$key] = $str : $this->aParameters[] = $str;
@@ -291,8 +263,20 @@ abstract class Button
 	 */
 	protected function getQuotedString(string $str, ?string $qt = null): string
 	{
-		$qt = $qt && \in_array($qt, self::$allowedQuotes, true) ? $qt : $this->sQuoteCharacter;
+		$qt = $this->getQuote($qt);
 		return $qt . trim($str) . $qt;
+	}
+
+	/**
+	 * Make sure, quotes are valid
+	 *
+	 * @param null|string $qt
+	 *
+	 * @return string
+	 */
+	protected function getQuote(?string $qt = null): string
+	{
+		return $qt && \in_array($qt, self::$allowedQuotes, true) ? $qt : $this->sQuoteCharacter;
 	}
 
 	/**

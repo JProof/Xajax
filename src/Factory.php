@@ -27,7 +27,7 @@ use Xajax\Scripts\Scripts;
  */
 class Factory
 {
-	use \Xajax\Errors\Call;
+	use \Xajax\Errors\TraitCall;
 	/**
 	 * Xajax Instances
 	 *

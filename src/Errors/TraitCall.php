@@ -23,7 +23,7 @@ use BadMethodCallException;
  *
  * @package Xajax\Errors
  */
-trait Call
+trait TraitCall
 {
 	/**
 	 * @param $name

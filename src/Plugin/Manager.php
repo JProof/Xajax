@@ -26,7 +26,7 @@ namespace Xajax\Plugin {
 	 */
 	class Manager
 	{
-		use \Xajax\Errors\Call;
+		use \Xajax\Errors\TraitCall;
 		/**
 		 * The Request-Plugins as own Objects with getters and setters
 		 *

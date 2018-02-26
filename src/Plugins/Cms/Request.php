@@ -18,6 +18,7 @@ namespace Xajax\Plugins\Cms;
 
 use Xajax\Factory;
 use Xajax\Response\Manager;
+use Xajax\Scripting\Base;
 
 /**
  * Class Handler
@@ -26,33 +27,17 @@ use Xajax\Response\Manager;
  */
 class Request
 {
-	/*
-		String: sAlias
-
-		An alias to use for this function.  This is useful when you want
-		to call the same xajax enabled function with a different set of
-		call options from what was already registered.
-	*/
 	/**
+	 * Need to set the ExecutionName
+	 * xajax.Exe('{$this->name}')
+	 *
 	 * @var string
 	 */
-	private $sAlias;
-	/*
-		Object: uf
-
-		A string or array which defines the function to be registered.
-	*/
+	private $name;
 	/**
-	 * @var array
-	 */
-	private $uf;
-	/*
-		Array: aConfiguration
-
-		An associative array containing call options that will be sent to the
-		browser curing client script generation.
-	*/
-	/**
+	 * An associative array containing call options that will be sent to the
+	 * browser curing client script generation.
+	 *
 	 * @var iterable|null
 	 */
 	private $aConfiguration;
@@ -66,14 +51,14 @@ class Request
 	/**
 	 * Request constructor.
 	 *
-	 * @param string        $alias
+	 * @param string        $name
 	 * @param iterable|null $clientscriptConfig
 	 */
-	public function __construct(string $alias, ?iterable $clientscriptConfig = null)
+	public function __construct(string $name, ?iterable $clientscriptConfig = null)
 	{
 
 		// todo check name against valid method name
-		$this->sAlias = $alias;
+		$this->name = $name;
 
 		// todo modify config params such as "uri" as uppercase
 		$this->aConfiguration = $clientscriptConfig;
@@ -88,15 +73,12 @@ class Request
 	public function getName(): string
 	{
 		// Do not use sAlias here!
-		return $this->sAlias;
+		return $this->name;
 	}
 
-	/*
-		Function: configure
-
-		Call this to set call options for this instance.
-	*/
 	/**
+	 * Call this to set call options for this instance.
+	 *
 	 * @param $sName
 	 * @param $sValue
 	 *
@@ -125,14 +107,6 @@ class Request
 		return (array) $this->aConfiguration;
 	}
 
-	/*
-		Function: generateRequest
-
-		Constructs and returns a <xajaxRequest> object which is capable
-		of generating the javascript call to invoke this xajax enabled
-		function.
-	*/
-
 	/**
 	 * Refactured Generation
 	 * Called by the <xajaxPlugin> that is referencing this function
@@ -146,16 +120,11 @@ class Request
 	{
 		$string = '';
 
-		$sFunction = $this->getName();
-		$sAlias    = $sFunction;
-		if (0 < \strlen($this->sAlias))
-		{
-			$sAlias = $this->sAlias;
-		}
+		$name = $this->getName();
 
 		$sSeparator = ', ';
 
-		$string .= "xajax.Reg('{$sAlias}', function() {";
+		$string .= "xajax.Reg('{$name}', function() {";
 		$string .= 'return xajax.request( ';
 		$string .= '{ xjxreq: \'cms\' }, ';
 		$string .= '{ parameters:arguments';
@@ -167,7 +136,20 @@ class Request
 
 		foreach ($configs as $sKey => $sValue)
 		{
-			$stringParts[] = "{$sKey}: '{$sValue}'";
+			if (\is_int($sValue) || \is_float($sValue) || \is_bool($sValue))
+			{
+
+			}
+			elseif (\is_string($sValue))
+			{
+				$sValue = Base::SQ . $sValue . Base::SQ;
+			}
+			else
+			{
+				continue;
+			}
+
+			$stringParts[] = "{$sKey}:" . $sValue;
 		}
 
 		if (0 < \count($stringParts))

@@ -34,7 +34,7 @@ namespace Xajax\Response {
 
 	final class Manager
 	{
-		use \Xajax\Errors\Call;
+		use \Xajax\Errors\TraitCall;
 
 		/*
 			Object: objResponse
