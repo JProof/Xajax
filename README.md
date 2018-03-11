@@ -1,6 +1,11 @@
 XAJAX
 
-next release(unofficial): 0.7.3
+The modernization/extension of xajax is already well advanced.
+As the next independent relase "jybrid" will be the follow-up to the xajax-version listed here.
+@see https://github.com/JProof/jybrid 
+
+next release(unofficial): 0.7.3 jybrid is not a part of the xajax-organisation
+
 
 [Relaunch-Notices](Relaunch.md)
 
