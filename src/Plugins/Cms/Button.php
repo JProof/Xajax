@@ -3,7 +3,7 @@
  * PHP version $phpversion$
  *
  * @category
- * @package            Xajax Core  Xajax\Plugins\Cms
+ * @package            Jybrid Core  Jybrid\Plugins\Cms
  * @author             ${JProof}
  * @copyright          ${copyright}
  * @license            ${license}
@@ -14,9 +14,11 @@
 
 declare(strict_types=1);
 
-namespace Xajax\Plugins\Cms;
+namespace Jybrid\Plugins\Cms;
 
-class Button extends \Xajax\Scripting\Button
+use Jybrid\Interfaces\IfaceButton;
+
+class Button extends \Jybrid\Scripting\Button implements IfaceButton
 {
 	/**
 	 * Button constructor.

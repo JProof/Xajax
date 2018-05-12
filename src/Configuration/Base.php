@@ -3,7 +3,7 @@
  * PHP version php7
  *
  * @category
- * @package            xajax-php-7
+ * @package            jybrid-php-7
  * @author             ${JProof}
  * @copyright          ${copyright}
  * @license            ${license}
@@ -14,17 +14,16 @@
 
 declare(strict_types=1);
 
-namespace Xajax\Configuration;
+namespace Jybrid\Configuration;
 
 use BadMethodCallException;
-
-use Xajax\Datas\Data;
-use Xajax\Errors\Handler;
+use Jybrid\Datas\Data;
+use Jybrid\Errors\Handler;
 
 /**
  * Class Base
  *
- * @package Xajax\Configuration
+ * @package Jybrid\Configuration
  */
 abstract class Base extends Data
 {
@@ -34,16 +33,16 @@ abstract class Base extends Data
 	abstract public static function getInstance();
 
 	/**
-	 * Legacy-Mode can be used to refacture xajax 6 versions. The Legacy-Flag allows to get and set vars without type checking
+	 * Legacy-Mode can be used to refacture jybrid 6 versions. The Legacy-Flag allows to get and set vars without type checking
 	 *
-	 * @deprecated jproof/xajax 0.7.2 Legacy Mode will be removed
+	 * @deprecated jproof/jybrid 0.7.2 Legacy Mode will be removed
 	 * @var bool
 	 */
 	static protected $legacy = false;
 	/**
 	 * @var string
 	 */
-	protected $version = 'jproof/xajax 0.7.2';
+	protected $version = 'jproof/jybrid 0.7.8';
 
 	/**
 	 *  Getter
@@ -56,22 +55,17 @@ abstract class Base extends Data
 	 */
 	public function __get($name)
 	{
-		$name = self::deprecatedNameAlias($name);
-		if (self::isLegacy())
-		{
-			return $this->{$name};
-		}
-
+		$return = null;
 		$method = self::getMethodName('get', $name);
 		if (method_exists($this, $method))
 		{
-			return $this->{$method()};
+			$return = $this->{$method()};
 		}
 
 		// never giveback an parameter without getter
-		addError(new BadMethodCallException(__CLASS__ . '::' . __METHOD__ . ' Method ' . $method . ' for variable ' . $name . ' does not exists'));
+		Handler::addError( new BadMethodCallException( __CLASS__ . '::' . __METHOD__ . ' Method ' . $method . ' for variable ' . $name . ' does not exists' ) );
 
-		return null;
+		return $return;
 	}
 
 	/**
@@ -84,22 +78,17 @@ abstract class Base extends Data
 	 */
 	public function __set($name, $value)
 	{
-		$name = self::deprecatedNameAlias($name);
-
-		if (self::isLegacy())
-		{
-			return $this->{$name} = $value;
-		}
-
+		$_value = null;
 		$method = self::getMethodName('set', $name);
 		if (method_exists($this, $method))
 		{
-			return $this->$method($value);
+			$_value = $this->$method( $value );
+		} else {
+			// never overload the setter! Make sure you have an
+			Handler::addError( new BadMethodCallException( __CLASS__ . '::' . __METHOD__ . ' Method ' . $method . ' for variable ' . $name . ' does not exists', E_ERROR ) );
 		}
-		// never overload the setter! Make sure you have an
-		trigger_error(__CLASS__ . '::' . __METHOD__ . ' Method ' . $method . ' for variable ' . $name . ' does not exists', E_ERROR);
 
-		return null;
+		return $_value;
 	}
 
 	/**
@@ -110,38 +99,9 @@ abstract class Base extends Data
 	 */
 	public function __isset($name)
 	{
-		$name = self::deprecatedNameAlias($name);
-		if (self::isLegacy())
-		{
-			return isset($this->{$name});
-		}
-
 		$method = self::getMethodName('is', $name);
-		if (method_exists($this, $method))
-		{
-			return $this->{$method()};
-		}
 
-		return isset($this->{$name});
-	}
-
-	/**
-	 * Old Array Key names
-	 *
-	 * @param string $name
-	 *
-	 * @deprecated jproof/xajax 0.7.2
-	 * @return string
-	 */
-	protected static function deprecatedNameAlias(?string $name = null)
-	{
-		switch ($name)
-		{
-			case 'javascript URI':
-				return 'javascriptUri';
-			default:
-				return $name;
-		}
+		return method_exists( $this, $method ) ? $this->{$method()} : isset( $this->{$name} );
 	}
 
 	/**
@@ -155,25 +115,6 @@ abstract class Base extends Data
 	private static function getMethodName(?string $type = null, ?string $name = null): string
 	{
 		return (string) $type . ucfirst((string) $name);
-	}
-
-	/**
-	 * @return bool
-	 * @deprecated jproof/xajax 0.7.2 will be removed
-	 */
-	public static function isLegacy(): bool
-	{
-		return self::$legacy;
-	}
-
-	/**
-	 * @param bool $legacy
-	 *
-	 * @deprecated jproof/xajax 0.7.2 will be removed
-	 */
-	public static function setLegacy(?bool $legacy = null)
-	{
-		self::$legacy = (bool) $legacy;
 	}
 
 	/**

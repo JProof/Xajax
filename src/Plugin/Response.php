@@ -3,7 +3,7 @@
  * PHP version php7
  *
  * @category
- * @package            xajax-php-7
+ * @package            jybrid-php-7
  * @author             ${JProof}
  * @copyright          ${copyright}
  * @license            ${license}
@@ -14,23 +14,23 @@
 
 declare(strict_types=1);
 
-namespace Xajax\Plugin;
+namespace Jybrid\Plugin;
 
-use Xajax\Language;
+use Jybrid\Language;
 
 /**
  * Class Response
  *
- * @package Xajax\Plugin
+ * @package Jybrid\Plugin
  */
 abstract class Response extends Plugin
 {
-	use \Xajax\Errors\TraitCall;
+	use \Jybrid\Errors\TraitCall;
 
 	/*
 		Object: objResponse
 
-		A reference to the current <xajaxResponse> object that is being used
+		A reference to the current <jybridResponse> object that is being used
 		to build the response that will be sent to the client browser.
 	*/
 	/**
@@ -40,12 +40,12 @@ abstract class Response extends Plugin
 	/*
 		Function: setResponse
 
-		Called by the <xajaxResponse> object that is currently being used
+		Called by the <jybridResponse> object that is currently being used
 		to build the response that will be sent to the client browser.
 
 		Parameters:
 
-		objResponse - (object):  A reference to the <xajaxResponse> object
+		objResponse - (object):  A reference to the <jybridResponse> object
 	*/
 	/**
 	 * @param $objResponse
@@ -59,8 +59,8 @@ abstract class Response extends Plugin
 		Function: addCommand
 
 		Used internally to add a command to the response command list.  This
-		will call <xajaxResponse->addPluginCommand> using the reference provided
-		in <xajaxResponsePlugin->setResponse>.
+		will call <jybridResponse->addPluginCommand> using the reference provided
+		in <jybridResponsePlugin->setResponse>.
 	*/
 	/**
 	 * @param $aAttributes
@@ -74,9 +74,9 @@ abstract class Response extends Plugin
 	/*
 		Function: getName
 
-		Called by the <xajaxPluginManager> when the user script requests a plugin.
+		Called by the <jybridPluginManager> when the user script requests a plugin.
 		This name must match the plugin name requested in the called to
-		<xajaxResponse->plugin>.
+		<jybridResponse->plugin>.
 	*/
 	/**
 	 *
@@ -86,7 +86,7 @@ abstract class Response extends Plugin
 //SkipDebug
 		$objLanguageManager = Language::getInstance();
 		trigger_error(
-		    $objLanguageManager->getText('XJXPLG:GNERR:01')
+			$objLanguageManager->getText( 'JYBPLG:GNERR:01' )
 		    , E_USER_ERROR
 		);
 //EndSkipDebug
@@ -95,10 +95,10 @@ abstract class Response extends Plugin
 	/*
 		Function: process
 
-		Called by <xajaxResponse> when a user script requests the service of a
+		Called by <jybridResponse> when a user script requests the service of a
 		response plugin.  The parameters provided by the user will be used to
 		determine which response command and parameters will be sent to the
-		client upon completion of the xajax request process.
+		client upon completion of the jybrid request process.
 	*/
 	/**
 	 *
@@ -108,7 +108,7 @@ abstract class Response extends Plugin
 //SkipDebug
 		$objLanguageManager = Language::getInstance();
 		trigger_error(
-		    $objLanguageManager->getText('XJXPLG:PERR:01')
+			$objLanguageManager->getText( 'JYBPLG:PERR:01' )
 		    , E_USER_ERROR
 		);
 //EndSkipDebug

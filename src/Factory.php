@@ -3,7 +3,7 @@
  * PHP version php7
  *
  * @category
- * @package            xajax-php-7
+ * @package            jybrid-php-7
  * @author             ${JProof}
  * @copyright          ${copyright}
  * @license            ${license}
@@ -14,42 +14,62 @@
 
 declare(strict_types=1);
 
-namespace Xajax;
+namespace Jybrid;
 
-use Xajax\Response\Response;
-use Xajax\Scripts\Generator;
-use Xajax\Scripts\Scripts;
+use Jybrid\Emitter\Core;
+use Jybrid\Header\PhpRequest;
+use Jybrid\Interfaces\IfacePluginRequestRequest;
+use Jybrid\Plugin\Request;
+use Jybrid\Response\Response;
+use Jybrid\Scripts\Generator;
+use Jybrid\Scripts\Scripts;
+use Jybrid\Snippets\Snippets;
 
 /**
  * Class Factory
  *
- * @package Xajax
+ * @package Jybrid
  */
 class Factory
 {
-	use \Xajax\Errors\TraitCall;
+	use \Jybrid\Errors\TraitCall;
 	/**
-	 * Xajax Instances
+	 * Jybrid Instances
 	 *
 	 * @var array
 	 */
 	private static $instances = [];
 	/**
-	 * Is an Request against Xajax
+	 * Is an RequestRequest against Jybrid
 	 *
 	 * @var bool
 	 * @since 0.7.3
 	 */
-	private static $isXajaxRequest;
+	private static $isJybridRequest;
 	/**
-	 * @since 0.7.3 Detect the Request is not an old xajax type
+	 * @since 0.7.3 During the detect jybrid request method the target-jybrid-plugin will be automatically load(currently only cms)
 	 * @var bool
 	 */
-	private static $cmsRequest;
+	private static $requestAgainstPlugin;
 	/**
 	 * @var
 	 */
 	private static $input;
+	/**
+	 * @var Core
+	 */
+	private static $emitters;
+	/**
+	 * @var Snippets
+	 */
+	private static $snippets;
+	/**
+	 * Headers sent during an Ajax request
+	 *
+	 * @var \Jybrid\Header\PhpRequest
+	 * @since 0.7.8 Global Headers for all jybrid requests can be set
+	 */
+	private static $headers;
 
 	/**
 	 * Factory constructor.
@@ -59,23 +79,22 @@ class Factory
 	}
 
 	/**
-	 * Getting Access to Xajax
+	 * Getting Access to Jybrid
 	 *
-	 * @param string $instance      instanceName is necessary
-	 * @param array  $configuration configuration to Xajax
+	 * @param string $instance instanceName is necessary
 	 *
-	 * @return \Xajax\Xajax
+	 * @return \Jybrid\Jybrid
 	 */
-	public static function getInstance(string $instance = null, array $configuration = null): \Xajax\Xajax
+	public static function getInstance( string $instance = null ): \Jybrid\Jybrid
 	{
 		// todo errors and logger on less instanceName
 		// todo clearing evil name stuff if need
 		$instances = self::getInstances();
-		if (array_key_exists($instance, $instances) && ($foundInstance = $instances[$instance]) instanceof \Xajax\Xajax)
+		if ( array_key_exists( $instance, $instances ) && ( $foundInstance = $instances[ $instance ] ) instanceof \Jybrid\Jybrid )
 		{
 			return $foundInstance;
 		}
-		$instances[$instance] = self::createXajax($configuration);
+		$instances[ $instance ] = self::createJybrid();
 		self::setInstances($instances);
 
 		return $instances[$instance];
@@ -84,21 +103,18 @@ class Factory
 	/**
 	 * Getting the Script-Handler
 	 *
-	 * @return \Xajax\Scripts\Scripts
+	 * @return \Jybrid\Scripts\Scripts
 	 */
-	public static function getScripts(): \Xajax\Scripts\Scripts
+	public static function getScripts(): \Jybrid\Scripts\Scripts
 	{
 		return Scripts::getInstance();
 	}
 
 	/**
-	 * @param array $configuration
-	 *
-	 * @return \Xajax\Xajax
+	 * @return \Jybrid\Jybrid
 	 */
-	private static function createXajax(array $configuration = null): \Xajax\Xajax
-	{
-		return new \Xajax\Xajax($configuration);
+	private static function createJybrid(): \Jybrid\Jybrid {
+		return new \Jybrid\Jybrid();
 	}
 
 	/**
@@ -130,89 +146,71 @@ class Factory
 	}
 
 	/**
-	 * Xajax Request Parameters Class to handle Post Server Get Request Vars cleanly
+	 * Jybrid RequestRequest Parameters Class to handle Post Server Get RequestRequest Vars cleanly
 	 *
 	 * @param null|string $method
 	 *
-	 * @return \Xajax\Input\Parameter
+	 * @return \Jybrid\Input\Parameter
 	 */
 	public static function getInput(?string $method = null): Input\Parameter
 	{
 		$input = self::$input ?? self::$input = new Input\Input();
+
 		return $input->getInput($method);
 	}
 
 	/**
-	 * Simple detection request was send against Xajax
+	 * Simple detection request was send against Jybrid
 	 *
 	 * @return bool
 	 */
-	public static function isXajaxRequest(): bool
+	public static function isJybridRequest(): bool
 	{
 		// todo case: you have an file with responses and an request was send by browser against this file, maybe the request should not to be handle
-		return self::$isXajaxRequest ?? self::getInput()->getBool('xjxreq', false);
+		if ( \is_bool( self::$isJybridRequest ) ) {
+			return self::$isJybridRequest;
+		}
+		if ( false !== ( self::$isJybridRequest = self::getInput( 'request' )->getBool( 'jybreq', false ) ) ) {
+			self::detectJybridRequestPlugin( self::getInput( 'request' )->getString( 'jybreq', '' ) );
+		}
+
+		return self::$isJybridRequest;
 	}
 
 	/**
-	 * Method to check the calls was an new Cms Xajax Call
+	 * Method to check the calls was an new Cms Jybrid Call
 	 *
 	 * @since 0.7.3
 	 * @return bool
 	 */
 	public static function isCmsRequest(): bool
 	{
-		return self::$cmsRequest ?? self::$cmsRequest = self::detectIsCmsRequest();
+		return self::isJybridRequest() && self::$requestAgainstPlugin === 'cms';
 	}
 
 	/**
-	 * Can be set if the Request came not from Xajax but you will use the response-processor from xajax to give back the response
+	 * Can be set if the RequestRequest came not from Jybrid but you will use the response-processor from jybrid to give back the response
 	 *
 	 * @param bool|null $is
 	 *
 	 * @return bool
 	 */
-	public static function setXajaxRequest(?bool $is = null): bool
-	{
-		return self::$isXajaxRequest = (bool) $is;
-	}
-
-	/**
-	 * @param bool|null $is
-	 *
-	 * @return bool|null
-	 */
-	public static function setCmsRequest(?bool $is = null): ?bool
-	{
-		$is = (bool) $is;
-		if ($is)
-		{
-			self::setXajaxRequest($is);
-			self::$cmsRequest = $is;
-		}
-		else
-		{
-			self::$cmsRequest = $is;
-		}
-		return $is;
+	public static function setJybridRequest( ?bool $is = null ): bool {
+		return self::$isJybridRequest = (bool) $is;
 	}
 
 	/**
 	 * @since 0.7.3
-	 * @todo  check more parameters or insert methods for check cms Request
-	 * @return bool
+	 * @todo  check more parameters or insert methods for check cms RequestRequest
+	 *
+	 * @param string $pluginName
+	 *
+	 * @return null|string
 	 */
-	private static function detectIsCmsRequest(): bool
-	{
-		if (self::isXajaxRequest() && 'cms' === self::getInput()->getWord('xjxreq'))
-		{
-			// todo check security to auto-allow register plugin
-			// automatically enable the cms Plugin which is handling found objResponses
-			self::getInstance()->getRequestPlugin('cms');
+	private static function detectJybridRequestPlugin( string $pluginName ): ?string {
+		// todo check security to auto-allow register plugin
 
-			return true;
-		}
-
-		return false;
+		return ( self::getInstance()->getRequestPlugin( $pluginName ) instanceof Request ) ? self::$requestAgainstPlugin = $pluginName : null;
 	}
 
 	/**
@@ -235,5 +233,82 @@ class Factory
 	public static function getClientScript(?bool $forceNew = null): string
 	{
 		return Generator::generateClientScript($forceNew);
+	}
+
+	/**
+	 * Replacement of the old $xajax->register Method.
+	 *
+	 * @param string                                                  $pluginName         Name of the Plugin 'cms' or 'userfunction' or your own
+	 *                                                                                    plugin
+	 * @param string                                                  $jsMethodName       Js-MethodName to call via jybrid.Exe('js-MethodName')
+	 *                                                                                    in Browser-Script to execute an RequestRequest
+	 * @param iterable|\Jybrid\Interfaces\IfaceRequestParameters|null $configure          Configuring the RequestRequest with parameters if need
+	 *
+	 * @return IfacePluginRequestRequest
+	 */
+	public static function registerRequest( string $pluginName, string $jsMethodName, $configure = null ): ?IfacePluginRequestRequest {
+		try {
+			$plugin = self::getInstance()->getRequestPlugin( $pluginName );
+		}
+		catch ( \RuntimeException $exception ) {
+			// todo log
+		}
+		if ( $plugin ) {
+			return $plugin->registerRequest( $jsMethodName, $configure );
+		}
+
+		// todo error handling
+		return null;
+	}
+
+	/**
+	 * Try to get an already registered Request object
+	 *
+	 * @param string $pluginName
+	 * @param string $jsMethodName
+	 *
+	 * @since 0.7.8 more convenient Button-Handling
+	 * @return \Jybrid\Interfaces\IfacePluginRequestRequest|null
+	 */
+	public static function getRequestObject( string $pluginName, string $jsMethodName ): ?IfacePluginRequestRequest {
+		try {
+			/** @var \Jybrid\Plugin\Request $plugin */
+			$plugin = self::getInstance()->getRequestPlugin( $pluginName );
+		}
+		catch ( \RuntimeException $exception ) {
+			// todo log
+		}
+
+		return ( $plugin instanceof \Jybrid\Plugin\Request && ( $registeredRequestObject = $plugin->getRequestObject( $jsMethodName ) ) ) ? $registeredRequestObject : null;
+	}
+
+	/**
+	 * Getting the Core Emitter for initial PageLoad
+	 *
+	 * @since 0.7.4 Emitters-Update
+	 * @return Core
+	 */
+	public static function getEmitters(): Core {
+		return self::$emitters ?? self::$emitters = new Core();
+	}
+
+	/**
+	 * Snippets are small pieces of Javascript they will be rendered on initial page-load into the script tag
+	 *
+	 * @since 0.7.5 Javascript-Snippet-Update
+	 * @return Snippets
+	 */
+	public static function getSnippets(): Snippets {
+		return self::$snippets ?? self::$snippets = new Snippets();
+	}
+
+	/**
+	 * Headers sent during an Ajax request
+	 *
+	 * @since 0.7.8 Global Headers for all jybrid requests can be set
+	 * @return \Jybrid\Header\PhpRequest
+	 */
+	public static function getHeaders(): PhpRequest {
+		return self::$headers ?? self::$headers = new PhpRequest();
 	}
 }

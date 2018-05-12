@@ -3,7 +3,7 @@
  * PHP version php7
  *
  * @category
- * @package            xajax-php-7
+ * @package            jybrid-php-7
  * @author             ${JProof}
  * @copyright          ${copyright}
  * @license            ${license}
@@ -14,7 +14,7 @@
 
 declare(strict_types=1);
 
-namespace Xajax\Scriptlates;
+namespace Jybrid\Scriptlates;
 
 class Scriptlate
 {
@@ -24,7 +24,7 @@ class Scriptlate
 	protected static $dirs;
 
 	/**
-	 * @param null|string $name "core.xajax"
+	 * @param null|string $name "core.jybrid"
 	 * @param array|null  $data array with datas will be send to the script
 	 * @param null|string $dir  override directory. priority-queue will not used for the file
 	 */

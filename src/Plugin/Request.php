@@ -3,7 +3,7 @@
  * PHP version php7
  *
  * @category
- * @package            xajax-php-7
+ * @package            jybrid-php-7
  * @author             ${JProof}
  * @copyright          ${copyright}
  * @license            ${license}
@@ -14,31 +14,27 @@
 
 declare(strict_types=1);
 
-namespace Xajax\Plugin;
+namespace Jybrid\Plugin;
+
+use Jybrid\Errors\TraitCall;
+use Jybrid\Factory;
+use Jybrid\Interfaces\IfacePluginRequestRequest;
 
 /**
- * Class Request
+ * Class RequestRequest
  *
- * @package Xajax\Plugin
- */
-
-use Xajax\Factory;
-
-/**
- * Class Request
- *
- * @package Xajax\Plugin
+ * @package Jybrid\Plugin
  */
 abstract class Request extends Plugin
 {
-	use \Xajax\Errors\TraitCall;
+	use TraitCall;
 	/**
 	 * @var
 	 */
 	static protected $instance;
 
 	/**
-	 * Request constructor.
+	 * RequestRequest constructor.
 	 *
 	 * @param string $pluginType
 	 */
@@ -48,32 +44,20 @@ abstract class Request extends Plugin
 	}
 
 	/**
-	 * Request Plugin can check the request was against it
+	 * RequestRequest Plugin can check the request was against it
 	 *
 	 * @return bool
 	 */
 	public function isRequestAgainstPlugin(): bool
 	{
-		return Factory::getInput()->getWord('xjxreq', '') === $this->getName();
+		return Factory::getInput()->getString( 'jybreq', '' ) === $this->getName();
 	}
 
-	/**
-	 * Function: configure
-	 * Called by the <xajaxPluginManager> when a configuration setting is changing.
-	 * Plugins should store a local copy of the settings they wish to use during
-	 * registration, client script generation or request processing.
-	 *
-	 * @param $sName
-	 * @param $mValue
-	 */
-	public function configure($sName, $mValue)
-	{
-	}
 
 	/*
 		Function: register
 
-		Called by the <xajaxPluginManager> when a user script when a function, event
+		Called by the <jybridPluginManager> when a user script when a function, event
 		or callable object is to be registered.  Additional plugins may support other
 		registration types.
 	*/
@@ -97,7 +81,7 @@ abstract class Request extends Plugin
 	/*
 		Function: generateClientScript
 
-		Called by <xajaxPluginManager> when the page's HTML is being sent to the browser.
+		Called by <jybridPluginManager> when the page's HTML is being sent to the browser.
 		This allows each plugin to inject some script / style or other appropriate tags
 		into the HEAD of the document.  Each block must be appropriately enclosed, meaning
 		javascript code must be enclosed in SCRIPT and /SCRIPT tags.
@@ -110,8 +94,8 @@ abstract class Request extends Plugin
 	/*
 		Function: canProcessRequest
 
-		Called by the <xajaxPluginManager> when a request has been received to determine
-		if the request is for a xajax enabled function or for the initial page load.
+		Called by the <jybridPluginManager> when a request has been received to determine
+		if the request is for a jybrid enabled function or for the initial page load.
 	*/
 	/**
 	 * @return bool
@@ -121,9 +105,9 @@ abstract class Request extends Plugin
 	/*
 		Function: processRequest
 
-		Called by the <xajaxPluginManager> when a request is being processed.  This
-		will only occur when <xajax> has determined that the current request is a valid
-		(registered) xajax enabled function via <xajax->canProcessRequest>.
+		Called by the <jybridPluginManager> when a request is being processed.  This
+		will only occur when <jybrid> has determined that the current request is a valid
+		(registered) jybrid enabled function via <jybrid->canProcessRequest>.
 
 		Returns:
 			false
@@ -140,4 +124,25 @@ abstract class Request extends Plugin
 	 * @return string
 	 */
 	abstract public function getName(): string;
+
+	/**
+	 * Getting Access to an RequestRequest-Object.
+	 * It auto-registers the plugin if it was not load before
+	 *
+	 * @param string                                                     $jsName
+	 * @param iterable|\Jybrid\Interfaces\IfacePluginRequestRequest|null $configure
+	 *
+	 * @return IfacePluginRequestRequest|null
+	 */
+	abstract public static function registerRequest( string $jsName, $configure = null ): ?IfacePluginRequestRequest;
+
+	/**
+	 * Try to get an already registered Request Object
+	 *
+	 * @param string $jsName
+	 *
+	 * @return \Jybrid\Interfaces\IfacePluginRequestRequest|null
+	 * @since 0.7.8 more convenient Button-Handling
+	 */
+	abstract public static function getRequestObject( string $jsName ): ?IfacePluginRequestRequest;
 }

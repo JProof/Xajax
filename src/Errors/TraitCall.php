@@ -3,7 +3,7 @@
  * PHP version php7
  *
  * @category
- * @package            xajax-php-7
+ * @package            jybrid-php-7
  * @author             ${JProof}
  * @copyright          ${copyright}
  * @license            ${license}
@@ -14,14 +14,14 @@
 
 declare(strict_types=1);
 
-namespace Xajax\Errors;
+namespace Jybrid\Errors;
 
 use BadMethodCallException;
 
 /**
  * Trait Call
  *
- * @package Xajax\Errors
+ * @package Jybrid\Errors
  */
 trait TraitCall
 {

@@ -1,40 +1,43 @@
 <?php
 
-namespace Xajax\Response {
+namespace Jybrid\Response {
 
 	/*
-		File: xajaxResponseManager.inc.php
+		File: jybridResponseManager.inc.php
 
-		Contains the xajaxResponseManager class
+		Contains the jybridResponseManager class
 
-		Title: xajaxResponseManager class
+		Title: jybridResponseManager class
 
 		Please see <copyright.inc.php> for a detailed description, copyright
 		and license information.
 	*/
 
 	/*
-		@package xajax
-		@version $Id: xajaxResponseManager.inc.php 362 2007-05-29 15:32:24Z calltoconstruct $
+		@package jybrid
+		@version $Id: jybridResponseManager.inc.php 362 2007-05-29 15:32:24Z calltoconstruct $
 		@copyright Copyright (c) 2005-2007 by Jared White & J. Max Wilson
 		@copyright Copyright (c) 2008-2010 by Joseph Woolley, Steffen Konerow, Jared White  & J. Max Wilson
-		@license http://www.xajaxproject.org/bsd_license.txt BSD License
+		@license http://www.jybridproject.org/bsd_license.txt BSD License
 	*/
 
 	/*
-		Class: xajaxResponseManager
+		Class: jybridResponseManager
 
 		This class stores and tracks the response that will be returned after
 		processing a request.  The response manager represents a single point
-		of contact for working with <xajaxResponse> objects as well as
-		<xajaxCustomResponse> objects.
+		of contact for working with <jybridResponse> objects as well as
+		<jybridCustomResponse> objects.
 	*/
 
-	use Xajax\Language;
+	use Jybrid\Header\PhpResponse;
+	use Jybrid\Language;
 
 	final class Manager
 	{
-		use \Xajax\Errors\TraitCall;
+		use \Jybrid\Errors\TraitCall;
+
+		/**@since  0.7.7 Header* */
 
 		/*
 			Object: objResponse
@@ -43,26 +46,26 @@ namespace Xajax\Response {
 			once the request processing phase is complete.
 		*/
 		/**
-		 * @var \Xajax\Response\Response
+		 * @var \Jybrid\Response\Response
 		 */
 		private $objResponse;
-		/*
-			String: sCharacterEncoding
-		*/
-		private $sCharacterEncoding;
-		/*
-			Boolean: bOutputEntities
-		*/
-		private $bOutputEntities;
 		/*
 			Array: aDebugMessages
 		*/
 		private $aDebugMessages = [];
+		/**
+		 * @var PhpResponse
+		 */
+		private $header;
+
+		private function __construct() {
+			$this->header = new PhpResponse();
+		}
 
 		/*
 			Function: getInstance
 
-			Implementation of the singleton pattern: provide a single instance of the <xajaxResponseManager>
+			Implementation of the singleton pattern: provide a single instance of the <jybridResponseManager>
 			to all who request it.
 		*/
 		public static function &getInstance(): Manager
@@ -74,75 +77,6 @@ namespace Xajax\Response {
 			}
 
 			return $obj;
-		}
-
-		/*
-			Function: configure
-
-			Called by the xajax object when configuration options are set in the main script.  Option
-			values are passed to each of the main xajax components and stored locally as needed.  The
-			<xajaxResponseManager> will track the characterEncoding and outputEntities settings.
-
-			Parameters:
-			$sName - (string): Setting name
-			$mValue - (mixed): Value
-		*/
-		public function configure($sName, $mValue)
-		{
-			if ('characterEncoding' == $sName)
-			{
-				$this->sCharacterEncoding = $mValue;
-
-				if (isset($this->objResponse))
-				{
-					$this->objResponse->setCharacterEncoding($this->sCharacterEncoding);
-				}
-			}
-			else if ('contentType' == $sName)
-			{
-				if (isset($this->objResponse))
-				{
-					$this->objResponse->setContentType($mValue);
-				}
-			}
-			else if ('outputEntities' == $sName)
-			{
-				if (true === $mValue || false === $mValue)
-				{
-					$this->bOutputEntities = $mValue;
-
-					if (isset($this->objResponse))
-					{
-						$this->objResponse->setOutputEntities($this->bOutputEntities);
-					}
-				}
-			}
-			$this->aSettings[$sName] = $mValue;
-		}
-
-		/*
-			Function: getConfiguration
-
-			Get the current value of a configuration setting that was previously set
-			via <xajax->configure> or <xajax->configureMany>
-
-			Parameters:
-
-			$sName - (string): The name of the configuration setting
-
-			Returns:
-
-			$mValue : (mixed):  The value of the setting if set, null otherwise.
-		*/
-
-		public function getConfiguration($sName)
-		{
-			if (isset($this->aSettings[$sName]))
-			{
-				return $this->aSettings[$sName];
-			}
-
-			return null;
 		}
 
 		/*
@@ -160,8 +94,8 @@ namespace Xajax\Response {
 			Function: append
 
 			Used, primarily internally, to append one response object onto the end of another.  You can
-			append one xajaxResponse to the end of another, or append a xajaxCustomResponse onto the end of
-			another xajaxCustomResponse.  However, you cannot append a standard response object onto the end
+			append one jybridResponse to the end of another, or append a jybridCustomResponse onto the end of
+			another jybridCustomResponse.  However, you cannot append a standard response object onto the end
 			of a custom response and likewise, you cannot append a custom response onto the end of a standard
 			response.
 
@@ -174,56 +108,30 @@ namespace Xajax\Response {
 		*/
 		public function append($mResponse)
 		{
-			if ($mResponse instanceof \Xajax\Response\Response)
+			if ( $mResponse instanceof \Jybrid\Response\Response )
 			{
 				if (null === $this->objResponse)
 				{
 					$this->objResponse = $mResponse;
-				}
-				else if ($this->objResponse instanceof \Xajax\Response\Response)
+				} else if ( $this->objResponse instanceof \Jybrid\Response\Response )
 				{
 					if ($this->objResponse !== $mResponse)
 					{
 						$this->objResponse->appendResponse($mResponse);
 					}
-				}
-				else
+				} else
 				{
 					$objLanguageManager = Language::getInstance();
 					$this->debug(
-					    $objLanguageManager->getText('XJXRM:MXRTERR')
-					    . get_class($this->objResponse)
-					    . ')'
+						$objLanguageManager->getText( 'JYBRM:MXRTERR' )
+						. get_class($this->objResponse)
+						. ')'
 					);
 				}
-			}
-			else if ($mResponse instanceof xajaxCustomResponse)
-			{
-				if (null === $this->objResponse)
-				{
-					$this->objResponse = $mResponse;
-				}
-				else if ($this->objResponse instanceof xajaxCustomResponse)
-				{
-					if ($this->objResponse !== $mResponse)
-					{
-						$this->objResponse->appendResponse($mResponse);
-					}
-				}
-				else
-				{
-					$objLanguageManager = Language::getInstance();
-					$this->debug(
-					    $objLanguageManager->getText('XJXRM:MXRTERR')
-					    . get_class($this->objResponse)
-					    . ')'
-					);
-				}
-			}
-			else
+			} else
 			{
 				$objLanguageManager = Language::getInstance();
-				$this->debug($objLanguageManager->getText('XJXRM:IRERR'));
+				$this->debug( $objLanguageManager->getText( 'JYBRM:IRERR' ) );
 			}
 		}
 
@@ -232,7 +140,7 @@ namespace Xajax\Response {
 
 			Appends a debug message on the end of the debug message queue.  Debug messages
 			will be sent to the client with the normal response (if the response object supports
-			the sending of debug messages, see: <xajaxResponse>)
+			the sending of debug messages, see: <jybridResponse>)
 
 			Parameters:
 
@@ -265,38 +173,19 @@ namespace Xajax\Response {
 			}
 		}
 
-		/*
-			Function: getCharacterEncoding
-
-			Called automatically by new response objects as they are constructed to obtain the
-			current character encoding setting.  As the character encoding is changed, the <xajaxResponseManager>
-			will automatically notify the current response object since it would have been constructed
-			prior to the setting change, see <xajaxResponseManager::configure>.
-		*/
-		public function getCharacterEncoding()
+		/**
+		 * @return \Jybrid\Response\Response
+		 */
+		public function getObjResponse(): ?\Jybrid\Response\Response
 		{
-			return $this->sCharacterEncoding;
-		}
-
-		/*
-			Function: getOutputEntities
-
-			Called automatically by new response objects as they are constructed to obtain the
-			current output entities setting.  As the output entities setting is changed, the
-			<xajaxResponseManager> will automatically notify the current response object since it would
-			have been constructed prior to the setting change, see <xajaxResponseManager::configure>.
-		*/
-		public function getOutputEntities()
-		{
-			return $this->bOutputEntities;
+			return $this->objResponse;
 		}
 
 		/**
-		 * @return \Xajax\Response\Response
+		 * @return PhpResponse
 		 */
-		public function getObjResponse(): ?\Xajax\Response\Response
-		{
-			return $this->objResponse;
+		public function getHeader(): PhpResponse {
+			return $this->header;
 		}
 	}
 }

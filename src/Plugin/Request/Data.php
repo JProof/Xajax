@@ -3,7 +3,7 @@
  * PHP version php7
  *
  * @category
- * @package            xajax-php-7
+ * @package            jybrid-php-7
  * @author             ${JProof}
  * @copyright          ${copyright}
  * @license            ${license}
@@ -14,7 +14,7 @@
 
 declare(strict_types=1);
 
-namespace Xajax\Plugin\Request;
+namespace Jybrid\Plugin\Request;
 
 use InvalidArgumentException;
 
@@ -22,22 +22,21 @@ use InvalidArgumentException;
  * Class Plugin
  * PluginObject
  *
- * @package Xajax\Plugin\Request
- * @property-read string                $name
- * @property-read int                   $priority
- * @property-read string                pluginType
- * @property-read \Xajax\Plugin\Request $pluginInstance
+ * @package Jybrid\Plugin\RequestRequest
+ * @property-read string                 $name
+ * @property-read int                    $priority
+ * @property-read string                 pluginType
+ * @property-read \Jybrid\Plugin\Request $pluginInstance
  */
-class Data extends \Xajax\Plugin\Data
+class Data extends \Jybrid\Plugin\Data
 {
 	/**
 	 * Getting Access to real plugin
 	 *
-	 * @return \Xajax\Plugin\Request
+	 * @return \Jybrid\Plugin\Request
 	 */
-	public function getPluginInstance(): \Xajax\Plugin\Request
-	{
-		if ($this->pluginInstance instanceof \Xajax\Plugin\Request)
+	public function getPluginInstance(): \Jybrid\Plugin\Request {
+		if ( $this->pluginInstance instanceof \Jybrid\Plugin\Request )
 		{
 			return $this->pluginInstance;
 		}
@@ -45,13 +44,12 @@ class Data extends \Xajax\Plugin\Data
 	}
 
 	/**
-	 * @param \Xajax\Plugin\Plugin $pluginInstance
+	 * @param \Jybrid\Plugin\Plugin $pluginInstance
 	 *
-	 * @return \Xajax\Plugin\Request\Data
+	 * @return \Jybrid\Plugin\Request\Data
 	 */
-	public function setPluginInstance(?\Xajax\Plugin\Plugin $pluginInstance = null): self
-	{
-		if ($pluginInstance instanceof \Xajax\Plugin\Request)
+	public function setPluginInstance( ?\Jybrid\Plugin\Plugin $pluginInstance = null ): self {
+		if ( $pluginInstance instanceof \Jybrid\Plugin\Request )
 		{
 			$this->pluginInstance = $pluginInstance;
 

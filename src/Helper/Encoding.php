@@ -3,7 +3,7 @@
  * PHP version php7
  *
  * @category
- * @package            xajax-php-7
+ * @package            jybrid-php-7
  * @author             ${JProof}
  * @copyright          ${copyright}
  * @license            ${license}
@@ -14,7 +14,7 @@
 
 declare(strict_types=1);
 
-namespace Xajax\Helper {
+namespace Jybrid\Helper {
 
 	use RuntimeException;
 
@@ -22,7 +22,7 @@ namespace Xajax\Helper {
 	 * Class Encoding
 	 * Helper to detect and get valid Encoding Names
 	 *
-	 * @package Xajax\Helpers
+	 * @package Jybrid\Helpers
 	 */
 	class Encoding
 	{
@@ -55,9 +55,9 @@ namespace Xajax\Helper {
 		{
 			$encodings = self::getPhpEncodings();
 
-			if ($strict && 0 < count($encodings))
+			if ( 0 < \count( $encodings ) )
 			{
-				return array_key_exists($name, $encodings);
+				return \in_array( $name, $encodings, $strict );
 			}
 
 			return false;
@@ -75,7 +75,7 @@ namespace Xajax\Helper {
 
 				$encodings = self::getEncodings();
 
-				if (0 === count($encodings))
+				if ( 0 === \count( $encodings ) )
 				{
 					//todo can be removed or set as notice
 					throw new RuntimeException('Missing PHP MBString extension');

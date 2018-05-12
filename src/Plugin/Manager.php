@@ -3,7 +3,7 @@
  * PHP version php7
  *
  * @category
- * @package            xajax-php-7
+ * @package            jybrid-php-7
  * @author             ${JProof}
  * @copyright          ${copyright}
  * @license            ${license}
@@ -14,35 +14,36 @@
 
 declare(strict_types=1);
 
-namespace Xajax\Plugin {
+namespace Jybrid\Plugin {
 
 	use InvalidArgumentException;
-	use Xajax\Language;
-	use Xajax\Plugin\Request\Data;
-	use Xajax\Plugin\Request\RequestPluginIface;
+	use Jybrid\Interfaces\IfacePluginRequest;
+	use Jybrid\Interfaces\IfacePluginRequestRequest;
+	use Jybrid\Language;
+	use Jybrid\Plugin\Request\Data;
 
 	/**
 	 * Class Manager
 	 */
 	class Manager
 	{
-		use \Xajax\Errors\TraitCall;
+		use \Jybrid\Errors\TraitCall;
 		/**
-		 * The Request-Plugins as own Objects with getters and setters
+		 * The RequestRequest-Plugins as own Objects with getters and setters
 		 *
-		 * @var \Xajax\Plugin\Request\Datas
+		 * @var \Jybrid\Plugin\Request\Datas
 		 */
 		private $requestPlugins;
 		/**
-		 * The Request-Plugins as own Objects with getters and setters
+		 * The RequestRequest-Plugins as own Objects with getters and setters
 		 *
-		 * @var \Xajax\Plugin\Response\Datas
+		 * @var \Jybrid\Plugin\Response\Datas
 		 */
 		private $responsePlugins;
 		/*
-			Function: xajaxPluginManager
+			Function: jybridPluginManager
 
-			Construct and initialize the one and only xajax plugin manager.
+			Construct and initialize the one and only jybrid plugin manager.
 		*/
 
 		/**
@@ -51,20 +52,19 @@ namespace Xajax\Plugin {
 		private function __construct()
 		{
 
-			$this->requestPlugins  = new \Xajax\Plugin\Request\Datas();
-			$this->responsePlugins = new \Xajax\Plugin\Response\Datas;
+			$this->requestPlugins  = new \Jybrid\Plugin\Request\Datas();
+			$this->responsePlugins = new \Jybrid\Plugin\Response\Datas;
 		}
-
 
 		/**
 		 * Function: getInstance
 		 * Implementation of the singleton pattern: returns the one and only instance of the
-		 * xajax plugin manager.
+		 * jybrid plugin manager.
 		 * Returns:
 		 * object : a reference to the one and only instance of the
 		 * plugin manager.
 		 *
-		 * @return \Xajax\Plugin\Manager
+		 * @return \Jybrid\Plugin\Manager
 		 */
 		public static function &getInstance(): Manager
 		{
@@ -78,25 +78,20 @@ namespace Xajax\Plugin {
 		}
 
 		/**
-		 * Register Request Plugin
+		 * Register RequestRequest Plugin
 		 *
-		 * @todo hier gehts weiter, setting des Plugins als Data-Object
-		 *
-		 * @param \Xajax\Plugin\Request $objPlugin
-		 * @param int|null              $nPriority
+		 * @param \Jybrid\Interfaces\IfacePluginRequest $objPlugin
+		 * @param int|null                              $nPriority
 		 *
 		 * @return Request\Data
 		 */
-		protected function registerRequestPlugin(Request $objPlugin, ?int $nPriority = null): Request\Data
+		public function registerRequestPlugin( IfacePluginRequest $objPlugin, ?int $nPriority = null ): Request\Data
 		{
-			if (!$objPlugin instanceof RequestPluginIface)
-			{
-				throw new InvalidArgumentException('Request Plugin can not be registered because of missing RequestPluginIface');
-			}
-
-			// todo the Plugin is already exists!!
 			$plugins = $this->getRequestPlugins();
 
+			if ( $alreadyRegisteredPlugin = $plugins->getByName( $objPlugin->getName() ) ) {
+				return $alreadyRegisteredPlugin;
+			}
 			$pluginData = new Request\Data();
 			$pluginData->setPluginInstance($objPlugin);
 
@@ -106,48 +101,35 @@ namespace Xajax\Plugin {
 		}
 
 		/**
-		 * Register Request Plugin
+		 * Register RequestRequest Plugin
 		 *
 		 * @todo hier gehts weiter .........
 		 *
-		 * @param \Xajax\Plugin\Response $objPlugin
-		 * @param int|null               $nPriority
+		 * @param \Jybrid\Plugin\Response $objPlugin
+		 * @param int|null                $nPriority
 		 *
 		 * @throws \InvalidArgumentException
 		 */
 		protected function registerResponsePlugin(Response $objPlugin, ?int $nPriority = null)
 		{
-			if (!$objPlugin instanceof RequestPluginIface)
+			if ( ! $objPlugin instanceof IfacePluginRequestRequest )
 			{
 				throw new InvalidArgumentException('Request Plugin can not be registered because of missing ResponsePluginInfterface');
 			}
 
 			$plugins = $this->getRequestPlugins();
 
-			$plugin = new \Xajax\Plugin\Response\Data();
+			$plugin = new \Jybrid\Plugin\Response\Data();
 			$plugin->setPluginInstance($objPlugin);
 		}
 
-		/*
-			Function: registerPlugin
 
-			Registers a plugin.
 
-			Parameters:
-
-			objPlugin - (object):  A reference to an instance of a plugin.
-
-			Note:
-			Below is a table for priorities and their description:
-			0 thru 999: Plugins that are part of or extensions to the xajax core
-			1000 thru 8999: User created plugins, typically, these plugins don't care about order
-			9000 thru 9999: Plugins that generally need to be last or near the end of the plugin list
-		*/
 		/**
-		 * @param \Xajax\Plugin\Plugin $objPlugin
-		 * @param int|null             $nPriority
+		 * @param \Jybrid\Plugin\Plugin $objPlugin
+		 * @param int|null              $nPriority
 		 *
-		 * @return void|\Xajax\Plugin\Request\Data
+		 * @return void|\Jybrid\Plugin\Request\Data
 		 */
 		public function registerPlugin(Plugin $objPlugin, ?int $nPriority = null)
 		{
@@ -163,25 +145,25 @@ namespace Xajax\Plugin {
 
 			$objLanguageManager = Language::getInstance();
 			trigger_error(
-			    $objLanguageManager->getText('XJXPM:IPLGERR:01')
-			    . get_class($objPlugin)
-			    . $objLanguageManager->getText('XJXPM:IPLGERR:02')
+				$objLanguageManager->getText( 'JYBPM:IPLGERR:01' )
+				. get_class($objPlugin)
+				. $objLanguageManager->getText( 'JYBPM:IPLGERR:02' )
 			    , E_USER_ERROR
 			);
 		}
 
 		/**
-		 * @return \Xajax\Plugin\Request\Datas
+		 * @return \Jybrid\Plugin\Request\Datas
 		 */
-		public function getRequestPlugins(): \Xajax\Plugin\Request\Datas
+		public function getRequestPlugins(): \Jybrid\Plugin\Request\Datas
 		{
 			return $this->requestPlugins;
 		}
 
 		/**
-		 * @return \Xajax\Plugin\Response\Datas
+		 * @return \Jybrid\Plugin\Response\Datas
 		 */
-		public function getResponsePlugins(): \Xajax\Plugin\Response\Datas
+		public function getResponsePlugins(): \Jybrid\Plugin\Response\Datas
 		{
 			return $this->responsePlugins;
 		}
@@ -191,7 +173,7 @@ namespace Xajax\Plugin {
 		 * current request can be processed by one of them.  If no processor identifies
 		 * the current request, then the request must be for the initial page load.
 		 *
-		 * @see \Xajax\Xajax::canProcessRequest() for more information.
+		 * @see \Jybrid\Jybrid::canProcessRequest() for more information.
 		 * @return bool
 		 */
 		public function canProcessRequest(): bool
@@ -201,7 +183,7 @@ namespace Xajax\Plugin {
 			// Getting the StackObjects
 			$requestPlugins = $this->getRequestPlugins();
 
-			/** @var \Xajax\Plugin\Request\Data $requestPlugin */
+			/** @var \Jybrid\Plugin\Request\Data $requestPlugin */
 			foreach ($requestPlugins as $requestPlugin)
 			{
 
@@ -228,7 +210,7 @@ namespace Xajax\Plugin {
 			// Getting the StackObjects
 			$requestPlugins = $this->getRequestPlugins();
 
-			/** @var \Xajax\Plugin\Request\Data $requestPlugin */
+			/** @var \Jybrid\Plugin\Request\Data $requestPlugin */
 			foreach ($requestPlugins as $requestPlugin)
 			{
 
@@ -261,7 +243,7 @@ namespace Xajax\Plugin {
 		 *
 		 * @param string $name
 		 *
-		 * @return \Xajax\Plugin\Request\Data
+		 * @return \Jybrid\Plugin\Request\Data
 		 */
 		public function getRequestPlugin(?string $name = null): Data
 		{
@@ -271,33 +253,6 @@ namespace Xajax\Plugin {
 				return $pluginData;
 			}
 			throw new InvalidArgumentException('RequestPlugin not registered: ' . (string) $name);
-		}
-
-		/*
-			Function: _getScriptFilename
-
-			Returns the name of the script file, based on the current settings.
-
-			sFilename - (string):  The base filename.
-
-			Returns:
-
-			string - The filename as it should be specified in the script tags
-			on the browser.
-		*/
-
-		/*
-			Function: generateClientScript
-
-			Call each of the request and response plugins giving them the
-			opportunity to output some javascript to the page being generated.  This
-			is called only when the page is being loaded initially.  This is not
-			called when processing a request.
-		*/
-
-		public function configure()
-		{
-			$args = func_get_args();
 		}
 	}
 }

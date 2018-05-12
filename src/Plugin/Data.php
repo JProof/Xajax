@@ -3,7 +3,7 @@
  * PHP version php7
  *
  * @category
- * @package            xajax-php-7
+ * @package            jybrid-php-7
  * @author             ${JProof}
  * @copyright          ${copyright}
  * @license            ${license}
@@ -14,26 +14,30 @@
 
 declare(strict_types=1);
 
-namespace Xajax\Plugin;
+namespace Jybrid\Plugin;
+
+use Jybrid\Plugin\Plugin;
 
 /**
  * Class Plugin
  * PluginObject
  *
- * @package Xajax\Plugin\Request
- * @property-read string               $name
- * @property-read int                  $priority
- * @property-read string               pluginType
- * @property-read \Xajax\Plugin\Plugin $pluginInstance
+ * @package Jybrid\Plugin\RequestRequest
+ * @property-read string                $name
+ * @property-read int                   $priority
+ * @property-read string                pluginType
+ * @property-read \Jybrid\Plugin\Plugin $pluginInstance
  */
-abstract class Data extends \Xajax\Datas\Data
+abstract class Data extends \Jybrid\Datas\Data
 {
 	/**
 	 * Plugin constructor.
+	 *
+	 * @param iterable|null $datas
 	 */
-	public function __construct()
-	{
-		$this->setPluginType(\Xajax\Plugin\Plugin::getRequestType());
+	public function __construct( ?iterable $datas = null ) {
+		parent::__construct( $datas );
+		$this->setPluginType( Plugin::getRequestType() );
 	}
 
 	/**
@@ -47,9 +51,9 @@ abstract class Data extends \Xajax\Datas\Data
 	/**
 	 * @param string $name
 	 *
-	 * @return \Xajax\Plugin\Data
+	 * @return \Jybrid\Plugin\Data
 	 */
-	public function setName(?string $name = null)
+	public function setName( ?string $name = null ): Data
 	{
 		$this->name = (string) $name;
 
@@ -67,9 +71,9 @@ abstract class Data extends \Xajax\Datas\Data
 	/**
 	 * @param int $priority
 	 *
-	 * @return \Xajax\Plugin\Data
+	 * @return \Jybrid\Plugin\Data
 	 */
-	public function setPriority(?int $priority = null)
+	public function setPriority( ?int $priority = null ): Data
 	{
 		$this->priority = (int) $priority;
 
@@ -87,9 +91,9 @@ abstract class Data extends \Xajax\Datas\Data
 	/**
 	 * @param string $pluginType
 	 *
-	 * @return \Xajax\Plugin\Data
+	 * @return \Jybrid\Plugin\Data
 	 */
-	public function setPluginType(?string $pluginType = null)
+	public function setPluginType( ?string $pluginType = null ): Data
 	{
 		$this->pluginType = (string) $pluginType;
 
@@ -99,16 +103,16 @@ abstract class Data extends \Xajax\Datas\Data
 	/**
 	 * Getting Access to real plugin
 	 *
-	 * @return \Xajax\Plugin\Plugin
+	 * @return \Jybrid\Plugin\Plugin
 	 */
 	abstract protected function getPluginInstance();
 
 	/**
-	 * @param \Xajax\Plugin\Plugin $pluginInstance
+	 * @param \Jybrid\Plugin\Plugin $pluginInstance
 	 *
-	 * @return \Xajax\Plugin\Data
+	 * @return \Jybrid\Plugin\Data
 	 */
-	abstract protected function setPluginInstance(?\Xajax\Plugin\Plugin $pluginInstance = null);
+	abstract protected function setPluginInstance( ?Plugin $pluginInstance = null );
 
 	/**
 	 * Check the Plugin has an Method

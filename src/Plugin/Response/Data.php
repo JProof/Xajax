@@ -3,7 +3,7 @@
  * PHP version php7
  *
  * @category
- * @package            xajax-php-7
+ * @package            jybrid-php-7
  * @author             ${JProof}
  * @copyright          ${copyright}
  * @license            ${license}
@@ -14,7 +14,7 @@
 
 declare(strict_types=1);
 
-namespace Xajax\Plugin\Response;
+namespace Jybrid\Plugin\Response;
 
 use InvalidArgumentException;
 
@@ -22,23 +22,22 @@ use InvalidArgumentException;
  * Class Plugin
  * PluginObject
  *
- * @package Xajax\Plugin\Request
- * @property-read string                 $name
- * @property-read int                    $priority
- * @property-read string                 pluginType
- * @property-read \Xajax\Plugin\Response $pluginInstance
+ * @package Jybrid\Plugin\RequestRequest
+ * @property-read string                  $name
+ * @property-read int                     $priority
+ * @property-read string                  pluginType
+ * @property-read \Jybrid\Plugin\Response $pluginInstance
  */
-class Data extends \Xajax\Plugin\Data
+class Data extends \Jybrid\Plugin\Data
 {
 	/**
 	 * Getting Access to real plugin
 	 *
-	 * @return \Xajax\Plugin\Response
+	 * @return \Jybrid\Plugin\Response
 	 * @throws \InvalidArgumentException
 	 */
-	public function getPluginInstance(): \Xajax\Plugin\Response
-	{
-		if ($this->pluginInstance instanceof \Xajax\Plugin\Response)
+	public function getPluginInstance(): \Jybrid\Plugin\Response {
+		if ( $this->pluginInstance instanceof \Jybrid\Plugin\Response )
 		{
 			return $this->pluginInstance;
 		}
@@ -46,13 +45,13 @@ class Data extends \Xajax\Plugin\Data
 	}
 
 	/**
-	 * @param \Xajax\Plugin\Response $pluginInstance
+	 * @param \Jybrid\Plugin\Response $pluginInstance
 	 *
-	 * @return \Xajax\Plugin\Response\Data
+	 * @return \Jybrid\Plugin\Response\Data
 	 */
 	public function setPluginInstance(? $pluginInstance = null): self
 	{
-		if ($pluginInstance instanceof \Xajax\Plugin\Response)
+		if ( $pluginInstance instanceof \Jybrid\Plugin\Response )
 		{
 			$this->pluginInstance = $pluginInstance;
 

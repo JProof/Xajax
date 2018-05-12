@@ -3,7 +3,7 @@
  * PHP version php7
  *
  * @category
- * @package            xajax-php-7
+ * @package            jybrid-php-7
  * @author             ${JProof}
  * @copyright          ${copyright}
  * @license            ${license}
@@ -14,7 +14,7 @@
 
 declare(strict_types=1);
 
-namespace Xajax\Scripts;
+namespace Jybrid\Scripts;
 
 use Countable;
 use IteratorAggregate;
@@ -23,7 +23,7 @@ use SplPriorityQueue;
 /**
  * Class Queue
  *
- * @package Xajax\Scripts
+ * @package Jybrid\Scripts
  * @see     https://mwop.net/blog/253-Taming-SplPriorityQueue.html
  */
 class Queue implements Countable, IteratorAggregate

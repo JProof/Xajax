@@ -3,7 +3,7 @@
  * PHP version php7
  *
  * @category
- * @package            xajax-php-7
+ * @package            jybrid-php-7
  * @author             ${JProof}
  * @copyright          ${copyright}
  * @license            ${license}
@@ -14,21 +14,21 @@
 
 declare(strict_types=1);
 
-namespace Xajax;
+namespace Jybrid;
 
-use Xajax\Configuration\Base;
-use Xajax\Configuration\Deprecated;
-use Xajax\Configuration\Language;
-use Xajax\Configuration\Logging;
-use Xajax\Configuration\Security;
-use Xajax\Configuration\Uri;
-use Xajax\Errors\TraitCall;
-use Xajax\Helper\Encoding;
+use Jybrid\Configuration\Base;
+use Jybrid\Configuration\Traits\Deprecated;
+use Jybrid\Configuration\Traits\Logging;
+use Jybrid\Configuration\Traits\Security;
+use Jybrid\Configuration\Traits\Uri;
+use Jybrid\Errors\TraitCall;
+use Jybrid\Helper\Encoding;
+
 
 /**
  * Class Config
  *
- * @package Xajax
+ * @package Jybrid
  */
 class Configuration extends Base
 {
@@ -44,7 +44,7 @@ class Configuration extends Base
 	 */
 	use Security;
 	/** Language for errors an explanations **/
-	use Language;
+	use \Jybrid\Configuration\Traits\Language;
 
 	/**Configure the Error-Logging */
 	use Logging;
@@ -52,38 +52,30 @@ class Configuration extends Base
 	/** error handling **/
 	use TraitCall;
 	/**
-	 * String: XAJAX_DEFAULT_CHAR_ENCODING UTF-8
-	 * Default character encoding used by both the <xajax> and
-	 * <xajaxResponse> classes.
+	 * @since jybrid 7.0.1 Replaces the JYBRID_DEFAULT_CHAR_ENCODING
+	 * @var string
+	 */
+	private static $defaultCharacterEncoding = 'UTF-8';
+	/**
+	 * String: JYBRID_DEFAULT_CHAR_ENCODING UTF-8
+	 * Default character encoding used by both the <jybrid> and
+	 * <jybridResponse> classes.
 	 *
 	 * @var string
 	 */
 	protected $characterEncoding;
 	/**
-	 * @since xajax 7.0.1 Replaces the XAJAX_DEFAULT_CHAR_ENCODING
-	 * @var string
-	 */
-	private static $defaultCharacterEncoding = 'UTF-8';
-	/**
 	 * A configuration option used to indicate whether input data should be UTF8 decoded automatically.
 	 * Boolean: bDecodeUTF8Input
 	 *
 	 * @var bool
-	 * @see xajaxArgumentManager.inc.php
+	 * @see jybridArgumentManager.inc.php
 	 */
 	protected $decodeUTF8Input;
 	/**
-	 * Convert special characters to the HTML equivalent.  See also <xajax->bOutputEntities> and <xajax->configure>.
-	 * Called by the xajax object when configuration options are set in the main script.  Option
-	 * values are passed to each of the main xajax components and stored locally as needed.  The
-	 * <xajaxResponseManager> will track the characterEncoding and outputEntities settings.
+	 * JSON or XML (format to send after (jybrid)request response back to the browser) JSON is jybrid-default
 	 *
-	 * @var bool
-	 */
-	protected $outputEntities;
-	/**
-	 * JSON or XML (format to send after (xajax)request response back to the browser) JSON is xajax-default
-	 *
+	 * @deprecated jybrid use only json
 	 * @var string
 	 */
 	protected $responseType;
@@ -111,9 +103,9 @@ class Configuration extends Base
 	 */
 	protected $contentType;
 	/**
-	 * A configuration option that is tracked by the main <xajax>object.  Setting this
-	 * to true allows <xajax> to exit immediately after processing a xajax request.  If
-	 * this is set to false, xajax will allow the remaining code and HTML to be sent
+	 * A configuration option that is tracked by the main <jybrid>object.  Setting this
+	 * to true allows <jybrid> to exit immediately after processing a jybrid request.  If
+	 * this is set to false, jybrid will allow the remaining code and HTML to be sent
 	 * as part of the response.  Typically this would result in an error, however,
 	 * a response processor on the client side could be designed to handle this condition.
 	 *
@@ -121,7 +113,7 @@ class Configuration extends Base
 	 */
 	protected $exitAllowed = true;
 	/**
-	 * This is a configuration setting that the main xajax object tracks.  It is used
+	 * This is a configuration setting that the main jybrid object tracks.  It is used
 	 * to enable an error handler function which will trap php errors and return them
 	 * to the client as part of the response.  The client can then display the errors
 	 * to the user if so desired.
@@ -132,18 +124,18 @@ class Configuration extends Base
 	 */
 	protected $errorHandler;
 	/**
-	 * A configuration setting tracked by the main <xajax> object.  Set the name of the
+	 * A configuration setting tracked by the main <jybrid> object.  Set the name of the
 	 * file on the server that you wish to have php error messages written to during
-	 * the processing of <xajax> requests.
+	 * the processing of <jybrid> requests.
 	 *
 	 * @todo refacture this parameter
 	 * @var string
 	 */
 	protected $logFile;
 	/**
-	 * A configuration option that is tracked by the main <xajax> object.  Setting this
-	 * to true allows <xajax> to clear out any pending output buffers so that the
-	 * <xajaxResponse> is (virtually) the only output when handling a request.
+	 * A configuration option that is tracked by the main <jybrid> object.  Setting this
+	 * to true allows <jybrid> to clear out any pending output buffers so that the
+	 * <jybridResponse> is (virtually) the only output when handling a request.
 	 *
 	 * @var bool
 	 */
@@ -152,7 +144,7 @@ class Configuration extends Base
 	/**
 	 * @return self
 	 */
-	public static function getInstance(): Configuration
+	public static function getInstance(): self
 	{
 		static $instance;
 		if (!$instance)
@@ -164,11 +156,17 @@ class Configuration extends Base
 	}
 
 	/**
+	 * Function: getCharacterEncoding
+	 * Called automatically by new response objects as they are constructed to obtain the
+	 * current character encoding setting.  As the character encoding is changed, the <jybridResponseManager>
+	 * will automatically notify the current response object since it would have been constructed
+	 * prior to the setting change, see <jybridResponseManager::configure>.
+	 *
 	 * @return string
 	 */
 	public function getCharacterEncoding(): string
 	{
-		if ('' === $this->characterEncoding)
+		if ( null === $this->characterEncoding || '' === $this->characterEncoding )
 		{
 			// todo perhaps log
 			$this->setCharacterEncoding(self::getDefaultCharacterEncoding());
@@ -180,11 +178,11 @@ class Configuration extends Base
 	/**
 	 * @param string $characterEncoding
 	 *
-	 * @return \Xajax\Configuration
+	 * @return \Jybrid\Configuration
 	 */
 	public function setCharacterEncoding(?string $characterEncoding = null): Configuration
 	{
-		// @todo check the Setter, the encoding is valid
+		// @todo check the Setter, the encoding is valid otherwise give back an Message
 		if (Encoding::getEncoding($characterEncoding, true))
 		{
 			$this->characterEncoding = (string) $characterEncoding;
@@ -212,7 +210,7 @@ class Configuration extends Base
 	/**
 	 * @param bool $decodeUTF8Input
 	 *
-	 * @return \Xajax\Configuration
+	 * @return \Jybrid\Configuration
 	 */
 	public function setDecodeUTF8Input(?bool $decodeUTF8Input = null): Configuration
 	{
@@ -222,31 +220,11 @@ class Configuration extends Base
 	}
 
 	/**
-	 * @return bool
-	 */
-	public function isOutputEntities(): bool
-	{
-		return (bool) $this->outputEntities;
-	}
-
-	/**
-	 * @param bool $outputEntities
-	 *
-	 * @return \Xajax\Configuration
-	 */
-	public function setOutputEntities(?bool $outputEntities = null): Configuration
-	{
-		$this->outputEntities = (bool) $outputEntities;
-
-		return $this;
-	}
-
-	/**
 	 * @return string
 	 */
 	public function getResponseType(): string
 	{
-		// Automatic Setup to XajaxDefault JSON
+		// Automatic Setup to JybridDefault JSON
 		if (null === $this->responseType)
 		{
 			$this->setResponseType('');
@@ -261,7 +239,8 @@ class Configuration extends Base
 	 *
 	 * @param string $responseType case-insensitive xMl|JsON ..always valid
 	 *
-	 * @return \Xajax\Configuration has set or not
+	 * @deprecated jybrid works json
+	 * @return \Jybrid\Configuration has set or not
 	 */
 	public function setResponseType(?string $responseType = null): Configuration
 	{
@@ -271,8 +250,7 @@ class Configuration extends Base
 		{
 			$this->responseType = $responseType;
 			$this->setContentType('text/xml');
-		}
-		else
+		} else
 		{
 			$this->responseType = 'JSON';
 			$this->setContentType('application/json');
@@ -301,6 +279,7 @@ class Configuration extends Base
 	public function setResponseQueueSize(?int $responseQueueSize = null): self
 	{
 		$this->responseQueueSize = $responseQueueSize;
+
 		return $this;
 	}
 
@@ -320,6 +299,7 @@ class Configuration extends Base
 	public function setDebugOutputID(?string $debugOutputID = null): self
 	{
 		$this->debugOutputID = $debugOutputID;
+
 		return $this;
 	}
 
@@ -332,6 +312,8 @@ class Configuration extends Base
 	}
 
 	/**
+	 * @see https://jybrid.com/de/configuration#setscriptloadtimeout
+	 *
 	 * @param int $scriptLoadTimeout
 	 *
 	 * @return self
@@ -339,6 +321,7 @@ class Configuration extends Base
 	public function setScriptLoadTimeout(?int $scriptLoadTimeout = null): self
 	{
 		$this->scriptLoadTimeout = $scriptLoadTimeout;
+
 		return $this;
 	}
 
@@ -362,11 +345,11 @@ class Configuration extends Base
 	 * Mime
 	 * to Change the Content-Type use:
 	 *
-	 * @example $xajax->getConfiguration()->setResponseType(Json|Xml)
+	 * @example $jybrid->getConfiguration()->setResponseType(Json|Xml)
 	 *
 	 * @param string $contentType
 	 *
-	 * @return \Xajax\Configuration
+	 * @return \Jybrid\Configuration
 	 */
 	protected function setContentType(string $contentType): Configuration
 	{
@@ -375,9 +358,14 @@ class Configuration extends Base
 		return $this;
 	}
 
-
-
 	/**
+	 * Boolean: bExitAllowed
+	 * A configuration option that is tracked by the main <jybrid>object.  Setting this
+	 * to true allows <jybrid> to exit immediatly after processing a jybrid request.  If
+	 * this is set to false, jybrid will allow the remaining code and HTML to be sent
+	 * as part of the response.  Typically this would result in an error, however,
+	 * a response processor on the client side could be designed to handle this condition.
+	 *
 	 * @return bool
 	 */
 	public function isExitAllowed(): bool
@@ -388,7 +376,7 @@ class Configuration extends Base
 	/**
 	 * @param bool $exitAllowed
 	 *
-	 * @return \Xajax\Configuration
+	 * @return \Jybrid\Configuration
 	 */
 	public function setExitAllowed(?bool $exitAllowed = null): Configuration
 	{
@@ -414,17 +402,9 @@ class Configuration extends Base
 	}
 
 	/**
-	 * @return bool
-	 */
-	public function isErrorHandler(): bool
-	{
-		return null !== $this->errorHandler;
-	}
-
-	/**
 	 * @param string $errorHandler
 	 *
-	 * @return \Xajax\Configuration
+	 * @return \Jybrid\Configuration
 	 * @throws \InvalidArgumentException
 	 */
 	public function setErrorHandler(?string $errorHandler = null): Configuration
@@ -435,18 +415,23 @@ class Configuration extends Base
 			if (\is_string($errorHandler) && \is_callable($errorHandler))
 			{
 				$this->errorHandler = $errorHandler;
-			}
-			else
+			} else
 			{
 				throw new \InvalidArgumentException('ErrorHandler must be an callable Object such as MyErrorHandlerClass::myErrorMethod');
 			}
-		}
-		else
+		} else
 		{
 			$this->errorHandler = null;
 		}
 
 		return $this;
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function isErrorHandler(): bool {
+		return null !== $this->errorHandler;
 	}
 
 	/**
@@ -460,12 +445,21 @@ class Configuration extends Base
 	}
 
 	/**
+	 * Check the Logfile Parameter was set
+	 *
+	 * @return bool
+	 */
+	public function isLogFile(): bool {
+		return 0 < \strlen( $this->getLogFile() );
+	}
+
+	/**
 	 * @since 7.0.1 Logfile has his own class
 	 * @todo  refacture this parameter
 	 *
 	 * @param string $logFile
 	 *
-	 * @return \Xajax\Configuration
+	 * @return \Jybrid\Configuration
 	 */
 	public function setLogFile(?string $logFile = null): Configuration
 	{
@@ -485,7 +479,7 @@ class Configuration extends Base
 	/**
 	 * @param bool $cleanBuffer
 	 *
-	 * @return \Xajax\Configuration
+	 * @return \Jybrid\Configuration
 	 */
 	public function setCleanBuffer(?bool $cleanBuffer = null): Configuration
 	{

@@ -3,7 +3,7 @@
  * PHP version php7
  *
  * @category
- * @package            xajax-php-7
+ * @package            jybrid-php-7
  * @author             ${JProof}
  * @copyright          ${copyright}
  * @license            ${license}
@@ -12,5 +12,5 @@
  * @since              27.10.2017
  */
 
-declare(strict_types=1); ?>
+declare( strict_types=1 );
 

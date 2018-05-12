@@ -3,7 +3,7 @@
  * PHP version $phpversion$
  *
  * @category
- * @package            Xajax Core  Xajax\Scripts
+ * @package            Jybrid Core  Jybrid\Scripts
  * @author             ${JProof}
  * @copyright          ${copyright}
  * @license            ${license}
@@ -14,17 +14,25 @@
 
 declare(strict_types=1);
 
-namespace Xajax\Scripts;
+namespace Jybrid\Scripts;
 
-use Xajax\Plugin\Manager;
-use Xajax\Plugin\Request\Data;
+use Jybrid\Factory;
+use Jybrid\Plugin\Manager;
+use Jybrid\Plugin\Request\Data;
+use Jybrid\Scripts\Generate\Init;
+use Jybrid\Scripts\Generate\Timeout;
+use Jybrid\Snippets\Snippets;
 
 /**
  * Javascript OutputParser
  * Class Generator
  */
-class Generator
-{
+abstract class Generator {
+	/**
+	 * @return iterable
+	 */
+	abstract public static function generate(): iterable;
+
 	/**
 	 * Complex script generator which replaces the old "Response/Manager" Class
 	 *
@@ -54,20 +62,70 @@ class Generator
 
 		if (!$configScripts->isDebug())
 		{
-			$scripts->setLockScript('xajax.debug');
+			$scripts->setLockScript( 'jybrid.debug' );
 		}
+		/* @since 0.7.5 Javascript-Snippet-Update beforeScriptUrls */
+		$processorArray = [
+			[ 'generateSnippetPosition' => Snippets::beforeScriptUrls ],
+			[ 'generateScriptUrls' => '' ],
+			[ 'generateSnippetPosition' => Snippets::beforeInitScript ],
+			[ 'generateInitScript' => '' ],
+			[ 'generateSnippetPosition' => Snippets::beforeTimeoutScript ],
+			[ 'generateTimeoutScript' => '' ],
+			[ 'generateSnippetPosition' => Snippets::beforePluginScripts ],
+			[ 'generatePluginScripts' => '' ],
+			[ 'generateSnippetPosition' => Snippets::afterPluginScripts ],
+			[ 'generateFileScripts' => '' ],
+		];
 
-		self::generateScriptUrls();
-		self::generateInitScript();
-		self::generateTimeoutScript();
-		self::generatePluginScripts();
-
-		// at least because the caching in next version will probably add extra cache Files
-		self::generateFileScripts();
+		self::compileProcessScripts( $processorArray );
 
 		self::setHasProcessed(true);
 
 		return true;
+	}
+
+	/**
+	 * Internal processing of the script generation
+	 *
+	 * @param array $processorArray
+	 *
+	 * @return bool
+	 * @since 0.7.6.1
+	 */
+	protected static function compileProcessScripts( array $processorArray ): bool {
+		foreach ( $processorArray as $command ) {
+			if ( \is_array( $command ) ) {
+				foreach ( $command as $method => $parameters ) {
+					if ( method_exists( __CLASS__, $method ) ) {
+						if ( '' !== $parameters ) {
+							self::$method( $parameters );
+						} else {
+							self::$method();
+						}
+					}
+				}
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * Getting all found script-urls back as array (used in cms situations)
+	 *
+	 * @return array
+	 */
+	public static function getClientScriptUrls(): array {
+		self::processScripts();
+		if ( ! $scriptUrls = self::getGeneratedPart( 'scripts' ) ) {
+			self::generateScriptUrls();
+		}
+		if ( ! $scriptUrls = self::getGeneratedPart( 'scripts' ) ) {
+			return [];
+		}
+
+		return $scriptUrls;
 	}
 
 	/**
@@ -78,14 +136,15 @@ class Generator
 	public static function getClientScripts(): string
 	{
 		self::processScripts();
+
 		return implode('', self::getGeneratedPart('scriptTags'));
 	}
 
 	/**
-	 * Getting all Snippets in ScriptTag
+	 * Getting all Snippets (jybrid init-script,timeout-script if exists, plugin-scripts)
 	 *
-	 * @param bool|null $wrapCDATA
-	 * @param bool|null $wrapScriptTag
+	 * @param bool|null $wrapCDATA     Wrap the whole <script>-->/*<![CDATA[*\/ <--</script> in an CDATA-Block
+	 * @param bool|null $wrapScriptTag Wrap the <script></script> tag around the string
 	 *
 	 * @return string
 	 */
@@ -93,21 +152,17 @@ class Generator
 	{
 		self::processScripts();
 
-		$snippets = [];
+		$positionsOrder = [
+			Snippets::beforeInitScript,
+			'init',
+			Snippets::beforeTimeoutScript,
+			'timeout',
+			Snippets::beforePluginScripts,
+			'plugins',
+			Snippets::afterPluginScripts,
+		];
 
-		if ($init = self::getGeneratedPart('init'))
-		{
-			$snippets[] = implode('', $init);
-		}
-		if ($timeout = self::getGeneratedPart('timeout'))
-		{
-			$snippets[] = implode('', $timeout);
-		}
-
-		if ($plugins = self::getGeneratedPart('plugins'))
-		{
-			$snippets[] = implode('', $plugins);
-		}
+		$snippets = self::compileSnippets( $positionsOrder );
 
 		$str = implode('', $snippets);
 		if ($wrapCDATA ?? false)
@@ -123,7 +178,33 @@ class Generator
 	}
 
 	/**
-	 * Generate all relevant Scripts they was set by Scripts and set by Plugins()
+	 * Automatic internal getter of available snippets parts
+	 *
+	 * @param array $positions
+	 *
+	 * @return array
+	 * @since 0.7.6.1
+	 */
+	protected static function compileSnippets( array $positions ): array {
+		$snippets = [];
+		foreach ( $positions as $positionName ) {
+			if ( $generatedScriptArray = self::getGeneratedPart( $positionName ) ) {
+				$snippets[ $positionName ] = implode( $generatedScriptArray );
+			}
+		}
+
+		return $snippets;
+	}
+
+	/**
+	 * Generate all relevant Scripts they was set by Scripts and set by Jybrid-Plugins and give it back as String to "echo" it in <head></head>
+	 * tag This Method is used for "simple" own applications
+	 *
+	 * @example
+	 * <script src="/jybrid.min.js"></script>
+	 * <script type="text/javascript" charset="UTF-8" defer="">
+	 *      try { if (undefined == typeof jybrid.config) jybrid.config = {};  } catch (e) { jybrid = {}; jybrid.config = {};};
+	 * </script>
 	 *
 	 * @param bool|null $forceNew If one of an rendering was already processed and an script or snippet was after the generation process added,
 	 *                            then you can process again and re-generate all <script src=""> and <script></script>
@@ -137,7 +218,13 @@ class Generator
 			self::setHasProcessed(false);
 		}
 
+		self::processScripts();
 		$scriptParts = [];
+
+		// @since 0.7.5 Javascript-Snippet-Update
+		if ( $on_Part = self::getGeneratedPart( Snippets::beforeScriptUrls ) ) {
+			$scriptParts[] = self::wrapScriptTag( self::wrapCDATA( implode( $on_Part ) ) );
+		}
 
 		// full files First
 		$scriptParts[] = self::getClientScripts();
@@ -227,43 +314,7 @@ class Generator
 	 */
 	protected static function generateInitScript(): array
 	{
-
-		$xajaxConfig   = \Xajax\Configuration::getInstance();
-		$configScripts = Scripts::getInstance()->getConfiguration();
-
-		$parts = [];
-
-		$parts[] = 'try { if (undefined == typeof xajax.config) xajax.config = {};  } catch (e) { xajax = {}; xajax.config = {};  };';
-
-		// only if configured
-		if ('' !== ($requestUri = $xajaxConfig->getRequestURI()))
-		{
-			$parts[] = 'xajax.config.requestURI = "' . $requestUri . '";';
-		}
-
-		$parts[] = 'xajax.config.waitCursor = ' . ($configScripts->isWaitCursor() ? 'true' : 'false') . ';';
-		$parts[] = 'xajax.config.version = "' . $xajaxConfig->getVersion() . '";';
-		$parts[] = 'xajax.config.defaultMode = "' . $configScripts->getDefaultMode() . '";';
-		$parts[] = 'xajax.config.defaultMethod = "' . $configScripts->getDefaultMethod() . '";';
-		//$parts[] = 'xajax.config.responseType = "' . $this->getConfig()->getResponseType() . '";';
-
-		if (null !== $xajaxConfig->getResponseQueueSize())
-		{
-			$parts[] = 'xajax.config.responseQueueSize = ' . $xajaxConfig->getResponseQueueSize() . ';';
-		}
-
-		if (true === $configScripts->isDebug())
-		{
-			if (null !== $xajaxConfig->getDebugOutputID())
-			{
-
-				$parts[] = 'xajax.debug = {};';
-				$parts[] = 'xajax.debug.outputID = "' . $xajaxConfig->getDebugOutputID() . '";';
-			}
-		}
-
-		self::setGeneratedPart('init', $parts);
-		return $parts;
+		return Init::generate();
 	}
 
 	/**
@@ -273,26 +324,23 @@ class Generator
 	 */
 	protected static function generateTimeoutScript(): array
 	{
-		$parts       = [];
-		$xajaxConfig = \Xajax\Configuration::getInstance();
-		$xScripts    = Scripts::getInstance()->getScriptUrls();
-		if (0 < ($sto = $xajaxConfig->getScriptLoadTimeout()))
-		{
-			foreach ($xScripts as $name => $xScript)
-			{
-				// only Xajax scripts can timeOuted
-				if (false === strpos($name, 'xajax'))
-				{
-					continue;
-				}
+		return Timeout::generate();
+	}
 
-				$parts  [] = 'window.setTimeout( function() {  var scriptExists = false;  try { if (' . $name . '.isLoaded) scriptExists = true; }catch (e) {};if (!scriptExists) {
-					alert("Error: the Javascript component could not be included. Perhaps the URL is incorrect?\nURL:' . $xScript . '");} },' . $sto . ');';
-			}
+	/**
+	 * Stringify the "Event-Position" that this snippetPosition is an compact script-area
+	 *
+	 * @since 0.7.5 Javascript-Snippet-Update
+	 *
+	 * @param string $snippetPosition
+	 */
+	protected static function generateSnippetPosition( string $snippetPosition ) {
+		if ( ( $pos = Factory::getSnippets()->getPosition( $snippetPosition ) )
+		     && $pos->hasPositionSnippets()
+		     && '' !== ( $string = $pos->__toString() ) ) {
+
+			self::setGeneratedPart( $snippetPosition, [ $string ] );
 		}
-
-		self::setGeneratedPart('timeout', $parts);
-		return $parts;
 	}
 
 	/**
@@ -360,6 +408,7 @@ class Generator
 	}
 
 	/**
+	 * @todo Perhaps an Override defer or other attributes Helper
 	 * @return string
 	 */
 	protected static function getOpenScript(): string
@@ -379,7 +428,7 @@ class Generator
 	/**
 	 * Because of old bindings
 	 *
-	 * @return \Xajax\Plugin\Manager
+	 * @return \Jybrid\Plugin\Manager
 	 */
 	protected static function getPluginManager(): Manager
 	{
@@ -391,7 +440,7 @@ class Generator
 	 *
 	 * @return array|null
 	 */
-	private static function getGeneratedPart(string $name): ?array
+	protected static function getGeneratedPart( string $name ): ?array
 	{
 		return self::getGeneratedParts()[$name] ?? null;
 	}
@@ -399,12 +448,12 @@ class Generator
 	/**
 	 * Stack
 	 *
-	 * @param string $name
-	 * @param array  $piece
+	 * @param string     $name
+	 * @param null|array $piece return the set array
 	 *
 	 * @return array
 	 */
-	private static function setGeneratedPart(string $name, array $piece = null): array
+	protected static function setGeneratedPart( string $name, ?array $piece = null ): ?array
 	{
 		$parts        = self::getGeneratedParts();
 		$parts[$name] = $piece;

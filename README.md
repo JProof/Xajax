@@ -1,4 +1,4 @@
-XAJAX
+XAJAX has been moved to jybrid
 
 The modernization/extension of xajax is already well advanced.
 As the next independent relase "jybrid" will be the follow-up to the xajax-version listed here.

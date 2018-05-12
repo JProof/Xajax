@@ -3,7 +3,7 @@
  * PHP version php7
  *
  * @category
- * @package            xajax-php-7
+ * @package            jybrid-php-7
  * @author             ${JProof}
  * @copyright          ${copyright}
  * @license            ${license}
@@ -14,38 +14,40 @@
 
 declare(strict_types=1);
 
-namespace Xajax\Plugins\Cms;
+namespace Jybrid\Plugins\Cms;
 
 use InvalidArgumentException;
-use Xajax\Factory;
-use Xajax\Plugin\Request\RequestPluginIface;
-use Xajax\Response\Manager;
+use Jybrid\Factory;
+use Jybrid\Interfaces\IfaceButton;
+use Jybrid\Interfaces\IfacePluginRequest;
+use Jybrid\Interfaces\IfacePluginRequestRequest;
+use Jybrid\Response\Manager;
 
 /**
  * Class Plugin
- * Hold all Cms Plugin Instances
+ * The Class is the Stack for handling all Requests of type Cms
  *
- * @package Xajax\Plugins\Cms
+ * @package Jybrid\Plugins\Cms
  */
-class Plugin extends \Xajax\Plugin\Request implements RequestPluginIface
-{
-	/*
-		Array: aFunctions
-
-		An array of <xajaxCms> object that are registered and
-		available via a <xajax.request> call.
-	*/
+class Plugin extends \Jybrid\Plugin\Request implements IfacePluginRequest {
+	/**
+	 * Own Plugin Name is important to check the Plugin was load(or not) in jybrid's Plugins stack
+	 *
+	 * @return string
+	 * @since 7.0
+	 */
+	public function getName(): string {
+		return 'cms';
+	}
+	/**
+	 * Array: aFunctions
+	 * An array of <jybridCms> object that are registered and
+	 * available via a <jybrid.request> call.
+	 */
 	/**
 	 * @var array
 	 */
 	protected $aFunctions;
-	/*
-		String: sXajaxPrefix
-
-		A configuration setting that is stored locally and used during
-		the client script generation phase.
-	*/
-
 	/*
 		String: sDefer
 
@@ -76,14 +78,14 @@ class Plugin extends \Xajax\Plugin\Request implements RequestPluginIface
 	/**
 	 * @var bool
 	 */
-	protected $isXajaxRequest = false;
+	protected $isJybridRequest = false;
 	/*
-		Function: xajaxFunctionPlugin
+		Function: jybridFunctionPlugin
 
-		Constructs and initializes the <xajaxFunctionPlugin>.  The GET and POST
-		data is searched for xajax function call parameters.  This will later
+		Constructs and initializes the <jybridFunctionPlugin>.  The GET and POST
+		data is searched for jybrid function call parameters.  This will later
 		be used to determine if the request is for a registered function in
-		<xajaxFunctionPlugin->canProcessRequest>
+		<jybridFunctionPlugin->canProcessRequest>
 	*/
 	/**
 	 * Plugin constructor.
@@ -95,31 +97,17 @@ class Plugin extends \Xajax\Plugin\Request implements RequestPluginIface
 		$this->aFunctions = [];
 
 		// Autoregister this Plugin on construction
-		\Xajax\Plugin\Manager::getInstance()->registerPlugin($this);
+		\Jybrid\Plugin\Manager::getInstance()->registerPlugin( $this );
 	}
 
 	/**
-	 * @return \Xajax\Plugins\Cms\Plugin
+	 * @return \Jybrid\Plugins\Cms\Plugin
 	 */
-	public static function getInstance(): Plugin
+	public static function getInstance(): IfacePluginRequest
 	{
 		return self::$instance ?? self::$instance = new self();
 	}
-	/*
-		Function: configure
 
-		Sets/stores configuration options used by this plugin.
-	*/
-	/**
-	 * @param $sName
-	 * @param $mValue
-	 *
-	 * @deprecated
-	 */
-	public function configure($sName, $mValue)
-	{
-
-	}
 
 	/**
 	 * @return string
@@ -139,15 +127,15 @@ class Plugin extends \Xajax\Plugin\Request implements RequestPluginIface
 		Function: register
 
 		Provides a mechanism for functions to be registered and made available to
-		the page via the javascript <xajax.request> call.
+		the page via the javascript <jybrid.request> call.
 	*/
 
 	/**
 	 * Function: generateClientScript
-	 * Called by the <xajaxPluginManager> during the client script generation
+	 * Called by the <jybridPluginManager> during the client script generation
 	 * phase.  This is used to generate a block of javascript code that will
 	 * contain function declarations that can be used on the browser through
-	 * javascript to initiate xajax requests.
+	 * javascript to initiate jybrid requests.
 	 *
 	 * @return string
 	 */
@@ -163,34 +151,6 @@ class Plugin extends \Xajax\Plugin\Request implements RequestPluginIface
 		}
 
 		return $script;
-	}
-
-	/**
-	 * Getting an registered Request Object or create it if not exists
-	 *
-	 * @param string $jsName
-	 * @param        $configure
-	 *
-	 * @return \Xajax\Plugins\Cms\Request
-	 * @since 0.7.3
-	 */
-	public static function getRequest(string $jsName, ?iterable $configure = null): Request
-	{
-
-		$instance = self::getInstance();
-		// todo check modify $jsName
-		return $instance->aFunctions[$jsName] ?? $instance->createRequest($jsName, $configure);
-	}
-
-	/**
-	 * @param string $jsName
-	 * @param        $configure
-	 *
-	 * @return \Xajax\Plugins\Cms\Request
-	 */
-	protected function createRequest(string $jsName, $configure = null): Request
-	{
-		return $this->aFunctions[$jsName] = new Request($jsName, $configure);
 	}
 
 	/**
@@ -210,37 +170,60 @@ class Plugin extends \Xajax\Plugin\Request implements RequestPluginIface
 
 	/**
 	 * Function: processRequest
-	 * Called by the <xajaxPluginManager> when a request needs to be
+	 * Called by the <jybridPluginManager> when a request needs to be
 	 * processed.
 	 * Returns:
 	 * mixed - True when the request has been processed successfully.
 	 * An error message when an error has occurred.
 	 *
-	 * @return bool|mixed
+	 * @return bool
 	 */
-	public function processRequest()
-	{
-		if (false === $this->canProcessRequest())
-		{
-			return false;
+	public function processRequest(): bool {
+		$return = false;
+		if ( $this->canProcessRequest() ) {
+			$objResponseManager = Manager::getInstance();
+
+			$objResponseManager->append( Factory::getResponseInstance() );
+			$return = true;
 		}
 
-		$objResponseManager = Manager::getInstance();
+		return $return;
+	}
 
-		$objResponseManager->append(Factory::getResponseInstance());
+	/**
+	 * Getting an registered RequestRequest Object or create it if not exists
+	 *
+	 * @param string                                                  $jsName
+	 * @param iterable|\Jybrid\Interfaces\IfaceRequestParameters|null $configure
+	 *
+	 * @return IfacePluginRequestRequest
+	 * @since 0.7.3
+	 */
+	public static function registerRequest( string $jsName, $configure = null ): ?IfacePluginRequestRequest {
+		$instance = self::getInstance();
 
-		return true;
+		// todo check modify $jsName
+		return $instance->aFunctions[ $jsName ] ?? $instance->createRequest( $jsName, $configure );
+	}
+
+	/**
+	 * @param string                                     $jsName
+	 * @param  \Jybrid\Interfaces\IfaceRequestParameters $configure
+	 *
+	 * @return IfacePluginRequestRequest
+	 */
+	protected function createRequest( string $jsName, $configure = null ): IfacePluginRequestRequest {
+		return $this->aFunctions[ $jsName ] = new RequestRequest( $jsName, $configure );
 	}
 
 	/**
 	 * @param null|string $idx
 	 *
 	 * @todo check if possible in parent class
-	 * @return \Xajax\Plugins\Cms\Request
+	 * @return \Jybrid\Plugins\Cms\RequestRequest
 	 */
-	protected function getMethodByIndex(?string $idx = null): Request
-	{
-		if (\is_string($idx) && array_key_exists($idx, $this->aFunctions) && $this->aFunctions[$idx] instanceof Request)
+	protected function getMethodByIndex( ?string $idx = null ): RequestRequest {
+		if ( \is_string( $idx ) && array_key_exists( $idx, $this->aFunctions ) && $this->aFunctions[ $idx ] instanceof RequestRequest )
 		{
 			return $this->aFunctions[$idx];
 		}
@@ -248,13 +231,23 @@ class Plugin extends \Xajax\Plugin\Request implements RequestPluginIface
 	}
 
 	/**
-	 * Own Plugin Name
+	 * @param iterable|null $configure
 	 *
-	 * @return string
-	 * @since 7.0
+	 * @return IfaceButton
 	 */
-	public function getName(): string
-	{
-		return 'cms';
+	public function getButtonScript( ?iterable $configure = null ): IfaceButton {
+		// TODO: Implement getButtonScript() method.
+	}
+
+	/**
+	 * Try to get an already registered Request Object
+	 *
+	 * @param string $jsName
+	 *
+	 * @return \Jybrid\Interfaces\IfacePluginRequestRequest|null
+	 * @since 0.7.8 more convenient Button-Handling
+	 */
+	public static function getRequestObject( string $jsName ): ?IfacePluginRequestRequest {
+		return ( ( $registeredRequestObject = self::getInstance()->aFunctions[ $jsName ] ) instanceof RequestRequest ) ? $registeredRequestObject : null;
 	}
 }

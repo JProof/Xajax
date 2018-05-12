@@ -3,7 +3,7 @@
  * PHP version $phpversion$
  *
  * @category
- * @package            Xajax Core  Xajax\Input
+ * @package            Jybrid Core  Jybrid\Input
  * @author             ${JProof}
  * @copyright          ${copyright}
  * @license            ${license}
@@ -14,9 +14,9 @@
 
 declare(strict_types=1);
 
-namespace Xajax\Input;
+namespace Jybrid\Input;
 
-use Xajax\Datas\Data;
+use Jybrid\Datas\Data;
 
 /**
  * Class Parameters
@@ -37,12 +37,24 @@ class Parameter extends Data
 	}
 
 	/**
+	 * Save get int
+	 *
+	 * @param string   $name
+	 * @param int|null $default
+	 *
+	 * @return int|null
+	 */
+	public function getInt( string $name, ?int $default = null ): ?int {
+		return $this->getValue( $name, 'int', $default );
+	}
+
+	/**
 	 * @param string      $name
 	 * @param null|string $default
 	 *
 	 * @return string|null
 	 */
-	public function getWord(string $name, ?string $default = null): ?string
+	public function getString( string $name, ?string $default = null ): ?string
 	{
 		return $this->getValue($name, 'word', $default);
 	}
@@ -56,7 +68,7 @@ class Parameter extends Data
 	 */
 	public function getValue(string $name, ?string $type = null, $default = null)
 	{
-		if (!$this->{$name})
+		if ( ! isset( $this->{$name} ) )
 		{
 			return $default;
 		}
@@ -68,12 +80,24 @@ class Parameter extends Data
 			case 'int':
 				return Filter::getInt($val, $default);
 			case  'word':
-				return Filter::getWord($val, $default);
+				return Filter::getString( $val, $default );
 			case 'float':
 				return Filter::getFloat($val, $default);
 		}
 
 		// todo log error filter method not found
 		return null;
+	}
+
+	/**
+	 * Getting the Jybrid called RequestName from Javascript as "task" Parameter
+	 * Jybrid\Plugins\Cms\Plugin::registerRequest('myMethodName');
+	 * jybrid.Exe('myMethodName');
+	 *
+	 * @see https://github.com/JProof/jybrid-examples#sc
+	 * @return null|string
+	 */
+	public function getRequestName(): ?string {
+		return $this->getString( 'jybridRequestName' );
 	}
 }

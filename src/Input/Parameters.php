@@ -3,7 +3,7 @@
  * PHP version $phpversion$
  *
  * @category
- * @package            Xajax Core  Xajax\Input
+ * @package            Jybrid Core  Jybrid\Input
  * @author             ${JProof}
  * @copyright          ${copyright}
  * @license            ${license}
@@ -14,9 +14,9 @@
 
 declare(strict_types=1);
 
-namespace Xajax\Input;
+namespace Jybrid\Input;
 
-use Xajax\Datas\Datas;
+use Jybrid\Datas\Datas;
 
 /**
  * Class Parameters

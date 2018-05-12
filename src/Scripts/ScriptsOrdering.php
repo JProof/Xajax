@@ -3,7 +3,7 @@
  * PHP version php7
  *
  * @category
- * @package            xajax-php-7
+ * @package            jybrid-php-7
  * @author             ${JProof}
  * @copyright          ${copyright}
  * @license            ${license}
@@ -14,20 +14,20 @@
 
 declare(strict_types=1);
 
-namespace Xajax\Scripts;
+namespace Jybrid\Scripts;
 
 /**
  * Class ScriptsOrdering
  *
- * @package Xajax\Scripts
+ * @package Jybrid\Scripts
  */
 class ScriptsOrdering extends Queue
 {
 	/**
-	 * scriptNames xajax and xajax.debug are already registered. If you want to use Xajax for outputting other scrips like jQuery they must be
+	 * scriptNames jybrid and jybrid.debug are already registered. If you want to use Jybrid for outputting other scrips like jQuery they must be
 	 * inserted before
 	 *
-	 * @see \Xajax\Scripts\Scripts::getScriptUrls()
+	 * @see \Jybrid\Scripts\Scripts::getScriptUrls()
 	 *
 	 * @param string $scriptName
 	 *

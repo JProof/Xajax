@@ -1,36 +1,29 @@
 {
-  "name": "jproof/xajax",
+  "name": "jproof/jybrid",
   "type": "library",
-  "description": "Xajax is an open source PHP class library for easily creating powerful PHP-driven, web-based Ajax Applications. Using Xajax, you can asynchronously call PHP functions and update the content of your your webpage without reloading the page.",
+  "description": "Jybrid is an open source PHP class library for easily creating powerful PHP-driven, web-based Ajax Applications. Using jybrid, you can asynchronously call PHP functions and update the content of your your webpage without reloading the page. Jybrid was developed from Xajax. xajax was released under the terms of the BSD license. See xajax-original-license.md. Jybrid is not an Part of Xajax!",
   "authors": [
     {
-      "name": "Jared White"
+      "name": "(jybrid)romacron JProof"
     },
     {
-      "name": "J. Max Wilson"
-    },
-    {
-      "name": "Joseph Woolley"
-    },
-    {
-      "name": "Steffen Konerow"
-    },
-    {
-      "name": "romacron JProof"
+      "name": "(xajax)Jared White,(xajax)J. Max Wilson,(xajax)Joseph Woolley,(xajax)Steffen Konerow"
     }
   ],
-  "homepage": "http://xajaxproject.org",
-  "license": "BSD-2-Clause",
+  "homepage": "http://jybrid.com",
+  "license": "AGPL-3.0-or-later",
   "keywords": [
-    "Xajax",
+    "jybrid",
+    "Ajax",
+    "xajax",
     "PHP",
+    "Javascript",
+    "Content-Management-Systems CMS",
     "Asynchronous"
   ],
   "support": {
-    "forum": "http://community.xajax-project.org",
-    "irc": "irc://irc.freenode.org/xajax",
-    "issues": "https://github.com/JProof/Xajax/issues",
-    "source": "https://github.com/JProof/Xajax"
+    "issues": "https://github.com/JProof/jybrid/issues",
+    "source": "https://github.com/JProof/jybrid"
   },
   "require": {
     "php": ">=7.1.0"
@@ -42,7 +35,7 @@
     "psr-0": {
     },
     "psr-4": {
-      "Xajax\\": "src"
+      "Jybrid\\": "src"
     },
     "files": [
     ],

@@ -3,7 +3,7 @@
  * PHP version php7
  *
  * @category
- * @package            xajax-php-7
+ * @package            jybrid-php-7
  * @author             ${JProof}
  * @copyright          ${copyright}
  * @license            ${license}
@@ -14,15 +14,23 @@
 
 declare(strict_types=1);
 
-namespace Xajax\Configuration;
+namespace Jybrid\Configuration;
 
 /**
  * Trait Scripts
  *
- * @package Xajax\Config
+ * @package Jybrid\Config
  */
 class Scripts extends Base
 {
+	/**
+	 * @var array
+	 */
+	protected static $modes = [ 'asynchronous', 'synchronous', ];
+	/**
+	 * @var self
+	 */
+	private static $instance;
 	/**
 	 * Uncompressed Javascript if exists
 	 *
@@ -31,15 +39,15 @@ class Scripts extends Base
 	protected $useUncompressedScripts;
 	/**
 	 * JS
-	 * true - xajax should update the status bar during a request
-	 * false - xajax should not display the status of the request
+	 * true - jybrid should update the status bar during a request
+	 * false - jybrid should not display the status of the request
 	 *
 	 * @var bool
 	 */
 	protected $statusMessages;
 	/**
-	 * true - xajax should display a wait cursor when making a request
-	 * false - xajax should not show a wait cursor during a request
+	 * true - jybrid should display a wait cursor when making a request
+	 * false - jybrid should not show a wait cursor during a request
 	 *
 	 * @var bool
 	 */
@@ -52,19 +60,11 @@ class Scripts extends Base
 	 */
 	protected $deferScriptGeneration;
 	/**
-	 * Debug Flag for Xajax. Set to true only during development.
+	 * Debug Flag for Jybrid. Set to true only during development.
 	 *
 	 * @var bool
 	 */
 	protected $debug;
-	/**
-	 * @var array
-	 */
-	protected static $modes = ['asynchronous', 'synchronous',];
-	/**
-	 * @var self
-	 */
-	private static $instance;
 	/**
 	 * The request mode.
 	 * 'asynchronous' - The request will immediately return, the
@@ -84,7 +84,7 @@ class Scripts extends Base
 	protected $defaultMethod;
 
 	/**
-	 * @return \Xajax\Configuration\Scripts
+	 * @return \Jybrid\Configuration\Scripts
 	 */
 	public static function getInstance(): self
 	{
@@ -107,7 +107,7 @@ class Scripts extends Base
 	/**
 	 * @param bool $useUncompressedScripts
 	 *
-	 * @return \Xajax\Configuration\Scripts
+	 * @return \Jybrid\Configuration\Scripts
 	 */
 	public function setUseUncompressedScripts(?bool $useUncompressedScripts = null): Scripts
 	{
@@ -127,7 +127,7 @@ class Scripts extends Base
 	/**
 	 * @param bool $statusMessages
 	 *
-	 * @return \Xajax\Configuration\Scripts
+	 * @return \Jybrid\Configuration\Scripts
 	 */
 	public function setStatusMessages(?bool $statusMessages = null): Scripts
 	{
@@ -147,7 +147,7 @@ class Scripts extends Base
 	/**
 	 * @param bool $waitCursor
 	 *
-	 * @return \Xajax\Configuration\Scripts
+	 * @return \Jybrid\Configuration\Scripts
 	 */
 	public function setWaitCursor(?bool $waitCursor = null): Scripts
 	{
@@ -167,7 +167,7 @@ class Scripts extends Base
 	/**
 	 * @param bool $deferScriptGeneration
 	 *
-	 * @return \Xajax\Configuration\Scripts
+	 * @return \Jybrid\Configuration\Scripts
 	 */
 	public function setDeferScriptGeneration(?bool $deferScriptGeneration = null): Scripts
 	{
@@ -184,12 +184,7 @@ class Scripts extends Base
 	public function getDefaultMode(): string
 	{
 		// Automatic setup
-		if (null === $this->defaultMode)
-		{
-			return $this->setDefaultMode(self::getJSDefaultMode());
-		}
-
-		return $this->defaultMode;
+		return $this->defaultMode ?? $this->setDefaultMode( self::getJSDefaultMode() );
 	}
 
 	/**
@@ -203,8 +198,7 @@ class Scripts extends Base
 		if (\in_array($defaultMode, self::getModes(), true))
 		{
 			$this->defaultMode = $defaultMode;
-		}
-		else
+		} else
 		{
 			$this->defaultMode = self::getJSDefaultMode();
 		}
@@ -262,9 +256,20 @@ class Scripts extends Base
 	}
 
 	/**
+	 * @param bool $debug
+	 *
+	 * @return \Jybrid\Configuration\Scripts
+	 */
+	public function setDebug( ?bool $debug = null ): Scripts {
+		$this->debug = (bool) $debug;
+
+		return $this;
+	}
+
+	/**
 	 * enable debug
 	 *
-	 * @return \Xajax\Configuration\Scripts
+	 * @return \Jybrid\Configuration\Scripts
 	 */
 	public function enableDebug(): Scripts
 	{
@@ -276,23 +281,11 @@ class Scripts extends Base
 	/**
 	 * disable debug
 	 *
-	 * @return \Xajax\Configuration\Scripts
+	 * @return \Jybrid\Configuration\Scripts
 	 */
 	public function disableDebug(): Scripts
 	{
 		$this->setDebug(false);
-
-		return $this;
-	}
-
-	/**
-	 * @param bool $debug
-	 *
-	 * @return \Xajax\Configuration\Scripts
-	 */
-	public function setDebug(?bool $debug = null): Scripts
-	{
-		$this->debug = (bool) $debug;
 
 		return $this;
 	}

@@ -3,7 +3,7 @@
  * PHP version php7
  *
  * @category
- * @package            xajax-php-7
+ * @package            jybrid-php-7
  * @author             ${JProof}
  * @copyright          ${copyright}
  * @license            ${license}
@@ -14,16 +14,18 @@
 
 declare(strict_types=1);
 
-namespace Xajax\Scripts;
+namespace Jybrid\Scripts;
 
 /**
  * Trait Base
  *
- * @package Xajax\Scripts
+ * @package Jybrid\Scripts
  * @property-read string $scriptName           internal Name of an script -> unique identifier
  * @property-read string $fileName             the real fullName of the file without "min"
  * @property-read string $dir                  concrete directory for this file
  * @property-read int    $priority             Priority
+ * @property-read bool   $useScriptLoadTimeout
+ * @property-read string $relativeDir          During checking which script file has to be used the relative Directory will be set
  */
 trait Base
 {
@@ -101,5 +103,33 @@ trait Base
 	public function setPriority(?int $priority = null): void
 	{
 		$this->priority = $priority;
+	}
+
+	/**
+	 * @return null|bool
+	 */
+	public function isUseScriptLoadTimeout(): ?bool {
+		return $this->useScriptLoadTimeout;
+	}
+
+	/**
+	 * @param bool $useScriptLoadTimeout
+	 */
+	public function setUseScriptLoadTimeout( ?bool $useScriptLoadTimeout = null ): void {
+		$this->useScriptLoadTimeout = (bool) $useScriptLoadTimeout;
+	}
+
+	/**
+	 * @return null|string
+	 */
+	public function getRelativeDir(): ?string {
+		return $this->relativeDir;
+	}
+
+	/**
+	 * @param null|string $relOutDir
+	 */
+	public function setRelativeDir( ?string $relOutDir = null ): void {
+		$this->relativeDir = $relOutDir;
 	}
 }

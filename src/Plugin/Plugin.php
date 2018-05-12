@@ -3,7 +3,7 @@
  * PHP version php7
  *
  * @category
- * @package            xajax-php-7
+ * @package            jybrid-php-7
  * @author             ${JProof}
  * @copyright          ${copyright}
  * @license            ${license}
@@ -14,23 +14,23 @@
 
 declare(strict_types=1);
 
-namespace Xajax\Plugin;
+namespace Jybrid\Plugin;
 
 /**
  * Class Plugin
  * Basic Plugin Class
  *
- * @package Xajax\Plugin
+ * @package Jybrid\Plugin
  */
 
 /**
  * Class Plugin
  *
- * @package Xajax\Plugin
+ * @package Jybrid\Plugin
  */
 abstract class Plugin
 {
-	use \Xajax\Errors\TraitCall;
+	use \Jybrid\Errors\TraitCall;
 
 	/**
 	 * Request-Plugin-Type

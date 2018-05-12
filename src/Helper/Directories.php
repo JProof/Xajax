@@ -3,7 +3,7 @@
  * PHP version php7
  *
  * @category
- * @package            xajax-php-7
+ * @package            jybrid-php-7
  * @author             ${JProof}
  * @copyright          ${copyright}
  * @license            ${license}
@@ -14,12 +14,12 @@
 
 declare(strict_types=1);
 
-namespace Xajax\Helper;
+namespace Jybrid\Helper;
 
 /**
  * Class Directories
  *
- * @package Xajax\Helper
+ * @package Jybrid\Helper
  */
 class Directories
 {
@@ -179,7 +179,7 @@ class Directories
 		{
 			return self::$webDirectory = $nDir;
 		}
-		throw new \UnexpectedValueException('WebDirectory can not be found on System. Please the  Xajax\Helper\Directories::setWebDirectory($_SERVER[\'DOCUMENT_ROOT\']) or similar.');
+		throw new \UnexpectedValueException( 'WebDirectory can not be found on System. Please the  Jybrid\Helper\Directories::setWebDirectory($_SERVER[\'DOCUMENT_ROOT\']) or similar.' );
 	}
 
 	/**

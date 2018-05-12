@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Xajax\Datas;
+namespace Jybrid\Datas;
 
 use ArrayAccess;
 use InvalidArgumentException;
@@ -184,14 +184,6 @@ class Datas implements ArrayAccess, \Iterator
 	}
 
 	/**
-	 * @return array
-	 */
-	public function keys(): array
-	{
-		return array_keys($this->container);
-	}
-
-	/**
 	 * Checks if current position is valid
 	 *
 	 * @link  http://php.net/manual/en/iterator.valid.php
@@ -223,5 +215,12 @@ class Datas implements ArrayAccess, \Iterator
 
 		$keys          = $this->keys();
 		$this->current = array_shift($keys);
+	}
+
+	/**
+	 * @return array
+	 */
+	public function keys(): array {
+		return array_keys( $this->container );
 	}
 }

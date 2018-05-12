@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Xajax\Datas;
+namespace Jybrid\Datas;
 
 use ArrayIterator;
 use IteratorAggregate;
@@ -21,17 +21,9 @@ class Data implements IteratorAggregate, \Countable
 	private $datas = [];
 
 	/**
-	 * @return null|array
-	 */
-	public function getDatas(): ?array
-	{
-		return $this->datas;
-	}
-
-	/**
 	 * Data constructor.
 	 *
-	 * @param iterable null $datas
+	 * @param iterable|null $datas
 	 */
 	public function __construct(?iterable $datas = null)
 	{
@@ -39,6 +31,13 @@ class Data implements IteratorAggregate, \Countable
 		{
 			$this->bind($datas);
 		}
+	}
+
+	/**
+	 * @return null|array
+	 */
+	public function getDatas(): ?array {
+		return $this->datas;
 	}
 
 	/**
@@ -73,7 +72,9 @@ class Data implements IteratorAggregate, \Countable
 	}
 
 	/**
-	 * @param null $name
+	 * Getter
+	 *
+	 * @param null|string $name
 	 *
 	 * @return mixed|null Null on every not successfully try
 	 */
@@ -83,6 +84,7 @@ class Data implements IteratorAggregate, \Countable
 		{
 			return null;
 		}
+
 		return $this->datas[$name] ?? null;
 	}
 
@@ -93,18 +95,21 @@ class Data implements IteratorAggregate, \Countable
 	 * @see http://us3.php.net/manual/en/language.types.array.php#language.types.array.casting
 	 * @return mixed
 	 */
-	protected function set($name, $value)
-	{
+	protected function set( $name = null, $value = null ) {
+		if ( null === $name ) {
+			return false;
+		}
 		if (\is_int($name) || \is_float($name))
 		{
 			$name = (string) $name;
 		}
-		if (\is_string($name) && false === strpos("$name", "\0"))
+		if ( \is_string( $name ) && false === strpos( (string) $name, "\0" ) )
 		{
 			$this->datas[$name] = $value;
 
 			return $value;
 		}
+
 		return false;
 	}
 
@@ -172,6 +177,6 @@ class Data implements IteratorAggregate, \Countable
 	 */
 	public function getIterator(): \ArrayIterator
 	{
-		return new ArrayIterator($this->dump());
+		return new ArrayIterator( (array) $this->dump() );
 	}
 }

@@ -3,7 +3,7 @@
  * PHP version php7
  *
  * @category
- * @package            xajax-php-7
+ * @package            jybrid-php-7
  * @author             ${JProof}
  * @copyright          ${copyright}
  * @license            ${license}
@@ -14,19 +14,19 @@
 
 declare(strict_types=1);
 
-namespace Xajax\Scripting;
+namespace Jybrid\Scripting;
+
+use Jybrid\Errors\TraitCall;
 
 /**
  * Class Request
- * refactor old xajaxRequest.inc.php
+ * refactor old jybridRequest.inc.php
  *
- * @package Xajax
+ * @package Jybrid
  */
 abstract class Button extends Base
 {
-	use \Xajax\Errors\TraitCall;
-
-
+	use TraitCall;
 	/*
 		String: sName
 
@@ -38,19 +38,19 @@ abstract class Button extends Base
 
 		A string containing either a single or a double quote character
 		that will be used during the generation of the javascript for
-		this function.  This can be set prior to calling <xajaxRequest->printScript>
+		this function.  This can be set prior to calling <jybridRequest->printScript>
 	*/
 	private $sQuoteCharacter;
 	/*
 		Array: aParameters
 
 		An array of parameters that will be used to populate the argument list
-		for this function when the javascript is output in <xajaxRequest->printScript>
+		for this function when the javascript is output in <jybridRequest->printScript>
 	*/
 	private $aParameters;
 
 	/*
-		Function: xajaxRequest
+		Function: jybridRequest
 
 		Construct and initialize this request.
 
@@ -124,6 +124,22 @@ abstract class Button extends Base
 	}
 
 	/**
+	 * Adding or overwriting an Key ValuePair
+	 *
+	 * @param string                $key
+	 * @param int|string|float|bool $value
+	 * @param null|string           $sQuote
+	 *
+	 * @return \Jybrid\Scripting\Button
+	 * @todo testing
+	 */
+	public function addParameter( string $key, $value = null, ?string $sQuote = null ): self {
+		$this->addParameterArray( [ $key => $value ], $key, $sQuote );
+
+		return $this;
+	}
+
+	/**
 	 * Adding an Array Parameter
 	 *
 	 * @example ['my'=>'1','your'=>'3']; will be to js {my:'1',your:'3'}
@@ -144,9 +160,7 @@ abstract class Button extends Base
 			if ($key)
 			{
 				$this->aParameters[$key] = $string;
-			}
-			else
-			{
+			} else {
 				$this->aParameters[] = $string;
 			}
 		}
@@ -161,7 +175,7 @@ abstract class Button extends Base
 	 *
 	 * @param iterable|null $object
 	 * @param null|string   $sQuote
-	 * @param int|null      $depth
+	 * @param int|null      $depth // depth is not used currently
 	 *
 	 * @return null|string
 	 */
@@ -169,21 +183,28 @@ abstract class Button extends Base
 	{
 		if (is_iterable($object) && 0 < \count($object))
 		{
+			$parts = [];
 
-			$parts  = [];
-			$sQuote = $sQuote ?: $this->sQuoteCharacter;
-			$depth  = $depth ?? 1;
+			$depth = $depth ?? 1;
 			/** @var iterable $object */
 			foreach ($object as $k => $v)
 			{
 				if (is_iterable($v) && ($s = $this->iterateKeyValuePairs($v, $sQuote, $depth)))
 				{
 					$parts[] = $k . ':' . $s;
+				} elseif ( is_scalar( $v ) ) {
+					if ( \is_string( $v ) ) {
+						$parts[] = $k . ':' . $this->getQuotedString( $v, $sQuote );
+					} elseif ( \is_bool( $v ) ) {
+						$parts[] = $k . ':' . ( $v ? 'true' : 'false' );
+					} elseif ( null === $v ) {
+						$parts[] = $k . ':' . 'null';
+					} else {
+						// must bee float or int
+						$parts[] = $k . ':' . $v;
+					}
 				}
-				else
-				{
-					$parts[] = $k . ':' . $sQuote . $v . $sQuote;
-				}
+				// no type found error
 			}
 
 			return '{' . implode(',', $parts) . '}';
@@ -193,7 +214,7 @@ abstract class Button extends Base
 	}
 
 	/**
-	 * Adding the xajaxFormValues('formId') method to the  click-button-script
+	 * Adding the jybridFormValues('formId') method to the  click-button-script
 	 *
 	 * @param string      $elementId
 	 * @param null|string $key optional Key
@@ -203,15 +224,14 @@ abstract class Button extends Base
 	 */
 	public function setGetFormValues(string $elementId, ?string $key = null, ?string $qt = null): self
 	{
-		$str = 'xajax.getFormValues(' . $this->getQuotedString($elementId, $qt) . ')';
+		$str = 'jybrid.getFormValues(' . $this->getQuotedString( $elementId, $qt ) . ')';
 		if ($key)
 		{
 			$this->aParameters[$key] = $str;
-		}
-		else
-		{
+		} else {
 			$this->aParameters[] = $str;
 		}
+
 		return $this;
 	}
 
@@ -226,13 +246,11 @@ abstract class Button extends Base
 	 */
 	public function setGetValue(string $elementId, ?string $key = null, ?string $qt = null): self
 	{
-		$str = 'xajax.getValue(' . $this->getQuotedString($elementId, $qt) . ')';
+		$str = 'jybrid.getValue(' . $this->getQuotedString( $elementId, $qt ) . ')';
 		if ($key)
 		{
 			$this->aParameters[$key] = $str;
-		}
-		else
-		{
+		} else {
 			$this->aParameters[] = $str;
 		}
 
@@ -248,8 +266,9 @@ abstract class Button extends Base
 	 */
 	public function getInnerHtml(string $elementId, ?string $key = null, ?string $qt = null): self
 	{
-		$str = 'xajax.$(' . $this->getQuotedString($elementId, $qt) . ').innerHTML';
+		$str = 'jybrid.$(' . $this->getQuotedString( $elementId, $qt ) . ').innerHTML';
 		$key ? $this->aParameters[$key] = $str : $this->aParameters[] = $str;
+
 		return $this;
 	}
 
@@ -264,7 +283,13 @@ abstract class Button extends Base
 	protected function getQuotedString(string $str, ?string $qt = null): string
 	{
 		$qt = $this->getQuote($qt);
-		return $qt . trim($str) . $qt;
+
+		// escaping Slashes or Backslashes in Commands ..observe this behavour case should never happend
+		$str = ( in_array( $qt, [ self::SQ, self::SQE ] ) ) ?
+			str_replace( self::SQ, self::SQE, $str ) :
+			str_replace( self::DQ, self::DQE, $str );
+
+		return $qt . $str . $qt;
 	}
 
 	/**
@@ -292,6 +317,7 @@ abstract class Button extends Base
 	{
 		$str = '';
 		$str .= '{' . $key . ':' . $value . '}';
+
 		return $str;
 	}
 
@@ -301,14 +327,14 @@ abstract class Button extends Base
 	 *
 	 * @example
 	 * Config:
-	 * $anXajaxUserFunction->useSingleQuote()->setParameter('anName', 'anAutoQuotedValue');
+	 * $anJybridUserFunction->useSingleQuote()->setParameter('anName', 'anAutoQuotedValue');
 	 * Base-Mechanism as example
-	 * echo $anXajaxUserFunction->getScript(); Echos :  xajax_linkButton('anAutoQuotedValue');
+	 * echo $anJybridUserFunction->getScript(); Echos :  jybrid_linkButton('anAutoQuotedValue');
 	 * PHP/HTML Rendering:
-	 * <a onclick="<?php echo $anXajaxUserFunction->printScript() ?>">anButton</a>
+	 * <a onclick="<?php echo $anJybridUserFunction->printScript() ?>">anButton</a>
 	 * Parsed in Browser to:
-	 * <a onclick="xajax_listDirectory('anAutoQuotedValue')">anButton</a>
-	 * @see        \Xajax\Scripting\Request::printScript()
+	 * <a onclick="jybrid_listDirectory('anAutoQuotedValue')">anButton</a>
+	 * @see        \Jybrid\Request::printScript()
 	 * @return string
 	 * @deprecated use magic method __toString()
 	 */
@@ -318,10 +344,9 @@ abstract class Button extends Base
 	}
 
 	// build processor
-	public function __toString()
-	{
+	public function __toString(): string {
 		$lines   = [];
-		$lines[] = 'xajax.Exe(\'' . $this->sName . '\'';
+		$lines[] = 'jybrid.Exe(\'' . $this->sName . '\'';
 
 		$sSeparator = null;
 		$params     = $this->aParameters;

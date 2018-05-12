@@ -3,7 +3,7 @@
  * PHP version $phpversion$
  *
  * @category
- * @package            Xajax Core  Xajax
+ * @package            Jybrid Core  Jybrid
  * @author             ${JProof}
  * @copyright          ${copyright}
  * @license            ${license}
@@ -14,7 +14,7 @@
 
 declare(strict_types=1);
 
-namespace Xajax\Input;
+namespace Jybrid\Input;
 
 /**
  * Class Input
@@ -45,6 +45,10 @@ class Input
 		$this->setInputs(new Parameters());
 	}
 
+	/**
+	 * @param $name
+	 * @param $arguments
+	 */
 	public function __call($name, $arguments)
 	{
 		$args = func_get_args();
@@ -53,7 +57,7 @@ class Input
 	/**
 	 * @param null|string $method
 	 *
-	 * @return \Xajax\Input\Parameter
+	 * @return \Jybrid\Input\Parameter
 	 */
 	public function getInput(?string $method = null): Parameter
 	{
@@ -61,6 +65,7 @@ class Input
 		{
 			return $this->getDefaultInput();
 		}
+
 		return $this->_getInput($method);
 	}
 
@@ -76,6 +81,7 @@ class Input
 		{
 			$this->inputs->offsetSet($method, new Parameter(self::getGlobalFromVar($method)));
 		}
+
 		return $this->inputs->offsetGet($method);
 	}
 
@@ -107,25 +113,39 @@ class Input
 	{
 		$method = self::sanitizeRequestName($method);
 		$this->inputs->offsetSet($method, new Parameter($inputs));
+
 		return $this->inputs->offsetGet($method);
 	}
 
 	/**
+	 * todo harmonize unify with
+	 *
+	 * @see \Jybrid\Header\Header::autodetectRequestMethod();
 	 * @return string
 	 */
 	protected function getDetectInputMethod(): string
 	{
+		if ( $_SERVER && array_key_exists( 'REQUEST_METHOD', $_SERVER ) ) {
+			return self::sanitizeRequestName( $_SERVER['REQUEST_METHOD'] );
+		}
+
+		// buggy alternate
+		if ( $_POST && 0 < \count( $_POST ) ) {
+			return 'post';
+		}
 		if ($_GET && 0 < \count($_GET))
 		{
 			return 'get';
 		}
-		if ($_POST && 0 < \count($_POST))
-		{
-			return 'post';
-		}
+
 		return 'request';
 	}
 
+	/**
+	 * @param null|string $method
+	 *
+	 * @return array|null
+	 */
 	protected static function getGlobalFromVar(?string $method = null): ?array
 	{
 		switch ($method)

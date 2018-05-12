@@ -3,7 +3,7 @@
  * PHP version $phpversion$
  *
  * @category
- * @package            Xajax Core  Xajax\Input
+ * @package            Jybrid Core  Jybrid\Input
  * @author             ${JProof}
  * @copyright          ${copyright}
  * @license            ${license}
@@ -14,7 +14,7 @@
 
 declare(strict_types=1);
 
-namespace Xajax\Input;
+namespace Jybrid\Input;
 
 /**
  * Class Filter
@@ -27,7 +27,7 @@ class Filter
 	 *
 	 * @return string
 	 */
-	public static function getWord($val = null, ?string $default = null)
+	public static function getString( $val = null, ?string $default = null )
 	{
 		// todo regex;
 		return (string) $val;

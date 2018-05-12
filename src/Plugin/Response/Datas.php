@@ -3,7 +3,7 @@
  * PHP version php7
  *
  * @category
- * @package            xajax-php-7
+ * @package            jybrid-php-7
  * @author             ${JProof}
  * @copyright          ${copyright}
  * @license            ${license}
@@ -14,15 +14,15 @@
 
 declare(strict_types=1);
 
-namespace Xajax\Plugin\Response;
+namespace Jybrid\Plugin\Response;
 
 /**
  * Class Plugins
  *
- * @package Xajax\Plugin\Request
+ * @package Jybrid\Plugin\RequestRequest
  * @method Data offsetGet($offset)
  */
-class Datas extends \Xajax\Datas\Datas
+class Datas extends \Jybrid\Datas\Datas
 {
 	/**
 	 * @param      $nPriority

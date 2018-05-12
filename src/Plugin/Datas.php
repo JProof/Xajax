@@ -3,7 +3,7 @@
  * PHP version php7
  *
  * @category
- * @package            xajax-php-7
+ * @package            jybrid-php-7
  * @author             ${JProof}
  * @copyright          ${copyright}
  * @license            ${license}
@@ -14,14 +14,14 @@
 
 declare(strict_types=1);
 
-namespace Xajax\Plugin;
+namespace Jybrid\Plugin;
 
 /**
  * Class Plugins
  *
- * @package Xajax\Plugin\Request
+ * @package Jybrid\Plugin\RequestRequest
  */
-class Datas extends \Xajax\Datas\Datas
+class Datas extends \Jybrid\Datas\Datas
 {
 	/**
 	 * @param      $nPriority
@@ -39,7 +39,7 @@ class Datas extends \Xajax\Datas\Datas
 	 *
 	 * @param null|string $name the plugin-name
 	 *
-	 * @return bool|\Xajax\Plugin\Data
+	 * @return bool|\Jybrid\Plugin\Data
 	 */
 	public function getByName(?string $name = null)
 	{
@@ -48,7 +48,7 @@ class Datas extends \Xajax\Datas\Datas
 			throw new \InvalidArgumentException(__METHOD__ . ' Name can not be NULL!');
 		}
 
-		/** @var \Xajax\Plugin\Data $plugin */
+		/** @var \Jybrid\Plugin\Data $plugin */
 		foreach ($this as $plugin)
 		{
 			if ($plugin->getName() === $name)

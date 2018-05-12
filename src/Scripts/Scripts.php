@@ -3,7 +3,7 @@
  * PHP version php7
  *
  * @category
- * @package            xajax-php-7
+ * @package            jybrid-php-7
  * @author             ${JProof}
  * @copyright          ${copyright}
  * @license            ${license}
@@ -14,15 +14,15 @@
 
 declare(strict_types=1);
 
-namespace Xajax\Scripts;
+namespace Jybrid\Scripts;
 
-use Xajax\Helper\Directories;
+use Jybrid\Helper\Directories;
 
 /**
  * Class Scripts
  *
- * @see     https://github.com/JProof/Xajax/blob/master/docs/scripts.md
- * @package Xajax\Scripts
+ * @see     https://github.com/JProof/Jybrid/blob/master/docs/scripts.md
+ * @package Jybrid\Scripts
  */
 class Scripts
 {
@@ -49,7 +49,7 @@ class Scripts
 	/**
 	 * Internal Configuration
 	 *
-	 * @var \Xajax\Configuration\Scripts
+	 * @var \Jybrid\Configuration\Scripts
 	 */
 	protected $configuration;
 
@@ -58,7 +58,7 @@ class Scripts
 	 */
 	protected function __construct()
 	{
-		$this->configuration = \Xajax\Configuration\Scripts::getInstance();
+		$this->configuration = \Jybrid\Configuration\Scripts::getInstance();
 
 		$this->scriptDirs = new Queue();
 
@@ -66,13 +66,13 @@ class Scripts
 		$this->scriptsOrdering = new ScriptsOrdering();
 
 		// execution order call insert only on construction
-		$this->getScriptsOrdering()->insert('xajax', 50);
-		$this->getScriptsOrdering()->insert('xajax.debug', 49);
+		$this->getScriptsOrdering()->insert( 'jybrid', 50 );
+		$this->getScriptsOrdering()->insert( 'jybrid.debug', 49 );
 
-		$this->addScript(new Core(['scriptName' => 'xajax', 'fileName' => 'xajax_core.js']));
-		$this->addScript(new Core(['scriptName' => 'xajax.debug', 'fileName' => 'xajax_debug.js']));
+		$this->addScript( new Core( [ 'scriptName' => 'jybrid', 'fileName' => 'jybrid_core.js', 'useScriptLoadTimeout' => true ] ) );
+		$this->addScript( new Core( [ 'scriptName' => 'jybrid.debug', 'fileName' => 'jybrid_debug.js', 'useScriptLoadTimeout' => true ] ) );
 
-		// Adding xajax default Script Directory
+		// Adding jybrid default Script Directory
 		$this->addScriptDir(\dirname(__DIR__) . '/assets/js');
 	}
 
@@ -117,6 +117,41 @@ class Scripts
 	}
 
 	/**
+	 * Get all Script-Items they was set before (sorting,ordering,safe detecting)
+	 *
+	 * @param bool|null $relative
+	 *
+	 * @return array
+	 * @throws \UnexpectedValueException If scripts must be output but not found
+	 */
+	public function getScriptItems( ?bool $relative = null ): array {
+		$_solved         = [];
+		$scriptUrls      = [];
+		$scriptsIterator = $this->getScriptsOrdering()->getIterator();
+
+		while ( $scriptsIterator->valid() ) {
+
+			$item = $scriptsIterator->current();
+			$scriptsIterator->next();
+			if ( \in_array( $item, $_solved, true ) ) {
+				continue;
+			}
+			$_solved[] = $item;
+
+			if ( $this->isLockScript( $item ) ) {
+				continue;
+			}
+			// todo output relative or absolute
+			$tmp = $this->getScriptItem( $item );
+			if ( $tmp ) {
+				$scriptUrls[ $item ] = $tmp;
+			}
+		}
+
+		return $scriptUrls;
+	}
+
+	/**
 	 * Adding an Override dir
 	 *
 	 * @param null|string $dir
@@ -146,48 +181,53 @@ class Scripts
 	 */
 	public function getScriptUrl(?string $name = null): ?string
 	{
-		if ($this->isLockScript($name))
-		{
+		return null !== ( $scriptItem = $this->getScriptItem( $name ) ) ? $scriptItem->getRelativeDir() : null;
+	}
+
+	/**
+	 * Getting the Script-Item which is the most wanted(ordering/priority)
+	 *
+	 * @param null|string $name
+	 *
+	 * @return \Jybrid\Scripts\Core|null
+	 */
+	public function getScriptItem( ?string $name = null ): ?Core {
+		if ($this->isLockScript( $name)) {
 			return null;
 		}
 		// check the Script-Type is in Concrete Directory
-		if (null !== ($relOutPath = $this->getScriptByConcreteDirectory($name)))
-		{
-			return $relOutPath;
+		if ( null !== ( $scriptItem = $this->getScriptByConcreteDirectory( $name ) ) ) {
+			return $scriptItem;
 		}
 
-		if (($scriptQueue = $this->getScript($name)) instanceof Queue && 0 < ($cnt = $scriptQueue->count()))
-		{
+		if ( ($scriptQueue = $this->getScript( $name)) instanceof Queue && 0 < ($cnt = $scriptQueue->count())) {
 			// iterate getScriptDirs and try to find the js File
 			/** @var Queue $scriptQueue */
-			foreach ($this->getScriptDirs() as $scriptDir)
-			{
-				if (null === ($absDir = Directories::getValidAbsoluteDirectory($scriptDir)))
-				{
+			foreach ($this->getScriptDirs() as $scriptDir) {
+				if ( null === ($absDir = Directories::getValidAbsoluteDirectory( $scriptDir))) {
 					// not valid Directory
 					continue;
 				}
 
 				$sqIterator = $scriptQueue->getIterator();
-				/** @var \Xajax\Scripts\Base $scriptItem */
-				while ($sqIterator->valid())
-				{
+				/** @var \Jybrid\Scripts\Base $scriptItem */
+				while ($sqIterator->valid()) {
 
-					/** @var \Xajax\Scripts\Core $scriptItem */
+					/** @var \Jybrid\Scripts\Core $scriptItem */
 					$scriptItem = $sqIterator->current();
 
 					// do NOT try to render concrete js files
-					if ('' === (string) $scriptItem->getDir() && null !== ($relOutPath = $this->getSaveRelativeOutFile($absDir, $scriptItem->getFileName())))
-					{
+					if ( '' === (string) $scriptItem->getDir() && null !== ($relOutPath = $this->getSaveRelativeOutFile( $absDir, $scriptItem->getFileName()))) {
+						$scriptItem->setRelativeDir( $relOutPath );
 
-						return $relOutPath;
+						return $scriptItem;
 					}
 					$sqIterator->next();
 				}
 			}
-			throw new \UnexpectedValueException($name . ' js-file was not found in any scriptDir');
+			throw new \UnexpectedValueException( $name . ' js-file was not found in any scriptDir');
 		}
-		throw new \UnexpectedValueException($name . ' js-file was never set by an addScript Method');
+		throw new \UnexpectedValueException( $name . ' js-file was never set by an addScript Method');
 	}
 
 	/**
@@ -195,9 +235,9 @@ class Scripts
 	 *
 	 * @param null|string $name
 	 *
-	 * @return null|string
+	 * @return null|\Jybrid\Scripts\Core
 	 */
-	protected function getScriptByConcreteDirectory(?string $name = null): ?string
+	protected function getScriptByConcreteDirectory( ?string $name = null ): ?Core
 	{
 		if ($this->isLockScript($name))
 		{
@@ -209,7 +249,7 @@ class Scripts
 			$sqIterator = $scriptQueue->getIterator();
 			while ($sqIterator->valid())
 			{
-				/** @var \Xajax\Scripts\Core $scriptItem */
+				/** @var \Jybrid\Scripts\Core $scriptItem */
 				$scriptItem = $sqIterator->current();
 				// First look up the Javascript has set an concrete Directory
 				if ('' !== ($dir = (string) Directories::getValidAbsoluteDirectory($scriptItem->getDir())))
@@ -217,10 +257,12 @@ class Scripts
 					if (null !== ($relOutPath = $this->getSaveRelativeOutFile($dir, $this->getScriptFilename($scriptItem->getFileName()))))
 					{
 						// yes, we have an wanted custom specific directory for this javascript-file exists!
-						return $relOutPath;
+						$scriptItem->setRelativeDir( $relOutPath );
+
+						return $scriptItem;
 					}
 
-					throw new \UnexpectedValueException('The directory where the ' . $name . ' js file must be located does not exists');
+					throw new \UnexpectedValueException( 'The directory(' . $dir . ') where the ' . $name . ' js file must be located does not exists' );
 				}
 				$sqIterator->next();
 			}
@@ -279,8 +321,8 @@ class Scripts
 	/**
 	 * Adding an Script
 	 *
-	 * @example new Xajax\Scripts\Core(['scriptName' => 'xajax', 'fileName' => 'xajax_core2.js']);
-	 *          replaces the script 'xajax' with the xajax_core2.js override file
+	 * @example new Jybrid\Scripts\Core(['scriptName' => 'jybrid', 'fileName' => 'jybrid_core2.js']);
+	 *          replaces the script 'jybrid' with the jybrid_core2.js override file
 	 *
 	 * @param null|Iface $script   script object
 	 * @param int|null   $priority Higher value will be tried to render first
@@ -316,7 +358,7 @@ class Scripts
 	/**
 	 * Scripts and location will be as singleton
 	 *
-	 * @return \Xajax\Scripts\Scripts
+	 * @return \Jybrid\Scripts\Scripts
 	 */
 	public static function getInstance(): Scripts
 	{
@@ -342,7 +384,7 @@ class Scripts
 	/**
 	 * On Large PHP/WebApps there are many ways and points where somebody adds an script which you do not want to display/use.
 	 *
-	 * @example 'xajax' 'xajax.debug' 'jQuery'
+	 * @example 'jybrid' 'jybrid.debug' 'jQuery'
 	 *
 	 * @param string|null $name
 	 */
@@ -388,9 +430,9 @@ class Scripts
 	}
 
 	/**
-	 * @return \Xajax\Configuration\Scripts
+	 * @return \Jybrid\Configuration\Scripts
 	 */
-	public function getConfiguration(): \Xajax\Configuration\Scripts
+	public function getConfiguration(): \Jybrid\Configuration\Scripts
 	{
 		return $this->configuration;
 	}

@@ -3,7 +3,7 @@
  * PHP version php7
  *
  * @category
- * @package            xajax-php-7
+ * @package            jybrid-php-7
  * @author             ${JProof}
  * @copyright          ${copyright}
  * @license            ${license}
@@ -14,7 +14,7 @@
 
 declare(strict_types=1);
 
-namespace Xajax\Errors;
+namespace Jybrid\Errors;
 
 use Exception;
 use Throwable;
@@ -22,7 +22,7 @@ use Throwable;
 /**
  * Class Handler
  *
- * @package Xajax\Errors
+ * @package Jybrid\Errors
  */
 class Handler
 {
@@ -35,7 +35,10 @@ class Handler
 	 */
 	static private $userErrors = [];
 
-	public static function getErrors()
+	/**
+	 * @return null|string
+	 */
+	public static function getErrors(): ?string
 	{
 		$string = '';
 		$string .= self::getExceptions();
@@ -48,9 +51,11 @@ class Handler
 		return null;
 	}
 
-	public static function addError()
-	{
-		$args = func_get_args();
+	/**
+	 *
+	 */
+	public static function addError(): void {
+		$args = \func_get_args();
 		if ($args[0] instanceof Throwable)
 		{
 			self::addException($args[0]);
@@ -62,12 +67,18 @@ class Handler
 		}
 	}
 
-	private static function addUserError(?array $args = null)
+	/**
+	 * @param array|null $args
+	 */
+	private static function addUserError( ?array $args = null ): void
 	{
 		self::$userErrors[] = (array) $args;
 	}
 
-	public static function getUserErrors()
+	/**
+	 * @return null|string
+	 */
+	public static function getUserErrors(): ?string
 	{
 		$string = '';
 		foreach (self::$userErrors as list($code, $message, $file, $line, $trace))
@@ -82,7 +93,12 @@ class Handler
 		return $string;
 	}
 
-	protected static function errorTrace(?array $array = null)
+	/**
+	 * @param array|null $array
+	 *
+	 * @return string
+	 */
+	protected static function errorTrace( ?array $array = null ): string
 	{
 		$string = '';
 		if (!is_array($array))
@@ -101,7 +117,7 @@ class Handler
 	/**
 	 * @param \Exception|null $exception
 	 */
-	public static function addException(?Exception $exception = null)
+	public static function addException( ?Exception $exception = null ): void
 	{
 		if ($exception instanceof Exception)
 		{
@@ -112,7 +128,7 @@ class Handler
 	/**
 	 * @return null|string
 	 */
-	public static function getExceptions()
+	public static function getExceptions(): ?string
 	{
 		$string = '';
 		if (0 < count(self::$exceptions))
@@ -130,7 +146,12 @@ class Handler
 		return $string;
 	}
 
-	protected static function compileExceptionMessage(Exception $exception)
+	/**
+	 * @param \Exception $exception
+	 *
+	 * @return null|string
+	 */
+	protected static function compileExceptionMessage( Exception $exception ): ?string
 	{
 		return self::compileMessage($exception->getCode(), $exception->getMessage(), $exception->getFile(), $exception->getLine(), $exception->getTraceAsString());
 	}
@@ -142,10 +163,9 @@ class Handler
 	 */
 	protected static function compileMessage(): ?string
 	{
-		list($code, $message, $file, $line, $trace) = func_get_args();
+		[ $code, $message, $file, $line, $trace ] = \func_get_args();
 
-		$errorReporting = error_reporting();
-		if (0 === ($code && $errorReporting))
+		if ( 0 === ( $code && error_reporting() ) )
 		{
 			return null;
 		}
@@ -197,8 +217,7 @@ class Handler
 		elseif (E_ERROR === $code)
 		{
 			$errTypeStr = 'E_ERROR';
-		}
-		else if (defined('E_STRICT') && E_STRICT === $code)
+		} else if ( \defined( 'E_STRICT' ) && E_STRICT === $code )
 		{
 			$errTypeStr = 'E_STRICT';
 		}

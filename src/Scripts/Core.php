@@ -3,7 +3,7 @@
  * PHP version php7
  *
  * @category
- * @package            xajax-php-7
+ * @package            jybrid-php-7
  * @author             ${JProof}
  * @copyright          ${copyright}
  * @license            ${license}
@@ -14,15 +14,15 @@
 
 declare(strict_types=1);
 
-namespace Xajax\Scripts;
+namespace Jybrid\Scripts;
 
-use Xajax\Datas\Data;
+use Jybrid\Datas\Data;
 
 /**
  * Class Core
  * Core Script Data
  *
- * @package Xajax\Scripts
+ * @package Jybrid\Scripts
  */
 class Core extends Data implements Iface
 {

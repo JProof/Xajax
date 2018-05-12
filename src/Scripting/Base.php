@@ -3,7 +3,7 @@
  * PHP version $phpversion$
  *
  * @category
- * @package            Xajax Core  Xajax\Scripting
+ * @package            Jybrid Core  Jybrid\Scripting
  * @author             ${JProof}
  * @copyright          ${copyright}
  * @license            ${license}
@@ -14,7 +14,7 @@
 
 declare(strict_types=1);
 
-namespace Xajax\Scripting;
+namespace Jybrid\Scripting;
 
 /**
  * Class Base
@@ -42,5 +42,35 @@ class Base
 	 */
 	public const DQE = '\"';
 
+	/**
+	 * javascript window
+	 */
+	public const WIN = 'window';
+
+	/**
+	 * javascript document
+	 */
+	public const DOC = 'document';
+
 	static protected $allowedQuotes = [self::SQ, self::SQE, self::DQ, self::DQE];
+
+	/**
+	 * Method to check the perhapsString can be made to an string
+	 * Null can be stringify'd as empty string
+	 *
+	 * @param $perhapsString
+	 *
+	 * @return string
+	 */
+	public static function canStringify( $perhapsString ) {
+		if ( null === $perhapsString ) {
+			return '';
+		}
+		try {
+			return (string) $perhapsString;
+		}
+		catch ( \InvalidArgumentException $exception ) {
+			throw $exception;
+		}
+	}
 }

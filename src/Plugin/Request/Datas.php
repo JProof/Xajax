@@ -3,7 +3,7 @@
  * PHP version php7
  *
  * @category
- * @package            xajax-php-7
+ * @package            jybrid-php-7
  * @author             ${JProof}
  * @copyright          ${copyright}
  * @license            ${license}
@@ -14,15 +14,15 @@
 
 declare(strict_types=1);
 
-namespace Xajax\Plugin\Request;
+namespace Jybrid\Plugin\Request;
 
 /**
  * Class Plugins
  *
- * @package Xajax\Plugin\Request
+ * @package Jybrid\Plugin\RequestRequest
  * @method Data offsetGet($offset)
  */
-class Datas extends \Xajax\Datas\Datas
+class Datas extends \Jybrid\Datas\Datas
 {
 	/**
 	 * @param      $nPriority
@@ -32,8 +32,27 @@ class Datas extends \Xajax\Datas\Datas
 	{
 		if (null === $nPriority)
 		{
-			$nPriority = count($this->getContainer());
+			$nPriority = \count( $this->getContainer() );
 		}
 		$this->offsetSet($nPriority, $datas);
+	}
+
+	/**
+	 * Try to get an registered request plugin by his name
+	 *
+	 * @param string $name
+	 *
+	 * @return \Jybrid\Plugin\Request\Data|null
+	 */
+	public function getByName( string $name ): ?Data {
+
+		/** @var \Jybrid\Plugin\Request\Data $item */
+		foreach ( $this->getContainer() as $item ) {
+			if ( $item->getPluginInstance()->getName() === $name ) {
+				return $item;
+			}
+		}
+
+		return null;
 	}
 }

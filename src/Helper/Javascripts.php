@@ -3,7 +3,7 @@
  * PHP version php7
  *
  * @category
- * @package            xajax-php-7
+ * @package            jybrid-php-7
  * @author             ${JProof}
  * @copyright          ${copyright}
  * @license            ${license}
@@ -14,27 +14,27 @@
 
 declare(strict_types=1);
 
-namespace Xajax\Helper {
+namespace Jybrid\Helper {
 
 	/**
 	 * Class Javascripts
-	 * old xajaxCompress.inc.php
+	 * old jybridCompress.inc.php
 	 *
-	 * @package Xajax\Helper\Compress
+	 * @package Jybrid\Helper\Compress
 	 */
 	class Javascripts
 	{
 		/*
-			Function: xajaxCompressFile
+			Function: jybridCompressFile
 
-			<xajax> will call this function internally to compress the javascript code for
+			<jybrid> will call this function internally to compress the javascript code for
 			more efficient delivery.
 
 			Parameters:
 
 			$sFile - (stirng):  The file to be compressed.
 		*/
-		public static function xajaxCompressFile($sFile)
+		public static function jybridCompressFile( $sFile )
 		{
 			//remove windows cariage returns
 			$sFile = str_replace("\r", '', $sFile);
