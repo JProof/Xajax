@@ -22,6 +22,7 @@ acceptance-test
 * js-defer
 * js-min-full-switch
 
+https://github.com/JProof/Xajax-PHP-7/wiki/Commands-Overview wiki/Commands-Overview
 
 examples for the new version under @see https://github.com/JProof/jybrid-examples
 
