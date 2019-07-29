@@ -9,7 +9,7 @@ jybrid examples under https://github.com/JProof/jybrid-examples
 
 https://jybrid.com 
 
-current Version 0.7.9.3 
+current Version 0.7.9.3 with easy unobtrusive ajax/javascript 
 
 javascript testings:
 
