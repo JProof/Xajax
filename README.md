@@ -5,9 +5,7 @@ As the next independent relase "jybrid" will be the follow-up to the xajax-versi
 
 Mirror-Repository for jybrid-library 
 
-jybrid examples under https://github.com/JProof/jybrid-examples
-
-https://jybrid.com 
+jybrid examples under https://demo.jybrid.com 
 
 current Version 0.7.9.3 with easy unobtrusive ajax/javascript 
 
@@ -24,7 +22,7 @@ acceptance-test
 
 https://github.com/JProof/Xajax-PHP-7/wiki/Commands-Overview wiki/Commands-Overview
 
-examples for the new version under @see https://github.com/JProof/jybrid-examples
+examples for the new version under @see https://demo.jybrid.com
 
 @see https://github.com/JProof/jybrid 
 
